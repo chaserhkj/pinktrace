@@ -56,7 +56,8 @@
  **/
 
 #include <pinktrace/compat.h>
-#include <pinktrace/gcc.h>
+#include <pinktrace/macros.h>
+
 #include <pinktrace/about.h>
 #include <pinktrace/bitness.h>
 #include <pinktrace/decode.h>

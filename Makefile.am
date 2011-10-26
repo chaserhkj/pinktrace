@@ -37,7 +37,7 @@ pinktrace_include_HEADERS= \
 			  include/pinktrace/decode.h \
 			  include/pinktrace/encode.h \
 			  include/pinktrace/event.h \
-			  include/pinktrace/gcc.h \
+			  include/pinktrace/macros.h \
 			  include/pinktrace/name.h \
 			  include/pinktrace/socket.h \
 			  include/pinktrace/trace.h \

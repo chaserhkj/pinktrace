@@ -25,43 +25,39 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_GUARD_GCC_H
-#define PINKTRACE_GUARD_GCC_H 1
+#ifndef _PINK_MACRO_H
+#define _PINK_MACRO_H
 
 /**
- * \file
- * \brief Pink's GCC macros
- *
- * \ingroup g_gcc
+ * @file pinktrace/macro.h
+ * @brief Pink's common macros
+ * @defgroup pink_macro Pink's common macros
+ * @ingroup pinktrace
+ * @{
  **/
+
+#ifdef __cplusplus
+#define PINK_BEGIN_DECL  extern "C" {
+#define PINK_END_DECL    }
+#else
+/** Start declarations in C mode */
+#define PINK_BEGIN_DECL /* empty */
+/** End declarations in C mode */
+#define PINK_END_DECL /* empty */
+#endif
 
 #if !defined(SPARSE) && defined(__GNUC__) && __GNUC__ >= 3
-
-#define PINK_GCC_ATTR(x) __attribute__(x)
-#define PINK_GCC_LIKELY(x) __builtin_expect(!!(x), 1)
+#define PINK_GCC_ATTR(x)     __attribute__(x)
+#define PINK_GCC_LIKELY(x)   __builtin_expect(!!(x), 1)
 #define PINK_GCC_UNLIKELY(x) __builtin_expect(!!(x), 0)
-
 #else
-
-/**
- * Macro for GCC attributes
- *
- * \ingroup g_gcc
- **/
-#define PINK_GCC_ATTR(x)
-/**
- * GCC builtin_expect macro
- *
- * \ingroup g_gcc
- **/
-#define PINK_GCC_LIKELY(x) (x)
-/**
- * GCC builtin_expect macro
- *
- * \ingroup g_gcc
- **/
+/** Macro for GCC attributes */
+#define PINK_GCC_ATTR(x) /* empty */
+/** GCC builtin_expect macro */
+#define PINK_GCC_LIKELY(x)   (x)
+/** GCC builtin_expect macro */
 #define PINK_GCC_UNLIKELY(x) (x)
+#endif
 
-#endif /* !defined(SPARSE) ... */
-
-#endif /* !PINKTRACE_GUARD_GCC_H */
+/** @} */
+#endif
