@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,14 +25,34 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_GUARD_PINK_H
-#define PINKTRACE_GUARD_PINK_H 1
+#ifndef _PINK_PINK_H
+#define _PINK_PINK_H
 
 /**
- * \file
- * \brief A header file including all other header files part of pinktrace
+ * @mainpage pinktrace
  *
- * \ingroup g_core
+ * pinktrace - Pink's Tracing Library
+ *
+ * @section overview Overview
+ *
+ * pinktrace is a wrapper around @c ptrace(2) system call.
+ * It provides a robust API for tracing processes.
+ *
+ * @attention This is a work in progress and the API is @b not stable.
+ *
+ * @section parts Parts
+ *
+ * This library is divided into two parts:
+ * - @ref pinktrace      "Core library (pinktrace)"
+ * - @ref pinktrace-easy "Easy library (pinktrace-easy)"
+ *
+ * @author Ali Polatel <alip@exherbo.org>
+ **/
+
+/**
+ * @file
+ * @brief A header file including all other header files part of pinktrace
+ * @defgroup pinktrace Pink's Tracing Library
  **/
 
 #include <pinktrace/compat.h>
@@ -47,4 +67,4 @@
 #include <pinktrace/trace.h>
 #include <pinktrace/util.h>
 
-#endif /* !PINKTRACE_GUARD_PINK_H */
+#endif

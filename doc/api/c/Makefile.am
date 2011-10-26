@@ -4,9 +4,7 @@ MAINTAINERCLEANFILES = \
 		       doxygen.conf
 CLEANFILES= *~ c/* pinktrace.tag
 
-doxygen_files= \
-	       groups.doxygen \
-	       main_page.doxygen
+doxygen_files=
 EXTRA_DIST= doxygen.conf.in doxygen-filter-git.sh $(doxygen_files)
 
 if HAVE_DOXYGEN
