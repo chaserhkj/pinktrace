@@ -28,6 +28,7 @@ dist_noinst_SCRIPTS= ruby-test.sh
 if ENABLE_RUBY
 AM_CFLAGS= \
 	   -I. -I@RUBY_HDRDIR@ -I@RUBY_HDRARCHDIR@ \
+	   -I$(top_builddir)/include \
 	   -I$(top_srcdir)/include \
 	   @PINKTRACE_CFLAGS@ @PINKTRACE_RUBY_CFLAGS@
 

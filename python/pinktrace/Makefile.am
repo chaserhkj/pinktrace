@@ -12,6 +12,7 @@ IF_PYTHON_FILES= \
 EXTRA_DIST= $(IF_PYTHON_FILES)
 AM_CFLAGS= \
 	   -I. -I@PYTHON_INCLUDE_DIR@ \
+	   -I$(top_builddir)/include \
 	   -I$(top_srcdir)/include \
 	   @PINKTRACE_CFLAGS@
 BUILT_SOURCES=

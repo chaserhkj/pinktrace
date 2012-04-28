@@ -10,6 +10,7 @@ SUBDIRS+= . easy
 
 CLEANFILES=
 AM_CFLAGS= \
+	   -I$(top_builddir)/include \
 	   -I$(top_srcdir)/include \
 	   @PINKTRACE_CFLAGS@
 SPARSE=sparse

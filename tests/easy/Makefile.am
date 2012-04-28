@@ -1,6 +1,7 @@
 SUBDIRS= .
 
 COMMON_CFLAGS= \
+	       -I$(top_builddir)/include \
 	       -I$(top_srcdir)/include \
 	       -L$(top_builddir)/src/.libs -L$(top_builddir)/src/easy/.libs \
 	       @PINKTRACE_CFLAGS@

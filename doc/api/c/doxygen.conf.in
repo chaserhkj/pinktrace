@@ -114,7 +114,8 @@ FULL_PATH_NAMES        = YES
 # If left blank the directory from which doxygen is run is used as the
 # path to strip.
 
-STRIP_FROM_PATH        = @abs_top_srcdir@/include
+STRIP_FROM_PATH        = @abs_top_builddir@/include \
+			 @abs_top_srcdir@/include
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of
 # the path mentioned in the documentation of a class, which tells
@@ -123,7 +124,8 @@ STRIP_FROM_PATH        = @abs_top_srcdir@/include
 # definition is used. Otherwise one should specify the include paths that
 # are normally passed to the compiler using the -I flag.
 
-STRIP_FROM_INC_PATH    = @abs_top_srcdir@/include
+STRIP_FROM_INC_PATH    = @abs_top_builddir@/include \
+			 @abs_top_srcdir@/include
 
 # If the SHORT_NAMES tag is set to YES, doxygen will generate much shorter
 # (but less readable) file names. This can be useful is your file systems
@@ -583,8 +585,10 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = @abs_top_srcdir@/include/pinktrace \
-                         @abs_top_srcdir@/include/pinktrace/easy \
+INPUT                  = @abs_top_builddir@/include/pinktrace \
+                         @abs_top_builddir@/include/pinktrace/easy \
+			 @abs_top_srcdir@/include/pinktrace \
+			 @abs_top_srcdir@/include/pinktrace/easy \
                          @abs_top_srcdir@/examples/c \
                          ./
 
@@ -1355,7 +1359,8 @@ SEARCH_INCLUDES        = YES
 # contain include files that are not input files but should be processed by
 # the preprocessor.
 
-INCLUDE_PATH           = @abs_top_srcdir@/include
+INCLUDE_PATH           = @abs_top_builddir@/include \
+			 @abs_top_srcdir@/include
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the

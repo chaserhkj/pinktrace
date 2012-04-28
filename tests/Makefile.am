@@ -36,7 +36,9 @@ check_PROGRAMS= check_pinktrace
 check_pinktrace_SOURCES= \
 			 $(IF_CHECK_SRCS)
 check_pinktrace_CFLAGS= \
-			-I$(top_srcdir)/include -L$(top_builddir)/src/.libs \
+			-I$(top_builddir)/include \
+			-I$(top_srcdir)/include \
+			-L$(top_builddir)/src/.libs \
 			$(check_CFLAGS) \
 			@PINKTRACE_CFLAGS@
 check_pinktrace_LDADD= \
