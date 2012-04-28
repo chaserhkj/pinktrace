@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -485,7 +485,7 @@ pink_easy_loop(pink_easy_context_t *ctx)
 	/* Enter the event loop */
 	for (;;) {
 		/* Wait for children */
-		if ((pid = waitpid_nointr(-1, &status)) < 0) {
+		if ((pid = _pink_easy_waitpid_nointr(-1, &status)) < 0) {
 			if (errno == ECHILD) {
 				/* Received ECHILD, end of tracing */
 				return ctx->callback_table.end ? ctx->callback_table.end(ctx, true) : EXIT_SUCCESS;

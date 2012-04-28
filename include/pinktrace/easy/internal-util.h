@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,6 @@
 
 /** Simple waitpid() wrapper which handles EINTR **/
 pid_t
-waitpid_nointr(pid_t pid, int *status);
+_pink_easy_waitpid_nointr(pid_t pid, int *status);
 
 #endif /* !PINKTRACE_EASY_GUARD_INTERNAL_UTIL_H */

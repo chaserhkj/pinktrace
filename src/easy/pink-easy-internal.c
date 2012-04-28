@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 #include <pinktrace/easy/pink.h>
 
 pid_t
-waitpid_nointr(pid_t pid, int *status)
+_pink_easy_waitpid_nointr(pid_t pid, int *status)
 {
 	pid_t p;
 
@@ -67,7 +67,7 @@ _pink_easy_init(pink_easy_context_t *ctx, pink_easy_process_t *proc)
 	int status;
 
 	/* Wait for the initial sig */
-	if (waitpid_nointr(proc->pid, &status) < 0) {
+	if (_pink_easy_waitpid_nointr(proc->pid, &status) < 0) {
 		ctx->error = PINK_EASY_ERROR_WAIT_ELDEST;
 		if (ctx->callback_table.error)
 			ctx->callback_table.error(ctx, proc->pid);
