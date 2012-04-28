@@ -22,4 +22,5 @@ libpinktrace_easy_@PINKTRACE_PC_SLOT@_la_SOURCES= $(easy_SRCS)
 libpinktrace_easy_@PINKTRACE_PC_SLOT@_la_LDFLAGS= \
 						  -export-symbols-regex '^pink_' \
 						  -version-info @VERSION_LIB_CURRENT@:@VERSION_LIB_REVISION@:0
+libpinktrace_easy_@PINKTRACE_PC_SLOT@_la_LIBADD= $(top_builddir)/src/libpinktrace_@PINKTRACE_PC_SLOT@.la
 endif # WANT_EASY
