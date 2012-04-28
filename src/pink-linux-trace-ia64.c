@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * Based in part upon strace which is:
  *   Copyright (c) 1991, 1992 Paul Kranenburg <pk@cs.few.eur.nl>
  *   Copyright (c) 1993 Branko Lankester <branko@hacktic.nl>
@@ -43,7 +43,6 @@
 
 #define ORIG_ACCUM	(PT_R15)
 
-PINK_NONNULL(3)
 static bool
 pink_util_arg_setup_ia64(pid_t pid, int narg, unsigned long *state)
 {
