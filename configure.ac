@@ -60,7 +60,9 @@ AC_SUBST([GITHEAD])
 
 PINKTRACE_PC_VERSION="${VERSION_FULL}"
 PINKTRACE_PC_SLOT="${VERSION_MAJOR}.${VERSION_MINOR}${VERSION_SUFFIX}"
-PINKTRACE_PC_SLOT="${PINKTRACE_PC_SLOT}_"`echo ${GITHEAD} | sed -e 's,\(........\(-dirty\)\?\)$,#\1,' -e 's,.*#,,'`
+if test -n "${GITHEAD}"; then
+	PINKTRACE_PC_SLOT="${PINKTRACE_PC_SLOT}_"`echo ${GITHEAD} | sed -e 's,\(........\(-dirty\)\?\)$,#\1,' -e 's,.*#,,'`
+fi
 
 AC_MSG_CHECKING([for slot])
 AC_MSG_RESULT([$PINKTRACE_PC_SLOT])
