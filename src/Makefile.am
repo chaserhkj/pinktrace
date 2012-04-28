@@ -26,7 +26,9 @@ libpinktrace_@PINKTRACE_PC_SLOT@_la_SOURCES= \
 					     pink-bitness.c \
 					     pink-decode-array.c \
 					     pink-trace-internal.c
-libpinktrace_@PINKTRACE_PC_SLOT@_la_LDFLAGS= -version-info @VERSION_LIB_CURRENT@:@VERSION_LIB_REVISION@:0
+libpinktrace_@PINKTRACE_PC_SLOT@_la_LDFLAGS= \
+					     -export-symbols-regex '^pink_' \
+					     -version-info @VERSION_LIB_CURRENT@:@VERSION_LIB_REVISION@:0
 
 # Operating system specific sources
 if FREEBSD

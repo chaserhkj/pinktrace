@@ -19,4 +19,7 @@ EXTRA_DIST= $(easy_SRCS)
 if WANT_EASY
 lib_LTLIBRARIES= libpinktrace_easy_@PINKTRACE_PC_SLOT@.la
 libpinktrace_easy_@PINKTRACE_PC_SLOT@_la_SOURCES= $(easy_SRCS)
+libpinktrace_easy_@PINKTRACE_PC_SLOT@_la_LDFLAGS= \
+						  -export-symbols-regex '^pink_' \
+						  -version-info @VERSION_LIB_CURRENT@:@VERSION_LIB_REVISION@:0
 endif # WANT_EASY
