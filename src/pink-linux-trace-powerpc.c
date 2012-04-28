@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * Based in part upon strace which is:
  *   Copyright (c) 1991, 1992 Paul Kranenburg <pk@cs.few.eur.nl>
  *   Copyright (c) 1993 Branko Lankester <branko@hacktic.nl>
@@ -223,16 +223,12 @@ pink_decode_socket_fd(pid_t pid, pink_bitness_t bitness, unsigned ind, long *fd)
 		return false;
 
 	size = pink_bitness_wordsize(bitness);
-	switch (size) {
-	case sizeof(int):
+	if (size == sizeof(int))
 		args += ind * sizeof(unsigned int);
-		break;
-	case sizeof(long):
+	else if (size == sizeof(long))
 		args += ind * sizeof(unsigned long);
-		break;
-	default:
-		abort();
-	}
+	else
+		return false;
 
 	return pink_util_move(pid, args, fd);
 
