@@ -35,6 +35,7 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#define PY_SSIZE_T_CLEAN 1
 #include <Python.h>
 #include <pinktrace/pink.h>
 
