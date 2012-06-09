@@ -27,23 +27,21 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_GUARD_BITNESS_H
-#define PINKTRACE_GUARD_BITNESS_H 1
+#ifndef _PINK_BITNESS_H
+#define _PINK_BITNESS_H
 
 /**
- * \file
- * \brief Pink's bitness modes
+ * @file pinktrace/bitness.h
+ * @brief Pink's supported bitness modes
+ * @defgroup pink_bitness Pink's supported bitness modes
+ * @ingroup pinktrace
+ * @{
  **/
 
 #include <sys/types.h>
-
 #include <pinktrace/macros.h>
 
-/**
- * Bitness modes
- *
- * \ingroup g_bitness
- **/
+/** Bitness modes */
 typedef enum {
 	/** Unknown bitness ( error with #pink_bitness_get ) **/
 	PINK_BITNESS_UNKNOWN = -1,
@@ -53,78 +51,45 @@ typedef enum {
 	PINK_BITNESS_64,
 } pink_bitness_t;
 
-/**
- * Default bitness (eg #PINK_BITNESS_64 on x86_64, #PINK_BITNESS_32 on i386)
- *
- * \ingroup g_bitness
- **/
+/** Default bitness (eg #PINK_BITNESS_64 on x86_64, #PINK_BITNESS_32 on i386) */
 #define PINKTRACE_BITNESS_DEFAULT @PINKTRACE_BITNESS_DEFAULT@
-
-/**
- * Number of supported bitnesses (eg 2 on x86_64, 1 on i386)
- *
- * \ingroup g_bitness
- **/
+/** Number of supported bitnesses (eg 2 on x86_64, 1 on i386) */
 #define PINKTRACE_BITNESS_COUNT_SUPPORTED @PINKTRACE_BITNESS_COUNT_SUPPORTED@
-
-/**
- * Non-zero if 64bit is supported, 0 otherwise (eg 1 on x86_64, 0 on i386)
- *
- * \ingroup g_bitness
- **/
+/** Non-zero if 64bit is supported, 0 otherwise (eg 1 on x86_64, 0 on i386) */
 #define PINKTRACE_BITNESS_64_SUPPORTED @PINKTRACE_BITNESS_64_SUPPORTED@
-
-/**
- * Non-zero if 32bit is supported, 0 otherwise (eg 1 on i386, 0 on ia64)
- *
- * \ingroup g_bitness
- **/
+/** Non-zero if 32bit is supported, 0 otherwise (eg 1 on i386, 0 on ia64) */
 #define PINKTRACE_BITNESS_32_SUPPORTED @PINKTRACE_BITNESS_32_SUPPORTED@
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+PINK_BEGIN_DECL
 
 /**
- * Return the bitness of the given process ID.
+ * Return the bitness of the given process ID
  *
- * \ingroup g_bitness
- *
- * \param pid Process ID of the process whose bitness is to be returned.
- *
- * \return One of PINK_BITNESS_* constants.
+ * @param pid Process ID
+ * @return One of PINK_BITNESS_* constants
  **/
-pink_bitness_t
-pink_bitness_get(pid_t pid);
+pink_bitness_t pink_bitness_get(pid_t pid);
 
 /**
- * Return the string representation of the given bitness.
+ * Return the string representation of the given bitness
  *
- * \ingroup g_bitness
- *
- * \param bitness The bitness to be stringified.
- *
- * \return String representation of the bitness.
+ * @param bitness Bitness
+ * @return String representation of the bitness
  **/
-const char *
-pink_bitness_name(pink_bitness_t bitness) PINK_GCC_ATTR((pure));
+const char *pink_bitness_name(pink_bitness_t bitness)
+	PINK_GCC_ATTR((pure));
 
 /**
  * Return the word size of the given bitness.
  *
- * \ingroup g_bitness
+ * @param bitness Bitness
+ * @return Word size of the bitness
  *
- * \param bitness Bitness of the child
- *
- * \return Word size of the bitness
- *
- * \since 0.0.3
+ * @since 0.0.3
  **/
-unsigned short
-pink_bitness_wordsize(pink_bitness_t bitness) PINK_GCC_ATTR((pure));
+unsigned short pink_bitness_wordsize(pink_bitness_t bitness)
+	PINK_GCC_ATTR((pure));
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-#endif /* !PINKTRACE_GUARD_BITNESS_H */
+PINK_END_DECL
+/** @} */
+#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,130 +25,103 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_EASY_GUARD_PROCESS_H
-#define PINKTRACE_EASY_GUARD_PROCESS_H 1
+#ifndef _PINK_EASY_PROCESS_H
+#define _PINK_EASY_PROCESS_H
+
+/**
+ * @file pinktrace/easy/process.h
+ * @brief Pink's easy process representation
+ * @defgroup pink_easy_process Pink's easy process representation
+ * @ingroup pinktrace-easy
+ * @{
+ **/
 
 #include <stdbool.h>
 #include <sys/types.h>
-
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/func.h>
 
-/**
- * \file
- * \brief Pink's easy process representation
- *
- * \ingroup g_easy_process
- **/
+PINK_BEGIN_DECL
 
 /**
- * \struct pink_easy_process_t
- * \brief Opaque structure which represents a process entry.
- *
- * \ingroup g_easy_process
- *
- * These entries are allocated internally by the tracing context.
+ * @struct pink_easy_process_t
+ * @brief Opaque structure which represents a process entry
+ * @note These entries are allocated internally by the tracing context.
  **/
 typedef struct pink_easy_process pink_easy_process_t;
 
 /**
- * \struct pink_easy_process_tree_t
- * \brief Opaque structure which represents a process list.
- *
- * \ingroup g_easy_process
- *
- * This list is maintained internally by the tracing context.
+ * @struct pink_easy_process_tree_t
+ * @brief Opaque structure which represents a process list
+ * @note This list is maintained internally by the tracing context.
  **/
 typedef struct pink_easy_process_list pink_easy_process_list_t;
 
 /**
  * Kill a process
  *
- * \note This function uses tgkill(2) or tkill(2) if available.
+ * @note This function uses @e tgkill(2) or @e tkill(2) if available.
  *
- * \ingroup g_easy_process
- *
- * \param proc Process entry
- * \param sig Signal to deliver
- *
- * \return Same as kill(2)
+ * @param proc Process entry
+ * @param sig Signal to deliver
+ * @return Same as @e kill(2)
  **/
-int
-pink_easy_process_kill(const pink_easy_process_t *proc, int sig);
+int pink_easy_process_kill(const pink_easy_process_t *proc, int sig);
 
 /**
  * Detach from a process as necessary and resume its execution. This function
  * calls pink_trace_detach() if the process is attached and pink_trace_resume() if
  * the process is spawned.
  *
- * \ingroup g_easy_process
- *
- * \param proc Process entry
- * \param sig Same as pink_trace_cont()
- *
- * \return true on success, false on failure and sets errno accordingly.
+ * @param proc Process entry
+ * @param sig Same as pink_trace_cont()
+ * \return true on success, false on failure and sets errno accordingly
  **/
-bool
-pink_easy_process_resume(const pink_easy_process_t *proc, int sig);
+bool pink_easy_process_resume(const pink_easy_process_t *proc, int sig);
 
 /**
- * Returns the process ID of the entry.
+ * Returns the process ID of the entry
  *
- * \ingroup g_easy_process
- *
- * \param proc Process entry
- *
- * \return Process ID
+ * @param proc Process entry
+ * @return Process ID
  **/
-pid_t
-pink_easy_process_get_pid(const pink_easy_process_t *proc) PINK_GCC_ATTR((nonnull(1)));
+pid_t pink_easy_process_get_pid(const pink_easy_process_t *proc)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Returns the process ID of this entry's parent or -1 for the eldest entries.
  *
- * \ingroup g_easy_process
- *
- * \param proc Process entry
- *
- * \return Parent Process ID or -1
+ * @param proc Process entry
+ * @return Parent Process ID or -1
  **/
-pid_t
-pink_easy_process_get_ppid(const pink_easy_process_t *proc) PINK_GCC_ATTR((nonnull(1)));
+pid_t pink_easy_process_get_ppid(const pink_easy_process_t *proc)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Returns the bitness of the entry
  *
- * \ingroup g_easy_process
- *
- * \param proc Process entry
- *
- * \return Bitness
+ * @param proc Process entry
+ * @return Bitness
  **/
-pink_bitness_t
-pink_easy_process_get_bitness(const pink_easy_process_t *proc) PINK_GCC_ATTR((nonnull(1)));
+pink_bitness_t pink_easy_process_get_bitness(const pink_easy_process_t *proc)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Are we attached to the process?
  *
- * \ingroup g_easy_process
- *
- * \param proc Process entry
- *
- * \return true if the process is attached, false otherwise
+ * @param proc Process entry
+ * @return true if the process is attached, false otherwise
  **/
-bool
-pink_easy_process_is_attached(const pink_easy_process_t *proc) PINK_GCC_ATTR((nonnull(1)));
+bool pink_easy_process_is_attached(const pink_easy_process_t *proc)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Is this process a clone?
  *
- * \ingroup g_easy_process
+ * @see pink_easy_attach()
  *
- * \see pink_easy_attach()
- *
- * \param proc Process entry
- *
- * \return true if the process is a clone, false otherwise
+ * @param proc Process entry
+ * @return true if the process is a clone, false otherwise
  **/
 bool
 pink_easy_process_is_clone(const pink_easy_process_t *proc)  PINK_GCC_ATTR((nonnull(1)));
@@ -156,73 +129,66 @@ pink_easy_process_is_clone(const pink_easy_process_t *proc)  PINK_GCC_ATTR((nonn
 /**
  * Set the user data of the process entry.
  *
- * \ingroup g_easy_process
+ * @note This function accepts a destructor function pointer which may be used
+ *       to free the user data. You may pass NULL if you want to handle the
+ *       destruction yourself or use the standard @e free(3) function from
+ *       stdlib.h for basic destruction.
  *
- * \note This function accepts a destructor function pointer which may be used
- * to free the user data. You may pass NULL if you want to handle the
- * destruction yourself or use the standard free() function from stdlib.h for
- * basic destruction.
- *
- * \param proc Process entry
- * \param userdata User data
- * \param userdata_destroy The destructor function of the user data
+ * @param proc Process entry
+ * @param userdata User data
+ * @param userdata_destroy The destructor function of the user data
  **/
-void
-pink_easy_process_set_userdata(pink_easy_process_t *proc, void *userdata, pink_easy_free_func_t userdata_destroy) PINK_GCC_ATTR((nonnull(1)));
+void pink_easy_process_set_userdata(pink_easy_process_t *proc, void *userdata,
+		pink_easy_free_func_t userdata_destroy)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Get the user data of the process entry, previously set by
  * pink_easy_process_set_data()
  *
- * \ingroup g_easy_process
- *
- * \param proc Process entry
- *
- * \return User data
+ * @param proc Process entry
+ * @return User data
  **/
-void *
-pink_easy_process_get_userdata(const pink_easy_process_t *proc) PINK_GCC_ATTR((nonnull(1)));
+void *pink_easy_process_get_userdata(const pink_easy_process_t *proc)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Remove a process from the process list.
  *
- * \ingroup g_easy_process
+ * @note pinktrace doesn't export an insertion function because insertions are
+ *       handled internally by this library. You may, however, need to remove
+ *       an entry due to problems (e.g. -ESRCH) caused by the process.
  *
- * \note pinktrace doesn't export an insertion function because insertions are
- * handled internally by this library. You may, however, need to remove an
- * entry due to problems (e.g. -ESRCH) caused by the process.
- *
- * \param list Process list
- * \param proc Process entry
+ * @param list Process list
+ * @param proc Process entry
  **/
-void
-pink_easy_process_list_remove(pink_easy_process_list_t *list, const pink_easy_process_t *proc) PINK_GCC_ATTR((nonnull(1)));
+void pink_easy_process_list_remove(pink_easy_process_list_t *list,
+		const pink_easy_process_t *proc)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Look up the process list for the given process ID.
  *
- * \ingroup g_easy_process
- *
- * \param list The process list
- * \param pid Process ID
- *
- * \return The process on successful look up, NULL on failure.
+ * @param list The process list
+ * @param pid Process ID
+ * @return The process on successful look up, NULL on failure
  **/
-pink_easy_process_t *
-pink_easy_process_list_lookup(const pink_easy_process_list_t *list, pid_t pid) PINK_GCC_ATTR((nonnull(1)));
+pink_easy_process_t *pink_easy_process_list_lookup(const pink_easy_process_list_t *list,
+		pid_t pid)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Walk the process tree.
  *
- * \ingroup g_easy_process
- *
- * \param list Process list
- * \param func Walk function
- * \param userdata User data to pass to the walk function
- *
- * \return Number of visited entries
+ * @param list Process list
+ * @param func Walk function
+ * @param userdata User data to pass to the walk function
+ * @return Total number of visited entries
  **/
-unsigned
-pink_easy_process_list_walk(const pink_easy_process_list_t *list, pink_easy_walk_func_t func, void *userdata)  PINK_GCC_ATTR((nonnull(1,2)));
+unsigned pink_easy_process_list_walk(const pink_easy_process_list_t *list,
+		pink_easy_walk_func_t func, void *userdata)
+	PINK_GCC_ATTR((nonnull(1,2)));
 
-#endif /* !PINKTRACE_EASY_GUARD_PROCESS_H */
+PINK_END_DECL
+/** @} */
+#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,25 +25,25 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_EASY_GUARD_FUNC_H
-#define PINKTRACE_EASY_GUARD_FUNC_H 1
+#ifndef _PINK_EASY_FUNC_H
+#define _PINK_EASY_FUNC_H
 
 /**
- * \file
- * \brief Pink's easy function pointers
- *
- * \ingroup g_easy_func
+ * @file pinktrace/easy/func.h
+ * @brief Pink's easy function pointers
+ * @defgroup pink_easy_func Pink's easy function pointers
+ * @ingroup pinktrace-easy
+ * @{
  **/
+PINK_BEGIN_DECL
 
 struct pink_easy_process;
 
 /**
- * This type definition represents a generic free() function.
+ * This type definition represents a generic @e free(3) function.
  *
- * \ingroup g_easy_func
- *
- * \see pink_easy_context_new
- * \see pink_easy_process_set_data
+ * @see pink_easy_context_new
+ * @see pink_easy_process_set_data
  **/
 typedef void (*pink_easy_free_func_t) (void *data);
 
@@ -53,20 +53,19 @@ typedef void (*pink_easy_free_func_t) (void *data);
  * false, pink_easy_process_tree_walk() stops iterating through the process
  * tree and returns immediately.
  *
- * \ingroup g_easy_func
- *
- * \see pink_easy_process_tree_walk
+ * @see pink_easy_process_tree_walk
  **/
-typedef bool (*pink_easy_walk_func_t) (struct pink_easy_process *proc, void *userdata);
+typedef bool (*pink_easy_walk_func_t) (struct pink_easy_process *proc,
+		void *userdata);
 
 /**
  * This type definition represents a function to be executed by the child under
- * tracing. Its return value is passed directly to _exit().
+ * tracing. Its return value is passed directly to @e _exit(2).
  *
- * \ingroup g_easy_func
- *
- * \see pink_easy_call
+ * @see pink_easy_call
  **/
 typedef int (*pink_easy_child_func_t) (void *userdata);
 
-#endif /* !PINKTRACE_EASY_GUARD_FUNC_H */
+PINK_END_DECL
+/** @} */
+#endif

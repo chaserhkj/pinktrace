@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * Based in part upon strace which is:
  *   Copyright (c) 1991, 1992 Paul Kranenburg <pk@cs.few.eur.nl>
  *   Copyright (c) 1993 Branko Lankester <branko@hacktic.nl>
@@ -29,8 +29,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_EASY_GUARD_INTERNAL_H
-#define PINKTRACE_EASY_GUARD_INTERNAL_H 1
+#ifndef _PINK_EASY_INTERNAL_H
+#define _PINK_EASY_INTERNAL_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -60,6 +60,8 @@
 #define PINK_EASY_PROCESS_FOLLOWFORK		00100
 /** Process is a clone **/
 #define PINK_EASY_PROCESS_CLONE_THREAD		00200
+
+PINK_BEGIN_DECL
 
 typedef enum {
 	PINK_EASY_TRIBOOL_FALSE = 0,
@@ -116,7 +118,7 @@ struct pink_easy_context {
 };
 
 /** Initialize tracing **/
-int
-_pink_easy_init(struct pink_easy_context *ctx, pink_easy_process_t *proc);
+int _pink_easy_init(struct pink_easy_context *ctx, pink_easy_process_t *proc);
 
-#endif /* !PINKTRACE_EASY_GUARD_INTERNAL_H */
+PINK_END_DECL
+#endif

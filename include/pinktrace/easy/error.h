@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,39 +25,34 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_EASY_GUARD_ERROR_H
-#define PINKTRACE_EASY_GUARD_ERROR_H 1
+#ifndef _PINK_EASY_ERROR_H
+#define _PINK_EASY_ERROR_H
+
+/**
+ * @file pinktrace/easy/error.h
+ * @brief Pink's easy error codes
+ * @defgroup pink_easy_error Pink's easy error codes
+ * @ingroup pinktrace-easy
+ * @{
+ **/
 
 #include <pinktrace/pink.h>
 
-/**
- * \file
- * \brief Pink's easy error codes
- *
- * \ingroup g_easy_error
- **/
+PINK_BEGIN_DECL
 
-/**
- * Child error codes
- *
- * \ingroup g_easy_error
- **/
+/** Child error codes */
 typedef enum {
 	/** Success **/
 	PINK_EASY_CHILD_ERROR_SUCCESS = 0,
 	/** Preparation for tracing failed. (e.g. pink_trace_me()) **/
 	PINK_EASY_CHILD_ERROR_SETUP,
-	/** execve() failed. **/
+	/** @e execve(2) failed. **/
 	PINK_EASY_CHILD_ERROR_EXEC,
 	/** Maximum error number **/
 	PINK_EASY_CHILD_ERROR_MAX,
 } pink_easy_child_error_t;
 
-/**
- * Error codes
- *
- * \ingroup g_easy_error
- **/
+/** Error codes */
 typedef enum {
 	/** Successful run **/
 	PINK_EASY_ERROR_SUCCESS = 0,
@@ -73,9 +68,9 @@ typedef enum {
 	/** Attaching to the child failed **/
 	PINK_EASY_ERROR_ATTACH,
 
-	/** fork() failed **/
+	/** @e fork(2) failed **/
 	PINK_EASY_ERROR_FORK,
-	/** vfork() failed **/
+	/** @e vfork(2) failed **/
 	PINK_EASY_ERROR_VFORK,
 
 	/** Initial wait(2) failed **/
@@ -86,14 +81,14 @@ typedef enum {
 	/** Eldest child didn't stop **/
 	PINK_EASY_ERROR_STOP_ELDEST,
 
-	/** Setting up ptrace() options for the eldest child failed **/
+	/** Setting up @e ptrace(2) options for the eldest child failed **/
 	PINK_EASY_ERROR_SETUP_ELDEST,
-	/** Setting up ptrace() options for new child failed **/
+	/** Setting up @e ptrace(2) options for the new child failed **/
 	PINK_EASY_ERROR_SETUP,
 
 	/** Failed to get the bitness of the eldest child **/
 	PINK_EASY_ERROR_BITNESS_ELDEST,
-	/** Failed to get the bitness of a child after successful execve() **/
+	/** Failed to get the bitness of a child after successful @e execve(2) **/
 	PINK_EASY_ERROR_BITNESS,
 
 	/** Initial step (e.g. pink_trace_syscall()) failed **/
@@ -106,9 +101,9 @@ typedef enum {
 	PINK_EASY_ERROR_STEP_SYSCALL,
 	/** Stepping after event #PINK_EVENT_EXIT failed **/
 	PINK_EASY_ERROR_STEP_EXIT,
-	/** Stepping after fork(), vfork() or clone() failed **/
+	/** Stepping after @e fork(2), @e vfork(2) or @e clone(2) failed **/
 	PINK_EASY_ERROR_STEP_FORK,
-	/** Stepping after execve() failed **/
+	/** Stepping after @e execve(2) failed **/
 	PINK_EASY_ERROR_STEP_EXEC,
 	/** Stepping after genuine signal failed **/
 	PINK_EASY_ERROR_STEP_SIGNAL,
@@ -128,25 +123,21 @@ typedef enum {
 /**
  * Returns a string describing the child error.
  *
- * \ingroup g_easy_error
- *
- * \param e The error
- *
- * \return A string describing the error
+ * @param e Error code
+ * @return String describing the error
  **/
-const char *
-pink_easy_child_strerror(pink_easy_child_error_t e);
+const char *pink_easy_child_strerror(pink_easy_child_error_t e)
+	PINK_GCC_ATTR((pure));
 
 /**
  * Returns a string describing the error.
  *
- * \ingroup g_easy_error
- *
- * \param e The error
- *
- * \return A string describing the error
+ * @param e Error code
+ * @return String describing the error
  **/
-const char *
-pink_easy_strerror(pink_easy_error_t e) PINK_GCC_ATTR((pure));
+const char *pink_easy_strerror(pink_easy_error_t e)
+	PINK_GCC_ATTR((pure));
 
-#endif /* !PINKTRACE_EASY_GUARD_ERROR_H */
+PINK_END_DECL
+/** @} */
+#endif

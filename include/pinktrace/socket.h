@@ -25,14 +25,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_GUARD_SOCKET_H
-#define PINKTRACE_GUARD_SOCKET_H 1
+#ifndef _PINK_SOCKET_H
+#define _PINK_SOCKET_H
 
 /**
- * \file
- * \brief Pink's socket related data structures and functions
- *
- * \ingroup g_socket
+ * @file pinktrace/socket.h
+ * @brief Pink's socket related data structures and functions
+ * @defgroup pink_socket Pink's socket related data structures and functions
+ * @ingroup pinktrace
+ * @{
  **/
 
 #if defined(PINKTRACE_FREEBSD) || defined(DOXYGEN)
@@ -49,9 +50,7 @@
 #include <pinktrace/macros.h>
 
 /**
- * \brief Structure which defines a decoded socket address.
- *
- * \ingroup g_socket
+ * @brief Structure which defines a decoded socket address
  **/
 typedef struct {
 	/** Family of the socket address **/
@@ -60,7 +59,7 @@ typedef struct {
 	/**
 	 * Length of the socket address
 	 *
-	 * \since 0.0.5
+	 * @since 0.0.5
 	 **/
 	socklen_t length;
 
@@ -107,9 +106,7 @@ typedef struct {
 /**
  * Decoded socket subcalls
  *
- * \ingroup g_socket
- *
- * \note Availability: Linux
+ * @note Availability: Linux
  **/
 typedef enum {
 	/** socket() subcall **/
@@ -150,9 +147,7 @@ typedef enum {
 	PINK_SOCKET_SUBCALL_ACCEPT4,
 } pink_socket_subcall_t;
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+PINK_BEGIN_DECL
 
 /**
  * Decide whether the socketcall() system call is defined for the given
@@ -160,36 +155,28 @@ extern "C" {
  * bind etc. - are implemented as separate system calls. On others these calls
  * are subcalls of the socketcall() system call.
  *
- * \ingroup g_socket
+ * @note Availability: Linux
  *
- * \note Availability: Linux
+ * @see pink_socket_subcall_t
  *
- * \see pink_socket_subcall_t
- *
- * \param bitness Bitness of the child
- * \return true if socketcall() system call is available, false otherwise.
+ * @param bitness Bitness
+ * @return true if socketcall() system call is available, false otherwise
  **/
-bool
-pink_has_socketcall(pink_bitness_t bitness) PINK_GCC_ATTR((pure));
+bool pink_has_socketcall(pink_bitness_t bitness)
+	PINK_GCC_ATTR((pure));
 
 /**
  * Name the given socket subcall
  *
- * \ingroup g_socket
+ * @note Availability: Linux
  *
- * \note Availability: Linux
- *
- * \param subcall The socket subcall
- *
- * \return The name of the subcall
+ * @param subcall Socket subcall
+ * @return Name of the subcall
  **/
-const char *
-pink_name_socket_subcall(pink_socket_subcall_t subcall) PINK_GCC_ATTR((pure));
+const char *pink_name_socket_subcall(pink_socket_subcall_t subcall)
+	PINK_GCC_ATTR((pure));
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-#endif /* defined(PINKTRACE_LINUX)... */
-
-#endif /* !PINKTRACE_GUARD_SOCKET_H */
+PINK_END_DECL
+#endif
+/** @} */
+#endif

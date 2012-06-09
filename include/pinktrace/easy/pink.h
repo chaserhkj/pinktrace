@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,14 +25,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_EASY_GUARD_PINK_H
-#define PINKTRACE_EASY_GUARD_PINK_H 1
+#ifndef _PINK_EASY_PINK_H
+#define _PINK_EASY_PINK_H
 
 /**
- * \file
- * \brief A header file including all other header files part of pinktrace-easy
- *
- * \ingroup g_easy
+ * @file
+ * @brief A header file including all other header files part of pinktrace-easy
+ * @defgroup pinktrace-easy Pink's Easy Tracing Library
  **/
 
 #include <pinktrace/pink.h>
@@ -47,4 +46,4 @@
 #include <pinktrace/easy/loop.h>
 #include <pinktrace/easy/process.h>
 
-#endif /* !PINKTRACE_EASY_GUARD_PINK_H */
+#endif

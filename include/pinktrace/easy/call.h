@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,34 +25,37 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_EASY_GUARD_CALL_H
-#define PINKTRACE_EASY_GUARD_CALL_H 1
+#ifndef _PINK_EASY_CALL_H
+#define _PINK_EASY_CALL_H
+
+/**
+ * @file pinktrace/easy/call.h
+ * @brief Pink's easy tracing function calls
+ * @defgroup pink_easy_call Pink's easy tracing function calls
+ * @ingroup pinktrace-easy
+ * @{
+ **/
 
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/context.h>
 #include <pinktrace/easy/func.h>
 
-/**
- * \file
- * \brief Pink's easy tracing function call
- *
- * \ingroup g_easy_call
- **/
+PINK_BEGIN_DECL
 
 /**
  * Call a simple function which will be traced.
  *
- * \ingroup g_easy_call
+ * @note This function uses fork() to spawn the initial child.
  *
- * \note This function uses fork() to spawn the initial child.
+ * @param ctx Tracing context
+ * @param func Function which will be executed under the tracing environment
+ * @param userdata User data to be passed to the child function
  *
- * \param ctx Tracing context
- * \param func Function which will be executed under the tracing environment
- * \param userdata User data to be passed to the child function
- *
- * \return Depends on the callbacks.
+ * @return Depends on the callbacks
  **/
-int
-pink_easy_call(pink_easy_context_t *ctx, pink_easy_child_func_t func, void *userdata) PINK_GCC_ATTR((nonnull(1,2)));
+int pink_easy_call(pink_easy_context_t *ctx, pink_easy_child_func_t func, void *userdata)
+	PINK_GCC_ATTR((nonnull(1,2)));
 
-#endif /* !PINKTRACE_EASY_GUARD_CALL_H */
+PINK_END_DECL
+/** @} */
+#endif

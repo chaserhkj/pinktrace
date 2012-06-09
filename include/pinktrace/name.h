@@ -25,70 +25,59 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_GUARD_NAME_H
-#define PINKTRACE_GUARD_NAME_H 1
+#ifndef _PINK_NAME_H
+#define _PINK_NAME_H
 
 /**
- * \file
- * \brief Pink's system call naming
- *
- * \ingroup g_name
+ * @file pinktrace/name.h
+ * @brief Pink's system call naming
+ * @defgroup pink_name Pink's system call naming
+ * @ingroup pinktrace
+ * @{
  **/
 
 #include <pinktrace/bitness.h>
 #include <pinktrace/macros.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+PINK_BEGIN_DECL
 
 /**
- * Return the name of the given system call.
+ * Return the name of the given system call
  *
- * \ingroup g_name
+ * @note On ARM architecture, this function considers the system call
+ *       architecture specific if scno is smaller than zero.
  *
- * \note On ARM architecture, this function considers the system call
- * architecture specific if scno is smaller than zero.
+ * @see pink_util_get_syscall
  *
- * \see pink_util_get_syscall
- *
- * \param scno System call number
- * \param bitness Bitness of the child
- *
- * \return The name of the system call, NULL if system call name is unknown.
+ * @param scno System call number
+ * @param bitness Bitness of the child
+ * @return The name of the system call, NULL if system call name is unknown
  **/
-const char *
-pink_name_syscall(long scno, pink_bitness_t bitness) PINK_GCC_ATTR((pure));
+const char *pink_name_syscall(long scno, pink_bitness_t bitness)
+	PINK_GCC_ATTR((pure));
 
 /**
- * Look up the number of the given system call name.
+ * Look up the number of the given system call name
  *
- * \ingroup g_name
- *
- * \param name Name of the system call
- * \param bitness Bitness of the child
- *
- * \return The system call number on success, -1 on failure.
+ * @param name Name of the system call
+ * @param bitness Bitness of the child
+ * @return The system call number on success, -1 on failure
  **/
-long
-pink_name_lookup(const char *name, pink_bitness_t bitness) PINK_GCC_ATTR((pure));
+long pink_name_lookup(const char *name, pink_bitness_t bitness)
+	PINK_GCC_ATTR((pure));
 
 /**
- * Look up the number of the given system call name.
+ * Look up the number of the given system call name
  *
- * \ingroup g_name
- *
- * \param name Name of the system call
- * \param length Length of the name
- * \param bitness Bitness of the child
- *
- * \return The system call number on success, -1 on failure.
+ * @param name Name of the system call
+ * @param length Length of the name
+ * @param bitness Bitness of the child
+ * @return The system call number on success, -1 on failure
  **/
-long
-pink_name_lookup_with_length(const char *name, size_t length, pink_bitness_t bitness) PINK_GCC_ATTR((pure));
+long pink_name_lookup_with_length(const char *name, size_t length,
+		pink_bitness_t bitness)
+	PINK_GCC_ATTR((pure));
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-#endif /* !PINKTRACE_GUARD_NAME_H */
+PINK_END_DECL
+/** @} */
+#endif

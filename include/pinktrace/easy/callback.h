@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,33 +25,27 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_EASY_GUARD_CALLBACK_H
-#define PINKTRACE_EASY_GUARD_CALLBACK_H 1
+#ifndef _PINK_EASY_CALLBACK_H
+#define _PINK_EASY_CALLBACK_H
+
+/**
+ * @file pinktrace/easy/callback.h
+ * @brief Pink's easy ptrace(2) event callbacks
+ * @defgroup pink_easy_callback Pink's easy ptrace(2) event callbacks
+ * @ingroup pinktrace-easy
+ * @{
+ **/
 
 #include <stdbool.h>
-
 #include <pinktrace/easy/error.h>
 #include <pinktrace/easy/process.h>
 
-/**
- * \file
- * \brief Pink's easy \c ptrace(2) event callbacks
- *
- * \ingroup g_easy_callback
- **/
-
-/**
- * Implies that the loop should be aborted immediately.
- *
- * \ingroup g_easy_callback
- **/
+/** Implies that the loop should be aborted immediately */
 #define PINK_EASY_CFLAG_ABRT		(1 << 0)
 
 /**
  * Implies that the current process should be removed from the
  * process tree. Useful for handling -ESRCH in callbacks.
- *
- * \ingroup g_easy_callback
  **/
 #define PINK_EASY_CFLAG_DROP		(1 << 1)
 
@@ -59,17 +53,11 @@
  * Implies that the child of the current process should be removed from the
  * process tree. Useful for handling -ESRCH.
  *
- * This only makes sense for fork, vfork and clone events.
- *
- * \ingroup g_easy_callback
+ * @note This only makes sense for fork, vfork and clone events.
  **/
 #define PINK_EASY_CFLAG_DROP_CHILD	(1 << 2)
 
-/**
- * Do not deliver the signal to the traced child.
- *
- * \ingroup g_easy_callback
- **/
+/** Do not deliver the signal to the traced child. */
 #define PINK_EASY_CFLAG_SIGIGN		(1 << 3)
 
 struct pink_easy_context;
@@ -86,7 +74,7 @@ struct pink_easy_context;
  *
  * Here's a list of possible error conditions, in no particular order:
  *
- * \verbatim
+ * @verbatim
      ----------------------------------------------------------------------
      - Error             errno  Arguments                                 -
      ----------------------------------------------------------------------
@@ -114,23 +102,18 @@ struct pink_easy_context;
      - GETEVENTMSG_EXIT  +      pid_t pid                                 -
      - EVENT_UNKNOWN     -      pink_easy_process_t *current, int status  -
      ----------------------------------------------------------------------
-   \endverbatim
+   @endverbatim
  *
- * \ingroup g_easy_callback
- *
- * \param ctx Tracing context
- * \param ... Variable arguments give extra information about the error.
+ * @param ctx Tracing context
+ * @param ... Variable arguments give extra information about the error.
  **/
 typedef void (*pink_easy_errback_t) (const struct pink_easy_context *ctx, ...);
 
 /**
  * Errback for errors in the spawned child.
  *
- * \ingroup g_easy_callback
- *
- * \param e Error code
- *
- * \return Child exists with this return value
+ * @param e Error code
+ * @return Child exists with this return value
  **/
 typedef int (*pink_easy_errback_child_t) (pink_easy_child_error_t e);
 
@@ -139,13 +122,12 @@ typedef int (*pink_easy_errback_child_t) (pink_easy_child_error_t e);
  *
  * This is called when a new process is created.
  *
- * \ingroup g_easy_callback
- *
- * \param ctx Tracing context
- * \param current New born child
- * \param parent The parent of the new child or NULL for the eldest child.
+ * @param ctx Tracing context
+ * @param current New born child
+ * @param parent The parent of the new child or NULL for the eldest child.
  **/
-typedef void (*pink_easy_callback_birth_t) (const struct pink_easy_context *ctx, pink_easy_process_t *current, pink_easy_process_t *parent);
+typedef void (*pink_easy_callback_birth_t) (const struct pink_easy_context *ctx,
+		pink_easy_process_t *current, pink_easy_process_t *parent);
 
 /**
  * Callback for child death.
@@ -155,135 +137,118 @@ typedef void (*pink_easy_callback_birth_t) (const struct pink_easy_context *ctx,
  * In this case, the process is removed from the process tree.
  * This is the last callback that is called before the child is freed.
  *
- * \ingroup g_easy_callback
- *
- * \param ctx Tracing context
- * \param current Dead child
+ * @param ctx Tracing context
+ * @param current Dead child
  **/
-typedef void (*pink_easy_callback_death_t) (const struct pink_easy_context *ctx, const pink_easy_process_t *current);
+typedef void (*pink_easy_callback_death_t) (const struct pink_easy_context *ctx,
+		const pink_easy_process_t *current);
 
 /**
  * Callback for the end of tracing.
  *
  * This is called when the count of the process tree dropped to zero, or
- * waitpid() returned -ECHILD. If this callback is NULL, pink_easy_loop() will
- * just return with success, which may not always be what you want.
+ * @e waitpid(2) returned -ECHILD. If this callback is NULL, pink_easy_loop()
+ * will just return with success, which may not always be what you want.
  *
- * \ingroup g_easy_callback
+ * @see pink_easy_loop
  *
- * \see pink_easy_loop
- *
- * \param ctx Tracing context
- * \param echild true if waitpid() failed with -ECHILD, false if process tree
- * dropped to zero.
- *
- * \return This value is returned by pink_easy_loop()
+ * @param ctx Tracing context
+ * @param echild true if @e waitpid(2) failed with -ECHILD, false if count of
+ *               leaves in the process tree dropped to zero.
+ * @return This value is returned by pink_easy_loop()
  **/
-typedef int (*pink_easy_callback_end_t) (const struct pink_easy_context *ctx, bool echild);
+typedef int (*pink_easy_callback_end_t) (const struct pink_easy_context *ctx,
+		bool echild);
 
 /**
  * Callback for #PINK_EVENT_TRAP
  *
- * \ingroup g_easy_callback
- *
- * \param ctx Tracing context
- * \param current Current child
- *
- * \return See PINK_EASY_CFLAG_* for flags to set in the return value.
+ * @param ctx Tracing context
+ * @param current Current child
+ * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
-typedef int (*pink_easy_callback_trap_t) (const struct pink_easy_context *ctx, pink_easy_process_t *current);
+typedef int (*pink_easy_callback_trap_t) (const struct pink_easy_context *ctx,
+		pink_easy_process_t *current);
 
 /**
  * Callback for #PINK_EVENT_SYSCALL
  *
- * \ingroup g_easy_callback
- *
- * \param ctx Tracing context
- * \param current Current child
- * \param entering true if the child is entering the system call, false
- * otherwise.
- *
- * \return See PINK_EASY_CFLAG_* for flags to set in the return value.
+ * @param ctx Tracing context
+ * @param current Current child
+ * @param entering true if the child is entering the system call, false
+ *                 otherwise.
+ * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
-typedef int (*pink_easy_callback_syscall_t) (const struct pink_easy_context *ctx, pink_easy_process_t *current, bool entering);
+typedef int (*pink_easy_callback_syscall_t) (const struct pink_easy_context *ctx,
+		pink_easy_process_t *current, bool entering);
 
 /**
  * Callback for #PINK_EVENT_FORK, #PINK_EVENT_VFORK and #PINK_EVENT_CLONE
  *
- * \ingroup g_easy_callback
- *
- * \param ctx Tracing context
- * \param current Current child
- * \param alive true if the child was born and suspended before, false
- * otherwise.
- *
- * \return See PINK_EASY_CFLAG_* for flags to set in the return value.
+ * @param ctx Tracing context
+ * @param current Current child
+ * @param alive true if the child was born and suspended before, false
+ *              otherwise.
+ * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
-typedef int (*pink_easy_callback_fork_t) (const struct pink_easy_context *ctx, pink_easy_process_t *current, pink_easy_process_t *child, bool alive);
+typedef int (*pink_easy_callback_fork_t) (const struct pink_easy_context *ctx,
+		pink_easy_process_t *current, pink_easy_process_t *child, bool
+		alive);
 
 /**
  * Callback for #PINK_EVENT_EXEC
  *
- * \ingroup g_easy_callback
+ * @note The bitness of the child is updated before this callback is called.
  *
- * \note The bitness of the child is updated before this callback is called.
- *
- * \param ctx Tracing context
- * \param current Current child
- * \param old_bitness Old bitness of the child
- *
- * \return See PINK_EASY_CFLAG_* for flags to set in the return value.
+ * @param ctx Tracing context
+ * @param current Current child
+ * @param old_bitness Old bitness of the child
+ * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
-typedef int (*pink_easy_callback_exec_t) (const struct pink_easy_context *ctx, pink_easy_process_t *current, pink_bitness_t old_bitness);
+typedef int (*pink_easy_callback_exec_t) (const struct pink_easy_context *ctx,
+		pink_easy_process_t *current, pink_bitness_t old_bitness);
 
 /**
  * Callback for #PINK_EVENT_EXIT
  *
- * \ingroup g_easy_callback
+ * @warning The current child may or may not exist in the process tree at this
+ *          point so this callback is called with a pid_t value. You may
+ *          manually use pink_easy_process_tree_search() to get a
+ *          #pink_easy_process_t value.
  *
- * \warning The current child may or may not exist in the process tree at this
- * point so this callback is called with a pid_t value. You may manually use
- * pink_easy_process_tree_search() to get a #pink_easy_process_t value.
- *
- * \param ctx Tracing context
- * \param current Process ID
- * \param status Exit status
- *
- * \return See PINK_EASY_CFLAG_* for flags to set in the return value.
+ * @param ctx Tracing context
+ * @param current Process ID
+ * @param status Exit status
+ * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
-typedef int (*pink_easy_callback_pre_exit_t) (const struct pink_easy_context *ctx, pid_t pid, unsigned long status);
+typedef int (*pink_easy_callback_pre_exit_t) (const struct pink_easy_context *ctx,
+		pid_t pid, unsigned long status);
 
 /**
  * Callback for #PINK_EVENT_GENUINE
  *
- * \ingroup g_easy_callback
- *
- * \param ctx Tracing context
- * \param current Current process
- * \param stopsig Stop signal
- *
- * \return See PINK_EASY_CFLAG_* for flags to set in the return value.
+ * @param ctx Tracing context
+ * @param current Current process
+ * @param stopsig Stop signal
+ * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
-typedef int (*pink_easy_callback_signal_t) (const struct pink_easy_context *ctx, pink_easy_process_t *current, int stopsig);
+typedef int (*pink_easy_callback_signal_t) (const struct pink_easy_context *ctx,
+		pink_easy_process_t *current, int stopsig);
 
 /**
  * Callback for #PINK_EVENT_EXIT_GENUINE and #PINK_EVENT_EXIT_SIGNAL
  *
- * \ingroup g_easy_callback
- *
- * \param ctx Tracing context
- * \param pid Process ID of the child
- * \param cs Exit code for #PINK_EVENT_EXIT_GENUINE, termination signal for
- * #PINK_EVENT_EXIT_SIGNAL.
- *
- * \return See PINK_EASY_CFLAG_* for flags to set in the return value.
+ * @param ctx Tracing context
+ * @param pid Process ID of the child
+ * @param cs Exit code for #PINK_EVENT_EXIT_GENUINE
+ *           Termination signal for #PINK_EVENT_EXIT_SIGNAL
+ * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
-typedef int (*pink_easy_callback_exit_t) (const struct pink_easy_context *ctx, pid_t pid, int cs);
+typedef int (*pink_easy_callback_exit_t) (const struct pink_easy_context *ctx,
+		pid_t pid, int cs);
 
 /**
- * \brief Structure which represents a callback table
- *
- * \ingroup g_easy_callback
+ * @brief Structure which represents a callback table
  **/
 typedef struct pink_easy_callback_table {
 	/** "error" errback **/
@@ -321,4 +286,6 @@ typedef struct pink_easy_callback_table {
 	pink_easy_callback_exit_t exit_signal;
 } pink_easy_callback_table_t;
 
-#endif /* !PINKTRACE_EASY_GUARD_CALLBACK_H */
+PINK_END_DECL
+/** @} */
+#endif

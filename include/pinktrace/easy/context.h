@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,8 +25,16 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_EASY_GUARD_CONTEXT_H
-#define PINKTRACE_EASY_GUARD_CONTEXT_H 1
+#ifndef _PINK_EASY_CONTEXT_H
+#define _PINK_EASY_CONTEXT_H
+
+/**
+ * @file pinktrace/easy/context.h
+ * @brief Pink's easy tracing context
+ * @defgroup pink_easy_context Pink's easy tracing context
+ * @ingroup pinktrace-easy
+ * @{
+ **/
 
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/callback.h>
@@ -34,44 +42,35 @@
 #include <pinktrace/easy/func.h>
 #include <pinktrace/easy/process.h>
 
-/**
- * \file
- * \brief Pink's easy tracing context
- *
- * \ingroup g_easy_context
- **/
+PINK_BEGIN_DECL
 
 /**
- * \struct pink_easy_context_t
- * \brief Opaque structure which represents a tracing context.
+ * @struct pink_easy_context_t
+ * @brief Opaque structure which represents a tracing context.
  *
  * Use pink_easy_context_new() to create one and pink_easy_context_destroy() to
  * free all allocated resources.
- *
- * \ingroup g_easy_context
  **/
 typedef struct pink_easy_context pink_easy_context_t;
 
 /**
  * Allocate a tracing context.
  *
- * \ingroup g_easy_context
+ * @note This function accepts a destructor function pointer which may be used
+ *       to free the user data. You may pass NULL if you want to handle the
+ *       destruction yourself or use the standard free() function from stdlib.h
+ *       for basic destruction.
  *
- * \note This function accepts a destructor function pointer which may be used
- * to free the user data. You may pass NULL if you want to handle the
- * destruction yourself or use the standard free() function from stdlib.h for
- * basic destruction.
- *
- * \param ptrace_options Options for pink_trace_setup()
- * \param callback_table Callback table
- * \param userdata User data
- * \param userdata_destroy The desctructor function for the user data
- *
- * \return The tracing context on success, NULL on failure and sets errno
- * accordingly.
+ * @param ptrace_options Options for pink_trace_setup()
+ * @param callback_table Callback table
+ * @param userdata User data
+ * @param userdata_destroy Destructor function for the user data
+ * @return The tracing context on success, NULL on failure and sets errno
+ *         accordingly
  **/
-pink_easy_context_t *
-pink_easy_context_new(int ptrace_options, const pink_easy_callback_table_t *callback_table, void *userdata, pink_easy_free_func_t userdata_destroy)
+pink_easy_context_t *pink_easy_context_new(int ptrace_options,
+		const pink_easy_callback_table_t *callback_table,
+		void *userdata, pink_easy_free_func_t userdata_destroy)
 	PINK_GCC_ATTR((malloc, nonnull(2)));
 
 /**
@@ -81,72 +80,62 @@ pink_easy_context_new(int ptrace_options, const pink_easy_callback_table_t *call
  * is free'd if a destructor function was provided with
  * pink_easy_context_new().
  *
- * \ingroup g_easy_context
- *
- * \param ctx Tracing context
+ * @param ctx Tracing context
  **/
-void
-pink_easy_context_destroy(pink_easy_context_t *ctx) PINK_GCC_ATTR((nonnull(1)));
+void pink_easy_context_destroy(pink_easy_context_t *ctx)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Returns the last error saved in the context.
  *
- * \ingroup g_easy_context
- *
- * \param ctx Tracing context
- *
- * \return Error condition
+ * @param ctx Tracing context
+ * @return Error condition
  **/
-pink_easy_error_t
-pink_easy_context_get_error(const pink_easy_context_t *ctx) PINK_GCC_ATTR((nonnull(1)));
+pink_easy_error_t pink_easy_context_get_error(const pink_easy_context_t *ctx)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Clears the error saved in the context.
  *
- * \ingroup g_easy_context
- *
- * \param ctx Tracing context
+ * @param ctx Tracing context
  **/
-void
-pink_easy_context_clear_error(pink_easy_context_t *ctx) PINK_GCC_ATTR((nonnull(1)));
+void pink_easy_context_clear_error(pink_easy_context_t *ctx)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Set user data and destruction function of the tracing context
  *
- * \ingroup g_easy_context
+ * @note This function accepts a destructor function pointer which may be used
+ *       to free the user data. You may pass NULL if you want to handle the
+ *       destruction yourself or use the standard free() function from stdlib.h
+ *       for basic destruction.
  *
- * \note This function accepts a destructor function pointer which may be used
- * to free the user data. You may pass NULL if you want to handle the
- * destruction yourself or use the standard free() function from stdlib.h for
- * basic destruction.
- *
- * \param ctx Tracing context
- * \param userdata User data
- * \param userdata_destroy The desctructor function for the user data
+ * @param ctx Tracing context
+ * @param userdata User data
+ * @param userdata_destroy Destructor function for the user data
  **/
-void
-pink_easy_context_set_userdata(pink_easy_context_t *ctx, void *userdata, pink_easy_free_func_t userdata_destroy) PINK_GCC_ATTR((nonnull(1)));
+void pink_easy_context_set_userdata(pink_easy_context_t *ctx, void *userdata,
+		pink_easy_free_func_t userdata_destroy)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Returns the user data of the tracing context
  *
- * \param ctx Tracing context
- *
- * \return User data
+ * @param ctx Tracing context
+ * @return User data
  **/
-void *
-pink_easy_context_get_userdata(const pink_easy_context_t *ctx) PINK_GCC_ATTR((nonnull(1)));
+void *pink_easy_context_get_userdata(const pink_easy_context_t *ctx)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Returns the process list
  *
- * \ingroup g_easy_context
- *
- * \param ctx Tracing context
- *
- * \return Process list
+ * @param ctx Tracing context
+ * @return Process list
  **/
-pink_easy_process_list_t *
-pink_easy_context_get_process_list(pink_easy_context_t *ctx) PINK_GCC_ATTR((nonnull(1)));
+pink_easy_process_list_t *pink_easy_context_get_process_list(pink_easy_context_t *ctx)
+	PINK_GCC_ATTR((nonnull(1)));
 
-#endif /* !PINKTRACE_EASY_GUARD_CONTEXT_H */
+PINK_END_DECL
+/** @} */
+#endif

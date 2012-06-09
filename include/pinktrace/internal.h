@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,8 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_GUARD_INTERNAL_H
-#define PINKTRACE_GUARD_INTERNAL_H 1
+#ifndef _PINK_INTERNAL_H
+#define _PINK_INTERNAL_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -72,18 +72,14 @@
 
 #define ADDR_MUL	((64 == __WORDSIZE) ? 8 : 4)
 
+#include <pinktrace/macros.h>
 #include <pinktrace/bitness.h>
 #include <pinktrace/socket.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+PINK_BEGIN_DECL
 
-bool
-_pink_decode_socket_address(pid_t pid, long addr, long addrlen, pink_socket_address_t *paddr);
+bool _pink_decode_socket_address(pid_t pid, long addr, long addrlen,
+		pink_socket_address_t *paddr);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-#endif /* !PINKTRACE_GUARD_INTERNAL_H */
+PINK_END_DECL
+#endif

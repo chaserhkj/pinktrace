@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,138 +25,112 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_GUARD_COMPAT_H
-#define PINKTRACE_GUARD_COMPAT_H
+#ifndef _PINK_COMPAT_H
+#define _PINK_COMPAT_H
 
 /**
- * \file
- * \brief Pink's compatibility macros
- *
- * \ingroup g_compat
+ * @file pinktrace/compat.h
+ * @brief Pink's compatibility macros
+ * @defgroup pink_compat Pink's compatibility macros
+ * @ingroup pinktrace
+ * @{
  **/
 
 /**
- * Define for the availability of pink_bitness_wordsize() function.
+ * Define for the availability of pink_bitness_wordsize() function
  *
- * \ingroup g_compat
- *
- * \see pink_bitness_wordsize
- *
- * \since 0.0.3
+ * @see pink_bitness_wordsize
+ * @since 0.0.3
  **/
 #define PINK_BITNESS_WORDSIZE_AVAILABLE 1
 
 /**
- * Define for the availability of pink_decode_string_array_member() function.
+ * Define for the availability of pink_decode_string_array_member() function
  *
- * \ingroup g_compat
- *
- * \see pink_decode_string_array_member
- *
- * \since 0.0.3
+ * @see pink_decode_string_array_member
+ * @since 0.0.3
  **/
 #define PINK_DECODE_STRING_ARRAY_MEMBER_AVAILABLE 1
 
 /**
- * Define for the availability of pink_decode_string_array_member_persistent() function.
+ * Define for the availability of pink_decode_string_array_member_persistent() function
  *
- * \ingroup g_compat
- *
- * \see pink_decode_string_array_member_persistent
- *
- * \since 0.0.3
+ * @see pink_decode_string_array_member_persistent
+ * @since 0.0.3
  **/
 #define PINK_DECODE_STRING_ARRAY_MEMBER_PERSISTENT_AVAILABLE 1
 
 /**
- * Define for the availability of pink_trace_sysemu() function.
+ * Define for the availability of pink_trace_sysemu() function
  *
- * \ingroup g_compat
- *
- * \see pink_trace_sysemu()
- *
- * \since 0.0.5
+ * @see pink_trace_sysemu()
+ * @since 0.0.5
  **/
 #define PINK_TRACE_SYSEMU_AVAILABLE 1
 
 /**
- * Define for the availability of pink_trace_sysemu_singlestep() function.
+ * Define for the availability of pink_trace_sysemu_singlestep() function
  *
- * \ingroup g_compat
- *
- * \see pink_trace_sysemu_singlestep()
- *
- * \since 0.0.5
+ * @see pink_trace_sysemu_singlestep()
+ * @since 0.0.5
  **/
 #define PINK_TRACE_SYSEMU_SINGLESTEP_AVAILABLE 1
 
 /**
  * Define for the availability of nl member (netlink) of #pink_socket_address_t
  *
- * \ingroup g_compat
- *
- * \see pink_socket_address_t
- *
- * \since 0.0.5
+ * @see pink_socket_address_t
+ * @since 0.0.5
  **/
 #define PINK_SOCKET_ADDRESS_T_NL_AVAILABLE 1
 
 /**
  * Define for the availability of length member of #pink_socket_address_t
  *
- * \ingroup g_compat
- *
- * \see pink_socket_address_t
- *
- * \since 0.0.5
+ * @see pink_socket_address_t
+ * @since 0.0.5
  **/
 #define PINK_SOCKET_ADDRESS_T_LENGTH_AVAILABLE 1
 
 /**
  * Define for the availability of pink_util_set_arg() function.
  *
- * \ingroup g_compat
- *
- * \see pink_util_set_arg()
- *
- * \since 0.0.5
+ * @see pink_util_set_arg()
+ * @since 0.0.5
  **/
 #define PINK_UTIL_SET_ARG_AVAILABLE 1
 
 /**
- * Define for the availability of #PINK_EVENT_TRAP constant.
+ * Define for the availability of #PINK_EVENT_TRAP constant
  *
- * \see pink_event_decide()
- *
- * \since 0.0.6
+ * @see pink_event_decide()
+ * @since 0.0.6
  **/
 #define PINK_EVENT_TRAP_AVAILABLE 1
 
 /**
- * Define for the availability of pink_trace_lwpinfo() function.
+ * Define for the availability of pink_trace_lwpinfo() function
  *
- * \see pink_trace_lwpinfo()
- *
- * \since 0.0.6
+ * @see pink_trace_lwpinfo()
+ * @since 0.0.6
  **/
 #define PINK_TRACE_LWPINFO_AVAILABLE 1
 
 /**
- * Define for the availability of pink_trace_followfork() function.
+ * Define for the availability of pink_trace_followfork() function
  *
- * \see pink_trace_followfork()
- *
- * \since 0.0.6
+ * @see pink_trace_followfork()
+ * @since 0.0.6
  **/
 #define PINK_TRACE_FOLLOWFORK_AVAILABLE 1
 
 /**
- * Define for the availability of the pink_name_lookup_with_length() function.
+ * Define for the availability of the pink_name_lookup_with_length() function
  *
- * \see pink_name_lookup_with_length()
- *
- * \since 0.1.2
+ * @see pink_name_lookup_with_length()
+ * @since 0.1.2
  **/
 #define PINK_NAME_LOOKUP_WITH_LENGTH_AVAILABLE 1
 
-#endif /* PINKTRACE_GUARD_COMPAT_H */
+/** @} */
+#endif

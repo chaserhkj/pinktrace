@@ -25,11 +25,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_EASY_GUARD_INTERNAL_UTIL_H
-#define PINKTRACE_EASY_GUARD_INTERNAL_UTIL_H 1
+#ifndef _PINK_EASY_INTERNAL_UTIL_H
+#define _PINK_EASY_INTERNAL_UTIL_H
+
+#include <pinktrace/pink.h>
+PINK_BEGIN_DECL
 
 /** Simple waitpid() wrapper which handles EINTR **/
-pid_t
-_pink_easy_waitpid_nointr(pid_t pid, int *status);
+pid_t _pink_easy_waitpid_nointr(pid_t pid, int *status);
 
-#endif /* !PINKTRACE_EASY_GUARD_INTERNAL_UTIL_H */
+PINK_END_DECL
+#endif

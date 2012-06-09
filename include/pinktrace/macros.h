@@ -25,13 +25,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_MACRO_H
-#define _PINK_MACRO_H
+#ifndef _PINK_MACROS_H
+#define _PINK_MACROS_H
 
 /**
- * @file pinktrace/macro.h
+ * @file pinktrace/macros.h
  * @brief Pink's common macros
- * @defgroup pink_macro Pink's common macros
+ * @defgroup pink_macros Pink's common macros
  * @ingroup pinktrace
  * @{
  **/

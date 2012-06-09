@@ -25,26 +25,24 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_GUARD_EVENT_H
-#define PINKTRACE_GUARD_EVENT_H 1
+#ifndef _PINK_EVENT_H
+#define _PINK_EVENT_H
 
 /**
- * \file
- * \brief Pink's event handling
- *
- * \ingroup g_event
+ * @file pinktrace/event.h
+ * @brief Pink's event handling
+ * @defgroup pink_event Pink's event handling
+ * @ingroup pinktrace
+ * @{
  **/
 
 #include <stdbool.h>
-
 #include <pinktrace/macros.h>
 
 /**
  * Event constants
  *
- * \ingroup g_event
- *
- * \note Some of these events are only available on Linux.
+ * @note Some of these events are only available on Linux.
  **/
 typedef enum {
 	/** Child has been stopped **/
@@ -54,43 +52,43 @@ typedef enum {
 	/**
 	 * Child has entered/exited a system call
 	 *
-	 * \note Availability: Linux
+	 * @note Availability: Linux
 	 **/
 	PINK_EVENT_SYSCALL,
 	/**
 	 * Child has called fork()
 	 *
-	 * \note Availability: Linux
+	 * @note Availability: Linux
 	 **/
 	PINK_EVENT_FORK,
 	/**
 	 * Child has called vfork()
 	 *
-	 * \note Availability: Linux
+	 * @note Availability: Linux
 	 **/
 	PINK_EVENT_VFORK,
 	/**
 	 * Child has called clone()
 	 *
-	 * \note Availability: Linux
+	 * @note Availability: Linux
 	 **/
 	PINK_EVENT_CLONE,
 	/**
 	 * Child has exited a vfork() call
 	 *
-	 * \note Availability: Linux
+	 * @note Availability: Linux
 	 **/
 	PINK_EVENT_VFORK_DONE,
 	/**
 	 * Child has called execve()
 	 *
-	 * \note Availability: Linux
+	 * @note Availability: Linux
 	 **/
 	PINK_EVENT_EXEC,
 	/**
 	 * Child is exiting (ptrace way, stopped before exit)
 	 *
-	 * \note Availability: Linux
+	 * @note Availability: Linux
 	 **/
 	PINK_EVENT_EXIT,
 	/** Child has received a genuine signal **/
@@ -103,39 +101,29 @@ typedef enum {
 	PINK_EVENT_UNKNOWN,
 } pink_event_t;
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+PINK_BEGIN_DECL
 
 /**
- * Return the last event made by child.
+ * Get the event from the status argument as returned by @e waitpid(2)
  *
- * \ingroup g_event
+ * @note On FreeBSD, this function gives only limited information about the
+ *       event. To get more information use pink_trace_lwpinfo()
  *
- * \note On FreeBSD, this function gives only limited information about the
- * event. To get more information use pink_trace_lwpinfo()
- *
- * \param status The status argument, received from wait(2) system call.
- *
- * \return One of PINK_EVENT_* constants
+ * @param status Status argument as returned by @e waitpid(2)
+ * @return One of PINK_EVENT_* constants
  **/
-pink_event_t
-pink_event_decide(int status) PINK_GCC_ATTR((pure));
+pink_event_t pink_event_decide(int status)
+	PINK_GCC_ATTR((pure));
 
 /**
- * Return a string representation of the event.
+ * Return a string representation of the event
  *
- * \ingroup g_event
- *
- * \param event The event to be stringified.
- *
- * \return The string representation of the event.
+ * @param event Event
+ * @return String representation of the event
  **/
-const char *
-pink_event_name(pink_event_t event) PINK_GCC_ATTR((pure));
+const char *pink_event_name(pink_event_t event)
+	PINK_GCC_ATTR((pure));
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-#endif /* !PINKTRACE_GUARD_EVENT_H */
+PINK_END_DECL
+/** @} */
+#endif
