@@ -7,15 +7,6 @@ $:.insert(0, '.libs')
 require 'PinkTrace'
 
 class TestPinkSyscall < Test::Unit::TestCase
-  def test_syscall_get_arg_invalid
-    assert_raise PinkTrace::BitnessError do
-      PinkTrace::Syscall.get_arg 0, 1, 13
-    end
-    assert_raise PinkTrace::IndexError do
-      PinkTrace::Syscall.get_arg 0, PinkTrace::Syscall::MAX_INDEX
-    end
-  end
-
   def test_syscall_get_arg_esrch
     assert_raise Errno::ESRCH do
       PinkTrace::Syscall.get_arg 0, 1
@@ -43,18 +34,6 @@ class TestPinkSyscall < Test::Unit::TestCase
   def test_syscall_get_ret_esrch
     assert_raise Errno::ESRCH do
       PinkTrace::Syscall.get_ret 0
-    end
-  end
-
-  def test_syscall_name_invalid
-    assert_raise PinkTrace::BitnessError do
-      PinkTrace::Syscall.name 0, 13
-    end
-  end
-
-  def test_syscall_set_no_invalid
-    assert_raise PinkTrace::BitnessError do
-      PinkTrace::Syscall.set_no 0, 1, 123
     end
   end
 

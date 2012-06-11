@@ -67,18 +67,6 @@ Init_PinkTrace(void)
 
 	mod = rb_define_module("PinkTrace");
 	/*
-	 * Document-const: PinkTrace::HAVE_IPV6
-	 *
-	 * This constant is +true+ if IPV6 support is available
-	 */
-	rb_define_const(mod, "HAVE_IPV6", PINKTRACE_HAVE_IPV6 ? Qtrue : Qfalse);
-	/*
-	 * Document-const: PinkTrace::HAVE_NETLINK
-	 *
-	 * This constant is +true+ if Netlink support is available
-	 */
-	rb_define_const(mod, "HAVE_NETLINK", PINKTRACE_HAVE_NETLINK ? Qtrue : Qfalse);
-	/*
 	 * Document-const: PinkTrace::PACKAGE
 	 *
 	 * The name of the package (eg pinktrace)
@@ -126,6 +114,30 @@ Init_PinkTrace(void)
 	 * The suffix used for so names (eg "0.30" or "0.31_15ece615")
 	 */
 	rb_define_const(mod, "PC_SLOT", rb_str_new2(PINKTRACE_PC_SLOT));
+	/*
+	 * Document-const: PinkTrace::OS_FREEBSD
+	 *
+	 * This constant is +true+ if the operating system is FreeBSD
+	 */
+	rb_define_const(mod, "OS_FREEBSD", PINK_OS_FREEBSD ? Qtrue : Qfalse);
+	/*
+	 * Document-const: PinkTrace::OS_LINUX
+	 *
+	 * This constant is +true+ if the operating system is Linux
+	 */
+	rb_define_const(mod, "OS_LINUX", PINK_OS_LINUX ? Qtrue : Qfalse);
+	/*
+	 * Document-const: PinkTrace::HAVE_IPV6
+	 *
+	 * This constant is +true+ if IPV6 support is available
+	 */
+	rb_define_const(mod, "HAVE_IPV6", PINK_HAVE_IPV6 ? Qtrue : Qfalse);
+	/*
+	 * Document-const: PinkTrace::HAVE_NETLINK
+	 *
+	 * This constant is +true+ if Netlink support is available
+	 */
+	rb_define_const(mod, "HAVE_NETLINK", PINK_HAVE_NETLINK ? Qtrue : Qfalse);
 
 	/*
 	 * Document-module: PinkTrace::Trace
@@ -133,7 +145,7 @@ Init_PinkTrace(void)
 	 * This class includes thin wrappers around the <tt>ptrace()</tt> system call.
 	 */
 	trace_mod = rb_define_module_under(mod, "Trace");
-#ifdef PINKTRACE_LINUX
+#if PINK_OS_LINUX
 	/*
 	 * Document-const: PinkTrace::Trace::OPTION_SYSGOOD
 	 * (Availability: Linux)
@@ -387,14 +399,14 @@ Init_PinkTrace(void)
 	 * constant as an argument to PinkTrace::Syscall.set_no to deny a
 	 * system call from execution.
 	 */
-	rb_define_const(syscall_mod, "INVALID", INT2FIX(PINKTRACE_INVALID_SYSCALL));
+	rb_define_const(syscall_mod, "INVALID", INT2FIX(PINK_SYSCALL_INVALID));
 	/*
-	 * Document-const: PinkTrace::Syscall::MAX_INDEX
+	 * Document-const: PinkTrace::Syscall::MAX_ARGS
 	 *
 	 * The index arguments of system call functions must be smaller than
 	 * this constant.
 	 */
-	rb_define_const(syscall_mod, "MAX_INDEX", INT2FIX(PINK_MAX_INDEX));
+	rb_define_const(syscall_mod, "MAX_ARGS", INT2FIX(PINK_MAX_ARGS));
 	rb_define_module_function(syscall_mod, "name", pinkrb_name_syscall, -1); /* in syscall.c */
 	rb_define_module_function(syscall_mod, "lookup", pinkrb_name_lookup, -1); /* in syscall.c */
 	rb_define_module_function(syscall_mod, "get_no", pinkrb_util_get_syscall, -1); /* in syscall.c */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ static char pinkpy_string_decode_doc[] = ""
 	"(Optional, defaults to -1, if smaller than zero, pinktrace tries to determine the string length itself)\n"
 	"@param bitness: The bitness of the traced child\n"
 	"(Optional, defaults to C{pinktrace.bitness.DEFAULT_BITNESS})\n"
-	"@raise IndexError: Raised if the index is not smaller than MAX_INDEX\n"
+	"@raise IndexError: Raised if the index is not smaller than MAX_ARGS\n"
 	"@raise ValueError: Raised if the given bitness is either unsupported or invalid\n"
 	"@raise OSError: Raised when the underlying I{ptrace(2)} call fails.\n"
 	"@rtype: str\n"
@@ -111,7 +111,7 @@ static char pinkpy_string_encode_doc[] = ""
 	"@param string: The string to be encoded\n"
 	"@param bitness: The bitness of the traced child\n"
 	"(Optional, defaults to C{pinktrace.bitness.DEFAULT_BITNESS})\n"
-	"@raise IndexError: Raised if the index is not smaller than C{MAX_INDEX}\n"
+	"@raise IndexError: Raised if the index is not smaller than C{MAX_ARGS}\n"
 	"@raise ValueError: Raised if the given bitness is either unsupported or invalid\n"
 	"@raise OSError: Raised when the underlying I{ptrace(2)} call fails.\n";
 static PyObject *
@@ -147,17 +147,17 @@ static char pinkpy_string_encode_safe_doc[] = ""
 	"@param string: The string to be encoded\n"
 	"@param bitness: The bitness of the traced child\n"
 	"(Optional, defaults to C{pinktrace.bitness.DEFAULT_BITNESS})\n"
-	"@raise IndexError: Raised if the index is not smaller than C{MAX_INDEX}\n"
+	"@raise IndexError: Raised if the index is not smaller than C{MAX_ARGS}\n"
 	"@raise ValueError: Raised if the given bitness is either unsupported or invalid\n"
 	"@raise OSError: Raised when the underlying I{ptrace(2)} call fails.\n";
 static PyObject *
 pinkpy_string_encode_safe(PINK_GCC_ATTR((unused)) PyObject *self,
-#if !defined(PINKTRACE_LINUX)
+#if !PINK_OS_LINUX
 	PINK_GCC_ATTR((unused))
 #endif
 	PyObject *args)
 {
-#if defined(PINKTRACE_LINUX)
+#if PINK_OS_LINUX
 	pid_t pid;
 	unsigned ind;
 	pink_bitness_t bit;
@@ -178,7 +178,7 @@ pinkpy_string_encode_safe(PINK_GCC_ATTR((unused)) PyObject *self,
 #else
 	PyErr_SetString(PyExc_NotImplementedError, "Not implemented");
 	return NULL;
-#endif /* defined(PINKTRACE_LINUX) */
+#endif /* PINK_OS_LINUX */
 }
 
 static char string_doc[] = "Pink's string decoding and encoding functions";

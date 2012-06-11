@@ -13,15 +13,6 @@ class TestPinkSocket < Test::Unit::TestCase
     end
   end
 
-  def test_socket_decode_fd_invalid
-    assert_raise PinkTrace::BitnessError do
-      PinkTrace::Socket.decode_fd 0, 1, 13
-    end
-    assert_raise PinkTrace::IndexError do
-      PinkTrace::Socket.decode_fd 0, PinkTrace::Syscall::MAX_INDEX
-    end
-  end
-
   def test_socket_decode_fd_esrch
     assert_raise Errno::ESRCH do
       PinkTrace::Socket.decode_fd 0

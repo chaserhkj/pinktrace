@@ -37,6 +37,8 @@ __init__.py: __init__.py.in
 		-e "s,#VERSION_SUFFIX#,$(VERSION_SUFFIX)," \
 		-e "s,#GIT_HEAD#,$(GITHEAD)," \
 		-e "s,#PC_SLOT#,$(PINKTRACE_PC_SLOT)," \
+		-e "s,#OS_FREEBSD#,$(OS_FREEBSD)," \
+		-e "s,#OS_LINUX#,$(OS_LINUX)," \
 		-e "s,#HAVE_IPV6#,$(PYTHON_HAVE_IPV6)," \
 		-e "s,#HAVE_NETLINK#,$(PYTHON_HAVE_NETLINK)," \
 		$< > $@

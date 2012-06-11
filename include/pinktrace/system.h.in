@@ -1,5 +1,7 @@
+@GENERATED_FILE@
+
 /*
- * Copyright (c) 2010, 2012 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,53 +27,44 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_ENCODE_H
-#define _PINK_ENCODE_H
+#ifndef _PINK_SYSTEM_H
+#define _PINK_SYSTEM_H
 
 /**
- * @file pinktrace/encode.h
- * @brief Pink's system call encoders
- * @defgroup pink_encode Pink's system call encoders
+ * @file pinktrace/system.h
+ * @brief Pink's system specific definitions
+ * @defgroup pink_system Pink's system specific definitions
  * @ingroup pinktrace
  * @{
  **/
 
-#include <stdbool.h>
-#include <sys/types.h>
-#include <pinktrace/bitness.h>
+/** Define to 1 if the operating system is FreeBSD, 0 otherwise */
+#define PINK_OS_FREEBSD			@OS_FREEBSD@
+/** Define to 1 if the operating system is Linux, 0 otherwise */
+#define PINK_OS_LINUX			@OS_LINUX@
+/** Define to 1 if the architecture is i386, 0 otherwise */
+#define PINK_ARCH_I386			@ARCH_I386@
+/** Define to 1 if the architecture is x86_64, 0 otherwise */
+#define PINK_ARCH_X86_64		@ARCH_X86_64@
+/** Define to 1 if the architecture is powerpc, 0 otherwise */
+#define PINK_ARCH_POWERPC		@ARCH_POWERPC@
+/** Define to 1 if the architecture is powerpc64, 0 otherwise */
+#define PINK_ARCH_POWERPC64		@ARCH_POWERPC64@
+/** Define to 1 if the architecture is ia64, 0 otherwise */
+#define PINK_ARCH_IA64			@ARCH_IA64@
+/** Define to 1 if the architecture is arm, 0 otherwise */
+#define PINK_ARCH_ARM			@ARCH_ARM@
 
-PINK_BEGIN_DECL
+/** Maximum number of arguments to a system call */
+#define PINK_MAX_ARGS			6
 
-/**
- * Write the given data argument src to the address of the argument arg.
- *
- * @param pid Process ID
- * @param bitness Bitness
- * @param ind Index of the argument (0-5, see #PINK_MAX_ARGS)
- * @param src Data to be encoded
- * @param len Length of the data
- * @return true on success, false on failure and sets errno accordingly
- **/
-bool pink_encode_simple(pid_t pid, pink_bitness_t bitness, unsigned ind,
-		const void *src, size_t len);
+/** A "valid" invalid system call number */
+#define PINK_SYSCALL_INVALID		@PINK_SYSCALL_INVALID@
 
-#if PINK_OS_LINUX || defined(DOXYGEN)
-/**
- * Write the given data argument src to the address of the argument arg safely.
- *
- * @note Availability: Linux
- *
- * @param pid Process ID
- * @param bitness Bitness
- * @param ind Index of the argument (0-5, see #PINK_MAX_ARGS)
- * @param src Data to be encoded
- * @param len Length of the data
- * @return true on success, false on failure and sets errno accordingly
- **/
-bool pink_encode_simple_safe(pid_t pid, pink_bitness_t bitness, unsigned ind,
-		const void *src, size_t len);
-#endif
+/** Define to 1 if pinktrace supports IPV6, 0 otherwise */
+#define PINK_HAVE_IPV6			@HAVE_IPV6@
+/** Define to 1 if pinktrace supports Netlink, 0 otherwise */
+#define PINK_HAVE_NETLINK		@HAVE_NETLINK@
 
-PINK_END_DECL
 /** @} */
 #endif

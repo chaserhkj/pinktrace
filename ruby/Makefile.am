@@ -4,6 +4,7 @@ IF_RUBY_FILES= \
 	       bitness.c \
 	       syscall.c \
 	       string.c \
+	       strarray.c \
 	       socket.c \
 	       init.c
 IF_RUBY_TESTS= \

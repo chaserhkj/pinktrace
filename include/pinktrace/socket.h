@@ -36,18 +36,20 @@
  * @{
  **/
 
-#if defined(PINKTRACE_FREEBSD) || defined(DOXYGEN)
+#include <pinktrace/macros.h>
+#include <pinktrace/system.h>
+
+#if PINK_OS_FREEBSD || defined(DOXYGEN)
 #include <sys/socket.h>
 #endif
 
 #include <netinet/in.h>
 #include <sys/un.h>
 
-#if PINKTRACE_HAVE_NETLINK || defined(DOXYGEN)
+#if PINK_HAVE_NETLINK || defined(DOXYGEN)
 #include <linux/netlink.h>
-#endif /* PINKTRACE_HAVE_NETLINK... */
+#endif
 
-#include <pinktrace/macros.h>
 
 /**
  * @brief Structure which defines a decoded socket address
@@ -80,29 +82,29 @@ typedef struct {
 		/** Inet socket address, only valid if family is AF_INET. **/
 		struct sockaddr_in sa_in;
 
-#if PINKTRACE_HAVE_IPV6 || defined(DOXYGEN)
+#if PINK_HAVE_IPV6 || defined(DOXYGEN)
 		/**
 		 * Inet6 socket address, only valid if family is AF_INET6.
 		 * This member is only available if IPV6 support was enabled at
-		 * compile time. Check with PINKTRACE_HAVE_IPV6.
+		 * compile time. Check with #PINK_HAVE_IPV6.
 		 **/
 		struct sockaddr_in6 sa6;
-#endif /* PINKTRACE_HAVE_IPV6... */
+#endif /* PINK_HAVE_IPV6... */
 
-#if PINKTRACE_HAVE_NETLINK || defined(DOXYGEN)
+#if PINK_HAVE_NETLINK || defined(DOXYGEN)
 		/**
 		 * Netlink socket address, only valid if family is AF_NETLINK.
-		 * Check with PINKTRACE_HAVE_NETLINK if this member is
-		 * available.
+		 * This member is only available if Netlink support was enabled
+		 * at compile time. Check with #PINK_HAVE_NETLINK.
 		 *
-		 * \since 0.0.5
+		 * @since 0.0.5
 		 **/
 		struct sockaddr_nl nl;
-#endif /* PINKTRACE_HAVE_NETLINK... */
+#endif /* PINK_HAVE_NETLINK... */
 	} u;
 } pink_socket_address_t;
 
-#if defined(PINKTRACE_LINUX) || defined(DOXYGEN)
+#if PINK_OS_LINUX || defined(DOXYGEN)
 /**
  * Decoded socket subcalls
  *

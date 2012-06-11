@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * Based in part upon Python-2.6.4's Modules/posixmodule.c which is:
  *   Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
  *   Python Software Foundation
@@ -28,8 +28,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_GUARD_PINK_HACKS_H
-#define PINKTRACE_GUARD_PINK_HACKS_H 1
+#ifndef _PINK_PYTHON_HACKS_H
+#define _PINK_PYTHON_HACKS_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -108,7 +108,7 @@ PINK_GCC_ATTR((unused))
 static bool
 check_index(unsigned ind)
 {
-	if (ind >= PINK_MAX_INDEX) {
+	if (ind >= PINK_MAX_ARGS) {
 		PyErr_SetString(PyExc_IndexError, "Invalid index");
 		return false;
 	}

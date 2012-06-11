@@ -1,11 +1,11 @@
 /**
- * \file
+ * @file
  *
- * Example \ref pink-simple-strace-linux.c "pink-simple-strace-linux.c" .
+ * Example @ref pink-simple-strace-linux.c "pink-simple-strace-linux.c"
  **/
 
 /**
- * \example pink-simple-strace-linux.c
+ * @example pink-simple-strace-linux.c
  *
  * Simple strace like program example written with pinktrace for Linux.
  **/
@@ -190,19 +190,19 @@ decode_socketcall(pid_t pid, pink_bitness_t bitness, const char *scname)
 		printf("{sa_family=AF_INET, sin_port=htons(%d), sin_addr=inet_addr(\"%s\")}",
 				ntohs(addr.u.sa_in.sin_port), ip);
 		break;
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 	case AF_INET6:
 		inet_ntop(AF_INET6, &addr.u.sa6.sin6_addr, ip, sizeof(ip));
 		printf("{sa_family=AF_INET6, sin_port=htons(%d), sin6_addr=inet_addr(\"%s\")}",
 				ntohs(addr.u.sa6.sin6_port), ip);
 		break;
-#endif /* PINKTRACE_HAVE_IPV6 */
-#if PINKTRACE_HAVE_NETLINK
+#endif
+#if PINK_HAVE_NETLINK
 	case AF_NETLINK:
 		printf("{sa_family=AF_NETLINK, nl_pid=%d, nl_groups=%08x}",
 				addr.u.nl.nl_pid, addr.u.nl.nl_groups);
 		break;
-#endif /* PINKTRACE_HAVE_NETLINK */
+#endif /* PINK_HAVE_NETLINK */
 	default: /* Unknown family */
 		printf("{sa_family=???}");
 		break;

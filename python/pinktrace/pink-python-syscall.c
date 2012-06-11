@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -200,7 +200,7 @@ static char pinkpy_syscall_get_arg_doc[] = ""
 	"@param index: The index of the argument\n"
 	"@param bitness: The bitness of the traced child\n"
 	"(Optional, defaults to C{pinktrace.bitness.DEFAULT_BITNESS})\n"
-	"@raise IndexError: Raised if the index is not smaller than C{MAX_INDEX}\n"
+	"@raise IndexError: Raised if the index is not smaller than C{MAX_ARGS}\n"
 	"@raise ValueError: Raised if the given bitness is either unsupported or invalid\n"
 	"@raise OSError: Raised when the underlying ptrace call fails.\n"
 	"@rtype: long\n"
@@ -234,7 +234,7 @@ static char pinkpy_syscall_set_arg_doc[] = ""
 	"@param arg: The new value of the argument\n"
 	"@param bitness: The bitness of the traced child\n"
 	"(Optional, defaults to C{pinktrace.bitness.DEFAULT_BITNESS})\n"
-	"@raise IndexError: Raised if the index is not smaller than C{MAX_INDEX}\n"
+	"@raise IndexError: Raised if the index is not smaller than C{MAX_ARGS}\n"
 	"@raise ValueError: Raised if the given bitness is either unsupported or invalid\n"
 	"@raise OSError: Raised when the underlying ptrace call fails.\n";
 static PyObject *
@@ -261,8 +261,8 @@ pinkpy_syscall_set_arg(PINK_GCC_ATTR((unused)) PyObject *self, PyObject *args)
 static void
 syscall_init(PyObject *mod)
 {
-	PyModule_AddIntConstant(mod, "INVALID", PINKTRACE_INVALID_SYSCALL);
-	PyModule_AddIntConstant(mod, "MAX_INDEX", PINK_MAX_INDEX);
+	PyModule_AddIntConstant(mod, "INVALID", PINK_SYSCALL_INVALID);
+	PyModule_AddIntConstant(mod, "MAX_ARGS", PINK_MAX_ARGS);
 }
 
 static char syscall_doc[] = "Pink's system call utility functions";

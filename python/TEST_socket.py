@@ -30,13 +30,13 @@ class TestSocket_01_Invalid(unittest.TestCase):
         if UNAME[0] != 'Linux': return
 
         self.assertRaises(TypeError, pinktrace.socket.decode_fd)
-        self.assertRaises(IndexError, pinktrace.socket.decode_fd, 0, pinktrace.syscall.MAX_INDEX)
+        self.assertRaises(IndexError, pinktrace.socket.decode_fd, 0, pinktrace.syscall.MAX_ARGS)
         self.assertRaises(ValueError, pinktrace.socket.decode_fd, 0, 1, 13)
 
     def test_04_decode_address(self):
         self.assertRaises(TypeError, pinktrace.socket.decode_address)
         self.assertRaises(TypeError, pinktrace.socket.decode_address, 0)
-        self.assertRaises(IndexError, pinktrace.socket.decode_address, 0, pinktrace.syscall.MAX_INDEX)
+        self.assertRaises(IndexError, pinktrace.socket.decode_address, 0, pinktrace.syscall.MAX_ARGS)
         self.assertRaises(ValueError, pinktrace.socket.decode_address, 0, 1, 13)
 
 if __name__ == '__main__':

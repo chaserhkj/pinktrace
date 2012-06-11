@@ -12,31 +12,13 @@ class TestPinkSocketAddress < Test::Unit::TestCase
     assert !(PinkTrace::Socket::Address.respond_to? :initialize)
   end
 
-  def test_address_decode_invalid
-    assert_raise PinkTrace::IndexError do
-      PinkTrace::Socket.decode_address 0, PinkTrace::Syscall::MAX_INDEX
-    end
-    assert_raise PinkTrace::BitnessError do
-      PinkTrace::Socket.decode_address 0, 1, 13
-    end
-  end
-
   def test_address_decode_esrch
     assert_raise Errno::ESRCH do
       PinkTrace::Socket.decode_address 0, 1
     end
   end
 
-  def test_address_decode2_invalid
-    assert_raise PinkTrace::IndexError do
-      PinkTrace::Socket.decode_address_fd 0, PinkTrace::Syscall::MAX_INDEX
-    end
-    assert_raise PinkTrace::BitnessError do
-      PinkTrace::Socket.decode_address_fd 0, 1, 13
-    end
-  end
-
-  def test_address_decode_esrch
+  def test_address_decode_fd_esrch
     assert_raise Errno::ESRCH do
       PinkTrace::Socket.decode_address_fd 0, 1
     end

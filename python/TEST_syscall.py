@@ -33,7 +33,7 @@ class TestSyscall_01_Invalid(unittest.TestCase):
     def test_06_get_arg(self):
         self.assertRaises(TypeError, syscall.get_arg)
         self.assertRaises(TypeError, syscall.get_arg, 0)
-        self.assertRaises(IndexError, syscall.get_arg, 0, syscall.MAX_INDEX)
+        self.assertRaises(IndexError, syscall.get_arg, 0, syscall.MAX_ARGS)
         self.assertRaises(ValueError, syscall.get_arg, 0, 1, 13)
 
 if __name__ == '__main__':

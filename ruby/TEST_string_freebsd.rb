@@ -7,27 +7,9 @@ $:.insert(0, '.libs')
 require 'PinkTrace'
 
 class TestPinkString < Test::Unit::TestCase
-  def test_string_decode_invalid
-    assert_raise PinkTrace::BitnessError do
-      PinkTrace::String.decode 0, 1, 2, 13
-    end
-    assert_raise PinkTrace::IndexError do
-      PinkTrace::String.decode 0, PinkTrace::Syscall::MAX_INDEX
-    end
-  end
-
   def test_string_decode_eperm
     assert_raise Errno::EPERM do
       PinkTrace::String.decode 0, 1
-    end
-  end
-
-  def test_string_encode_unsafe_invalid
-    assert_raise PinkTrace::BitnessError do
-      PinkTrace::String.encode! 0, 1, 'pink', 13
-    end
-    assert_raise PinkTrace::IndexError do
-      PinkTrace::String.encode! 0, PinkTrace::Syscall::MAX_INDEX, 'pink'
     end
   end
 

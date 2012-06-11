@@ -1,11 +1,11 @@
 /**
- * \file
+ * @file
  *
- * Example \ref pink-simple-strace-freebsd.c "pink-simple-strace-freebsd.c" .
+ * Example @ref pink-simple-strace-freebsd.c "pink-simple-strace-freebsd.c"
  **/
 
 /**
- * \example pink-simple-strace-freebsd.c
+ * @example pink-simple-strace-freebsd.c
  *
  * Simple strace like program example written with pinktrace for FreeBSD.
  **/
@@ -163,13 +163,13 @@ decode_socketcall(pid_t pid, pink_bitness_t bitness, const char *scname)
 		printf("{sa_family=AF_INET, sin_port=htons(%d), sin_addr=inet_addr(\"%s\")}",
 				ntohs(addr.u.sa_in.sin_port), ip);
 		break;
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 	case AF_INET6:
 		inet_ntop(AF_INET6, &addr.u.sa6.sin6_addr, ip, sizeof(ip));
 		printf("{sa_family=AF_INET6, sin_port=htons(%d), sin6_addr=inet_addr(\"%s\")}",
 				ntohs(addr.u.sa6.sin6_port), ip);
 		break;
-#endif /* PINKTRACE_HAVE_IPV6 */
+#endif
 	default: /* Unknown family */
 		printf("{sa_family=???}");
 		break;

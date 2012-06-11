@@ -49,7 +49,7 @@ PINK_BEGIN_DECL
  *
  * @param pid Process ID
  * @param bitness Bitness
- * @param ind Index of the argument (0-5, see #PINK_MAX_INDEX)
+ * @param ind Index of the argument (0-5, see #PINK_MAX_ARGS)
  * @param dest Pointer to store the data, must not be NULL
  * @param len Length of the data
  * @return true on success, false on failure and sets errno accordingly
@@ -65,7 +65,7 @@ bool pink_decode_simple(pid_t pid, pink_bitness_t bitness, unsigned ind,
  *
  * @param pid Process ID of the child whose argument is to be received.
  * @param bitness Bitness of the child
- * @param ind The index of the argument (0-5, see #PINK_MAX_INDEX)
+ * @param ind The index of the argument (0-5, see #PINK_MAX_ARGS)
  * @param dest Pointer to store the string
  * @param len Length of the string
  * @return true on success, false on failure and sets errno accordingly
@@ -122,7 +122,7 @@ char *pink_decode_string_array_member_persistent(pid_t pid,
 		pink_bitness_t bitness, long arg, unsigned ind)
 	PINK_GCC_ATTR((malloc));
 
-#if defined(PINKTRACE_LINUX) || defined(DOXYGEN)
+#if PINK_OS_LINUX || defined(DOXYGEN)
 /**
  * Decode the socket call and place it in subcall.
  *

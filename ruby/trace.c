@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <polatel@gmail.com>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -243,7 +243,7 @@ pinkrb_trace_syscall(int argc, VALUE *argv, VALUE mod)
 VALUE
 pinkrb_trace_syscall_entry(int argc, VALUE *argv, VALUE mod)
 {
-#ifdef PINKTRACE_FREEBSD
+#if PINK_OS_FREEBSD
 	pid_t pid;
 	long sig;
 	VALUE vpid, vsig;
@@ -285,7 +285,7 @@ pinkrb_trace_syscall_entry(int argc, VALUE *argv, VALUE mod)
 VALUE
 pinkrb_trace_syscall_exit(int argc, VALUE *argv, VALUE mod)
 {
-#ifdef PINKTRACE_FREEBSD
+#if PINK_OS_FREEBSD
 	pid_t pid;
 	long sig;
 	VALUE vpid, vsig;
@@ -308,7 +308,7 @@ pinkrb_trace_syscall_exit(int argc, VALUE *argv, VALUE mod)
 	return Qnil;
 #else
 	rb_raise(rb_eNotImpError, "Not implemented");
-#endif /* defined(PINKTRACE_FREEBSD) */
+#endif
 }
 
 /*
@@ -327,7 +327,7 @@ pinkrb_trace_syscall_exit(int argc, VALUE *argv, VALUE mod)
 VALUE
 pinkrb_trace_sysemu(int argc, VALUE *argv, VALUE mod)
 {
-#ifdef PINKTRACE_LINUX
+#if PINK_OS_LINUX
 	pid_t pid;
 	long sig;
 	VALUE vpid, vsig;
@@ -369,7 +369,7 @@ pinkrb_trace_sysemu(int argc, VALUE *argv, VALUE mod)
 VALUE
 pinkrb_trace_sysemu_singlestep(int argc, VALUE *argv, VALUE mod)
 {
-#ifdef PINKTRACE_LINUX
+#if PINK_OS_LINUX
 	pid_t pid;
 	long sig;
 	VALUE vpid, vsig;
@@ -410,7 +410,7 @@ pinkrb_trace_sysemu_singlestep(int argc, VALUE *argv, VALUE mod)
 VALUE
 pinkrb_trace_geteventmsg(VALUE mod, VALUE vpid)
 {
-#ifdef PINKTRACE_LINUX
+#if PINK_OS_LINUX
 	pid_t pid;
 	unsigned long data;
 
@@ -436,7 +436,7 @@ pinkrb_trace_geteventmsg(VALUE mod, VALUE vpid)
 VALUE
 pinkrb_trace_setup(int argc, VALUE *argv, VALUE mod)
 {
-#ifdef PINKTRACE_LINUX
+#if PINK_OS_LINUX
 	pid_t pid;
 	int opts;
 	VALUE vpid, vopts;

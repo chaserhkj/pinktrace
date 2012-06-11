@@ -25,8 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_GUARD_TRACE_H
-#define PINKTRACE_GUARD_TRACE_H 1
+#ifndef _PINK_TRACE_H
+#define _PINK_TRACE_H
 
 /**
  * @file pinktrace/trace.h
@@ -40,7 +40,7 @@
 #include <sys/types.h>
 #include <pinktrace/macros.h>
 
-#if defined(PINKTRACE_LINUX) || defined(DOXYGEN)
+#if PINK_OS_LINUX || defined(DOXYGEN)
 /**
  * This define represents the trace option SYSGOOD.
  * If this flag is set in the options argument of pink_trace_setup(), when
@@ -131,7 +131,7 @@
 	 PINK_TRACE_OPTION_VFORK_DONE |\
 	 PINK_TRACE_OPTION_EXIT)
 
-#endif /* defined(PINKTRACE_LINUX)... */
+#endif /* PINK_OS_LINUX... */
 
 PINK_BEGIN_DECL
 
@@ -200,7 +200,7 @@ bool pink_trace_singlestep(pid_t pid, int sig);
  **/
 bool pink_trace_syscall(pid_t pid, int sig);
 
-#if defined(PINKTRACE_FREEBSD) || defined(DOXYGEN)
+#if PINK_OS_FREEBSD || defined(DOXYGEN)
 /**
  * Restarts the stopped child process and arranges it to be stopped after
  * the entry of the next system call.
@@ -253,9 +253,9 @@ bool pink_trace_lwpinfo(pid_t pid, void *info, size_t size);
  **/
 bool pink_trace_followfork(pid_t pid, bool on);
 
-#endif /* defined(PINKTRACE_FREEBSD)... */
+#endif /* PINK_OS_FREEBSD... */
 
-#if defined(PINKTRACE_LINUX) || defined(DOXYGEN)
+#if PINK_OS_LINUX || defined(DOXYGEN)
 /**
  * Retrieve a message (as an unsigned long) about the trace event that just
  * happened, placing it in the location given by the second argument. For
@@ -307,7 +307,7 @@ bool pink_trace_sysemu(pid_t pid, int sig);
  **/
 bool pink_trace_sysemu_singlestep(pid_t pid, int sig);
 
-#endif /* defined(PINKTRACE_LINUX)... */
+#endif /* PINK_OS_LINUX... */
 
 /**
  * Attaches to the process specified in pid, making it a traced "child" of the

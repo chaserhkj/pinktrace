@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -195,12 +195,12 @@ static char pinkpy_trace_syscall_entry_doc[] = ""
 	"@see: pinktrace.trace.cont";
 static PyObject *
 pinkpy_trace_syscall_entry(PINK_GCC_ATTR((unused)) PyObject *self,
-#if !defined(PINKTRACE_FREEBSD)
+#if !PINK_OS_FREEBSD
 	PINK_GCC_ATTR((unused))
 #endif
 	PyObject *args)
 {
-#if defined(PINKTRACE_FREEBSD)
+#if PINK_OS_FREEBSD
 	pid_t pid;
 	int sig;
 
@@ -215,7 +215,7 @@ pinkpy_trace_syscall_entry(PINK_GCC_ATTR((unused)) PyObject *self,
 #else
 	PyErr_SetString(PyExc_NotImplementedError, "Not implemented");
 	return NULL;
-#endif /* defined(PINKTRACE_FREEBSD) */
+#endif /* PINK_OS_FREEBSD */
 }
 
 static char pinkpy_trace_syscall_exit_doc[] = ""
@@ -230,12 +230,12 @@ static char pinkpy_trace_syscall_exit_doc[] = ""
 	"@see: pinktrace.trace.cont";
 static PyObject *
 pinkpy_trace_syscall_exit(PINK_GCC_ATTR((unused)) PyObject *self,
-#if !defined(PINKTRACE_FREEBSD)
+#if !PINK_OS_FREEBSD
 	PINK_GCC_ATTR((unused))
 #endif
 	PyObject *args)
 {
-#if defined(PINKTRACE_FREEBSD)
+#if PINK_OS_FREEBSD
 	pid_t pid;
 	int sig;
 
@@ -250,7 +250,7 @@ pinkpy_trace_syscall_exit(PINK_GCC_ATTR((unused)) PyObject *self,
 #else
 	PyErr_SetString(PyExc_NotImplementedError, "Not implemented");
 	return NULL;
-#endif /* defined(PINKTRACE_FREEBSD) */
+#endif /* PINK_OS_FREEBSD */
 }
 
 static char pinkpy_trace_sysemu_doc[] = ""
@@ -265,12 +265,12 @@ static char pinkpy_trace_sysemu_doc[] = ""
 	"@see: pinktrace.trace.cont";
 static PyObject *
 pinkpy_trace_sysemu(PINK_GCC_ATTR((unused)) PyObject *self,
-#if !defined(PINKTRACE_LINUX)
+#if !PINK_OS_LINUX
 	PINK_GCC_ATTR((unused))
 #endif
 	PyObject *args)
 {
-#if defined(PINKTRACE_LINUX)
+#if PINK_OS_LINUX
 	pid_t pid;
 	int sig;
 
@@ -285,7 +285,7 @@ pinkpy_trace_sysemu(PINK_GCC_ATTR((unused)) PyObject *self,
 #else
 	PyErr_SetString(PyExc_NotImplementedError, "Not implemented");
 	return NULL;
-#endif /* defined(PINKTRACE_LINUX) */
+#endif /* PINK_OS_LINUX */
 }
 
 static char pinkpy_trace_sysemu_singlestep_doc[] = ""
@@ -300,12 +300,12 @@ static char pinkpy_trace_sysemu_singlestep_doc[] = ""
 	"@see: pinktrace.trace.cont";
 static PyObject *
 pinkpy_trace_sysemu_singlestep(PINK_GCC_ATTR((unused)) PyObject *self,
-#if !defined(PINKTRACE_LINUX)
+#if !PINK_OS_LINUX
 	PINK_GCC_ATTR((unused))
 #endif
 	PyObject *args)
 {
-#if defined(PINKTRACE_LINUX)
+#if PINK_OS_LINUX
 	pid_t pid;
 	int sig;
 
@@ -320,7 +320,7 @@ pinkpy_trace_sysemu_singlestep(PINK_GCC_ATTR((unused)) PyObject *self,
 #else
 	PyErr_SetString(PyExc_NotImplementedError, "Not implemented");
 	return NULL;
-#endif /* defined(PINKTRACE_LINUX) */
+#endif /* PINK_OS_LINUX */
 }
 
 static char pinkpy_trace_geteventmsg_doc[] = ""
@@ -337,12 +337,12 @@ static char pinkpy_trace_geteventmsg_doc[] = ""
 	"@return: The event message";
 static PyObject *
 pinkpy_trace_geteventmsg(PINK_GCC_ATTR((unused)) PyObject *self,
-#if !defined(PINKTRACE_LINUX)
+#if !PINK_OS_LINUX
 	PINK_GCC_ATTR((unused))
 #endif
 	PyObject *args)
 {
-#if defined(PINKTRACE_LINUX)
+#if PINK_OS_LINUX
 	pid_t pid;
 	unsigned long data;
 
@@ -356,7 +356,7 @@ pinkpy_trace_geteventmsg(PINK_GCC_ATTR((unused)) PyObject *self,
 #else
 	PyErr_SetString(PyExc_NotImplementedError, "Not implemented");
 	return NULL;
-#endif /* defined(PINKTRACE_LINUX) */
+#endif /* PINK_OS_LINUX */
 }
 
 static char pinkpy_trace_setup_doc[] = ""
@@ -370,12 +370,12 @@ static char pinkpy_trace_setup_doc[] = ""
 	"@raise OSError: Raised when the underlying I{ptrace(2)} call fails.\n";
 static PyObject *
 pinkpy_trace_setup(PINK_GCC_ATTR((unused)) PyObject *self,
-#if !defined(PINKTRACE_LINUX)
+#if !PINK_OS_LINUX
 	PINK_GCC_ATTR((unused))
 #endif
 	PyObject *args)
 {
-#if defined(PINKTRACE_LINUX)
+#if PINK_OS_LINUX
 	pid_t pid;
 	int opts;
 
@@ -390,7 +390,7 @@ pinkpy_trace_setup(PINK_GCC_ATTR((unused)) PyObject *self,
 #else
 	PyErr_SetString(PyExc_NotImplementedError, "Not implemented");
 	return NULL;
-#endif /* defined(PINKTRACE_LINUX) */
+#endif /* PINK_OS_LINUX */
 }
 
 static char pinkpy_trace_attach_doc[] = ""
@@ -443,12 +443,12 @@ pinkpy_trace_detach(PINK_GCC_ATTR((unused)) PyObject *self, PyObject *args)
 
 static void
 trace_init(
-#if !defined(PINKTRACE_LINUX)
+#if !PINK_OS_LINUX
 	PINK_GCC_ATTR((unused))
 #endif
 	PyObject *mod)
 {
-#if defined(PINKTRACE_LINUX)
+#if PINK_OS_LINUX
 	PyModule_AddIntConstant(mod, "OPTION_SYSGOOD", PINK_TRACE_OPTION_SYSGOOD);
 	PyModule_AddIntConstant(mod, "OPTION_FORK", PINK_TRACE_OPTION_FORK);
 	PyModule_AddIntConstant(mod, "OPTION_VFORK", PINK_TRACE_OPTION_VFORK);
@@ -457,7 +457,7 @@ trace_init(
 	PyModule_AddIntConstant(mod, "OPTION_VFORK_DONE", PINK_TRACE_OPTION_VFORK_DONE);
 	PyModule_AddIntConstant(mod, "OPTION_EXIT", PINK_TRACE_OPTION_EXIT);
 	PyModule_AddIntConstant(mod, "OPTION_ALL", PINK_TRACE_OPTION_ALL);
-#endif /* defined(PINKTRACE_LINUX) */
+#endif /* PINK_OS_LINUX */
 }
 
 static char trace_doc[] = "Pink's low level wrappers around I{ptrace(2)} internals";

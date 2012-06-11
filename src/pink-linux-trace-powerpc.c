@@ -127,7 +127,7 @@ pink_util_set_return(pid_t pid, long ret)
 bool
 pink_util_get_arg(pid_t pid, PINK_GCC_ATTR((unused)) pink_bitness_t bitness, unsigned ind, long *res)
 {
-	assert(ind < PINK_MAX_INDEX);
+	assert(ind < PINK_MAX_ARGS);
 
 	return pink_util_peek(pid, ARG_OFFSET(ind), res);
 }
@@ -135,7 +135,7 @@ pink_util_get_arg(pid_t pid, PINK_GCC_ATTR((unused)) pink_bitness_t bitness, uns
 bool
 pink_util_set_arg(pid_t pid, PINK_GCC_ATTR((unused)) pink_bitness_t bitness, unsigned ind, long arg)
 {
-	assert(ind < PINK_MAX_INDEX);
+	assert(ind < PINK_MAX_ARGS);
 
 	return pink_util_poke(pid, ARG_OFFSET(ind), arg);
 }
@@ -145,7 +145,7 @@ pink_decode_simple(pid_t pid, pink_bitness_t bitness, unsigned ind, void *dest, 
 {
 	long addr;
 
-	assert(ind < PINK_MAX_INDEX);
+	assert(ind < PINK_MAX_ARGS);
 	assert(dest != NULL);
 
 	return pink_util_get_arg(pid, bitness, ind, &addr) && pink_util_moven(pid, addr, dest, len);
@@ -156,7 +156,7 @@ pink_decode_string(pid_t pid, pink_bitness_t bitness, unsigned ind, char *dest, 
 {
 	long addr;
 
-	assert(ind < PINK_MAX_INDEX);
+	assert(ind < PINK_MAX_ARGS);
 	assert(dest != NULL);
 
 	return pink_util_get_arg(pid, bitness, ind, &addr) && pink_util_movestr(pid, addr, dest, len);
@@ -167,7 +167,7 @@ pink_decode_string_persistent(pid_t pid, pink_bitness_t bitness, unsigned ind)
 {
 	long addr;
 
-	assert(ind < PINK_MAX_INDEX);
+	assert(ind < PINK_MAX_ARGS);
 
 	if (PINK_GCC_UNLIKELY(!pink_util_get_arg(pid, bitness, ind, &addr)))
 		return false;
@@ -180,7 +180,7 @@ pink_encode_simple(pid_t pid, pink_bitness_t bitness, unsigned ind, const void *
 {
 	long addr;
 
-	assert(ind < PINK_MAX_INDEX);
+	assert(ind < PINK_MAX_ARGS);
 
 	return pink_util_get_arg(pid, bitness, ind, &addr) && pink_util_putn(pid, addr, src, len);
 }
@@ -190,7 +190,7 @@ pink_encode_simple_safe(pid_t pid, pink_bitness_t bitness, unsigned ind, const v
 {
 	long addr;
 
-	assert(ind < PINK_MAX_INDEX);
+	assert(ind < PINK_MAX_ARGS);
 
 	return pink_util_get_arg(pid, bitness, ind, &addr) && pink_util_putn_safe(pid, addr, src, len);
 }
@@ -216,7 +216,7 @@ pink_decode_socket_fd(pid_t pid, pink_bitness_t bitness, unsigned ind, long *fd)
 	unsigned short size;
 	long args;
 
-	assert(ind < PINK_MAX_INDEX);
+	assert(ind < PINK_MAX_ARGS);
 
 	/* Decode socketcall(2) */
 	if (PINK_GCC_UNLIKELY(!pink_util_get_arg(pid, bitness, 1, &args)))
@@ -240,7 +240,7 @@ pink_decode_socket_address(pid_t pid, pink_bitness_t bitness, unsigned ind, long
 	unsigned short size;
 	long addr, addrlen, args;
 
-	assert(ind < PINK_MAX_INDEX);
+	assert(ind < PINK_MAX_ARGS);
 	assert(paddr != NULL);
 
 	/* Decode socketcall(2) */

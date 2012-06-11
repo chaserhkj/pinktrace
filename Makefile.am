@@ -33,6 +33,7 @@ pinktrace_includedir=$(includedir)/pinktrace-$(PINKTRACE_PC_SLOT)/pinktrace/
 pinktrace_include_HEADERS= \
 			  include/pinktrace/about.h \
 			  include/pinktrace/bitness.h \
+			  include/pinktrace/system.h \
 			  include/pinktrace/compat.h \
 			  include/pinktrace/decode.h \
 			  include/pinktrace/encode.h \
@@ -46,10 +47,12 @@ pinktrace_include_HEADERS= \
 
 EXTRA_DIST+= \
 	     include/pinktrace/about.h.in \
-	     include/pinktrace/bitness.h.in
+	     include/pinktrace/bitness.h.in \
+	     include/pinktrace/system.h.in
 MAINTAINERCLEANFILES+= \
 		       include/pinktrace/about.h \
-		       include/pinktrace/bitness.h
+		       include/pinktrace/bitness.h \
+		       include/pinktrace/system.h
 noinst_HEADERS= \
 		include/pinktrace/internal.h
 

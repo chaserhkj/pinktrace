@@ -40,7 +40,7 @@
 VALUE
 pinkrb_has_socketcall(VALUE mod, int argc, VALUE *argv)
 {
-#ifdef PINKTRACE_LINUX
+#if PINK_OS_LINUX
 	unsigned bit;
 	VALUE vbit;
 
@@ -73,7 +73,7 @@ pinkrb_has_socketcall(VALUE mod, int argc, VALUE *argv)
 VALUE
 pinkrb_name_socket_subcall(VALUE mod, VALUE vsubcall)
 {
-#ifdef PINKTRACE_LINUX
+#if PINK_OS_LINUX
 	unsigned subcall;
 	const char *subname;
 
@@ -100,7 +100,7 @@ pinkrb_name_socket_subcall(VALUE mod, VALUE vsubcall)
 VALUE
 pinkrb_decode_socket_call(int argc, VALUE *argv, VALUE mod)
 {
-#ifdef PINKTRACE_LINUX
+#if PINK_OS_LINUX
 	pid_t pid;
 	unsigned bit;
 	long subcall;
@@ -142,7 +142,7 @@ pinkrb_decode_socket_call(int argc, VALUE *argv, VALUE mod)
 VALUE
 pinkrb_decode_socket_fd(int argc, VALUE *argv, VALUE mod)
 {
-#ifdef PINKTRACE_LINUX
+#if PINK_OS_LINUX
 	pid_t pid;
 	unsigned bit, ind;
 	long fd;
@@ -330,7 +330,7 @@ pinkrb_Address_is_inet(VALUE self)
 VALUE
 pinkrb_Address_is_inet6(VALUE self)
 {
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 	pink_socket_address_t *addr;
 
 	Data_Get_Struct(self, pink_socket_address_t, addr);
@@ -350,7 +350,7 @@ pinkrb_Address_is_inet6(VALUE self)
 VALUE
 pinkrb_Address_is_netlink(VALUE self)
 {
-#if PINKTRACE_HAVE_NETLINK
+#if PINK_HAVE_NETLINK
 	pink_socket_address_t *addr;
 
 	Data_Get_Struct(self, pink_socket_address_t, addr);
@@ -412,7 +412,7 @@ pinkrb_Address_port(VALUE self)
 	switch (addr->family) {
 	case AF_INET:
 		return INT2FIX(ntohs(addr->u.sa_in.sin_port));
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 	case AF_INET6:
 		return INT2FIX(ntohs(addr->u.sa6.sin6_port));
 #endif
@@ -455,7 +455,7 @@ pinkrb_Address_ip(VALUE self)
 VALUE
 pinkrb_Address_ipv6(VALUE self)
 {
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 	char *ip;
 	pink_socket_address_t *addr;
 	VALUE ret;
@@ -483,7 +483,7 @@ pinkrb_Address_ipv6(VALUE self)
 VALUE
 pinkrb_Address_pid(VALUE self)
 {
-#if PINKTRACE_HAVE_NETLINK
+#if PINK_HAVE_NETLINK
 	pink_socket_address_t *addr;
 
 	Data_Get_Struct(self, pink_socket_address_t, addr);
@@ -503,7 +503,7 @@ pinkrb_Address_pid(VALUE self)
 VALUE
 pinkrb_Address_groups(VALUE self)
 {
-#if PINKTRACE_HAVE_NETLINK
+#if PINK_HAVE_NETLINK
 	pink_socket_address_t *addr;
 
 	Data_Get_Struct(self, pink_socket_address_t, addr);

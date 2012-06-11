@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,19 +43,19 @@
 #define INET_ADDRSTRLEN 16
 #endif /* !INET_ADDRSTRLEN */
 
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 #ifndef INET6_ADDRSTRLEN
 #define INET6_ADDRSTRLEN 46
 #endif /* !INET6_ADDRSTRLEN */
 #endif
 
-#ifdef PINKTRACE_LINUX
+#if PINK_OS_LINUX
 #define IS_ABSTRACT(addr) \
 	((addr).u.sa_un.sun_path[0] == '\0' \
 	 && (addr).u.sa_un.sun_path[1] != '\0')
 #else
 #define IS_ABSTRACT(addr) 0
-#endif /* PINKTRACE_LINUX */
+#endif /* PINK_OS_LINUX */
 
 PyMODINIT_FUNC
 #if PY_MAJOR_VERSION > 2
@@ -80,12 +80,12 @@ static char pinkpy_socket_has_socketcall_doc[] = ""
 	"@raise ValueError: Raised if the given bitness is either unsupported or invalid\n";
 static PyObject *
 pinkpy_socket_has_socketcall(PINK_GCC_ATTR((unused)) PyObject *self,
-#if !defined(PINKTRACE_LINUX)
+#if !PINK_OS_LINUX
 	PINK_GCC_ATTR((unused))
 #endif
 	PyObject *args)
 {
-#if defined(PINKTRACE_LINUX)
+#if PINK_OS_LINUX
 	pink_bitness_t bit;
 
 	bit = PINKTRACE_BITNESS_DEFAULT;
@@ -104,7 +104,7 @@ pinkpy_socket_has_socketcall(PINK_GCC_ATTR((unused)) PyObject *self,
 #else
 	PyErr_SetString(PyExc_NotImplementedError, "Not implemented");
 	return NULL;
-#endif /* defined(PINKTRACE_LINUX) */
+#endif /* PINK_OS_LINUX */
 }
 
 static char pinkpy_socket_name_doc[] = ""
@@ -117,12 +117,12 @@ static char pinkpy_socket_name_doc[] = ""
 	"@return: The name of the socket subcall or C{None}";
 static PyObject *
 pinkpy_socket_name(PINK_GCC_ATTR((unused)) PyObject *self,
-#if !defined(PINKTRACE_LINUX)
+#if !PINK_OS_LINUX
 	PINK_GCC_ATTR((unused))
 #endif
 	PyObject *args)
 {
-#if defined(PINKTRACE_LINUX)
+#if PINK_OS_LINUX
 	long subno;
 	const char *subname;
 
@@ -135,7 +135,7 @@ pinkpy_socket_name(PINK_GCC_ATTR((unused)) PyObject *self,
 #else
 	PyErr_SetString(PyExc_NotImplementedError, "Not implemented");
 	return NULL;
-#endif /* defined(PINKTRACE_LINUX) */
+#endif /* PINK_OS_LINUX */
 }
 
 static char pinkpy_socket_decode_call_doc[] = ""
@@ -154,12 +154,12 @@ static char pinkpy_socket_decode_call_doc[] = ""
 	"@return: The decoded socket call";
 static PyObject *
 pinkpy_socket_decode_call(PINK_GCC_ATTR((unused)) PyObject *self,
-#if !defined(PINKTRACE_LINUX)
+#if !PINK_OS_LINUX
 	PINK_GCC_ATTR((unused))
 #endif
 	PyObject *args)
 {
-#if defined(PINKTRACE_LINUX)
+#if PINK_OS_LINUX
 	long subcall;
 	pid_t pid;
 	pink_bitness_t bit;
@@ -178,7 +178,7 @@ pinkpy_socket_decode_call(PINK_GCC_ATTR((unused)) PyObject *self,
 #else
 	PyErr_SetString(PyExc_NotImplementedError, "Not implemented");
 	return NULL;
-#endif /* defined(PINKTRACE_LINUX) */
+#endif /* PINK_OS_LINUX */
 }
 
 static char pinkpy_socket_decode_fd_doc[] = ""
@@ -191,19 +191,19 @@ static char pinkpy_socket_decode_fd_doc[] = ""
 	"@param index: The index of the argument\n"
 	"@param bitness: The bitness of the traced child\n"
 	"(Optional, defaults to C{pinktrace.bitness.DEFAULT_BITNESS})\n"
-	"@raise IndexError: Raised if the index is not smaller than MAX_INDEX\n"
+	"@raise IndexError: Raised if the index is not smaller than MAX_ARGS\n"
 	"@raise ValueError: Raised if the given bitness is either unsupported or invalid\n"
 	"@raise OSError: Raised when the underlying I{ptrace(2)} call fails.\n"
 	"@rtype: long\n"
 	"@return: The socket file descriptor";
 static PyObject *
 pinkpy_socket_decode_fd(PINK_GCC_ATTR((unused)) PyObject *self,
-#if !defined(PINKTRACE_LINUX)
+#if !PINK_OS_LINUX
 	PINK_GCC_ATTR((unused))
 #endif
 	PyObject *args)
 {
-#if defined(PINKTRACE_LINUX)
+#if PINK_OS_LINUX
 	pid_t pid;
 	unsigned ind;
 	pink_bitness_t bit;
@@ -224,7 +224,7 @@ pinkpy_socket_decode_fd(PINK_GCC_ATTR((unused)) PyObject *self,
 #else
 	PyErr_SetString(PyExc_NotImplementedError, "Not implemented");
 	return NULL;
-#endif /* defined(PINKTRACE_LINUX) */
+#endif /* PINK_OS_LINUX */
 }
 
 static PyObject *
@@ -311,7 +311,7 @@ Address_ip(PyObject *self, PINK_GCC_ATTR((unused)) void *x)
 	return NULL;
 }
 
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 static PyObject *
 Address_ipv6(PyObject *self, PINK_GCC_ATTR((unused)) void *x)
 {
@@ -329,7 +329,7 @@ Address_ipv6(PyObject *self, PINK_GCC_ATTR((unused)) void *x)
 	PyErr_SetString(PyExc_TypeError, "Invalid family");
 	return NULL;
 }
-#endif /* PINKTRACE_HAVE_IPV6 */
+#endif /* PINK_HAVE_IPV6 */
 
 static PyObject *
 Address_port(PyObject *self, PINK_GCC_ATTR((unused)) void *x)
@@ -343,14 +343,14 @@ Address_port(PyObject *self, PINK_GCC_ATTR((unused)) void *x)
 #else
 		return PyInt_FromLong(ntohs(addr->addr.u.sa_in.sin_port));
 #endif /* PY_MAJOR_VERSION > 2 */
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 	case AF_INET6:
 #if PY_MAJOR_VERSION > 2
 		return PyLong_FromLong(ntohs(addr->addr.u.sa6.sin6_port));
 #else
 		return PyInt_FromLong(ntohs(addr->addr.u.sa6.sin6_port));
 #endif /* PY_MAJOR_VERSION > 2 */
-#endif /* PINKTRACE_HAVE_IPV6 */
+#endif /* PINK_HAVE_IPV6 */
 	default:
 		PyErr_SetString(PyExc_TypeError, "Invalid family");
 		return NULL;
@@ -359,34 +359,34 @@ Address_port(PyObject *self, PINK_GCC_ATTR((unused)) void *x)
 
 static PyObject *
 Address_pid(
-#if !PINKTRACE_HAVE_NETLINK
+#if !PINK_HAVE_NETLINK
 	PINK_GCC_ATTR((unused))
-#endif /* !PINKTRACE_HAVE_NETLINK */
+#endif /* !PINK_HAVE_NETLINK */
 	PyObject *self, PINK_GCC_ATTR((unused)) void *x)
 {
-#if PINKTRACE_HAVE_NETLINK
+#if PINK_HAVE_NETLINK
 	Address *addr = (Address *)self;
 
 	if (addr->addr.family == AF_NETLINK)
 		return PyLong_FromPid(addr->addr.u.nl.nl_pid);
-#endif /* PINKTRACE_HAVE_NETLINK */
+#endif /* PINK_HAVE_NETLINK */
 	PyErr_SetString(PyExc_TypeError, "Invalid family");
 	return NULL;
 }
 
 static PyObject *
 Address_groups(
-#if !PINKTRACE_HAVE_NETLINK
+#if !PINK_HAVE_NETLINK
 	PINK_GCC_ATTR((unused))
-#endif /* !PINKTRACE_HAVE_NETLINK */
+#endif /* !PINK_HAVE_NETLINK */
 	PyObject *self, PINK_GCC_ATTR((unused)) void *x)
 {
-#if PINKTRACE_HAVE_NETLINK
+#if PINK_HAVE_NETLINK
 	Address *addr = (Address *)self;
 
 	if (addr->addr.family == AF_NETLINK)
 		return PyLong_FromLong(addr->addr.u.nl.nl_groups);
-#endif /* PINKTRACE_HAVE_NETLINK */
+#endif /* PINK_HAVE_NETLINK */
 	PyErr_SetString(PyExc_TypeError, "Invalid family");
 	return NULL;
 }
@@ -406,16 +406,16 @@ Address_repr(PyObject *self)
 	case AF_INET:
 		return PyUnicode_FromFormat("<Address family=AF_INET, addr=%p>",
 			(void *)&addr->addr);
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 	case AF_INET6:
 		return PyUnicode_FromFormat("<Address family=AF_INET6, addr=%p>",
 			(void *)&addr->addr);
-#endif /* PINKTRACE_HAVE_IPV6 */
-#if PINKTRACE_HAVE_NETLINK
+#endif /* PINK_HAVE_IPV6 */
+#if PINK_HAVE_NETLINK
 	case AF_NETLINK:
 		return PyUnicode_FromFormat("<Address family=AF_NETLINK, addr=%p>",
 			(void *)&addr->addr);
-#endif /* PINKTRACE_HAVE_NETLINK */
+#endif /* PINK_HAVE_NETLINK */
 	default:
 		return PyUnicode_FromFormat("<Address family=%d, addr=NULL>",
 			addr->addr.family);
@@ -434,16 +434,16 @@ Address_repr(PyObject *self)
 	case AF_INET:
 		return PyString_FromFormat("<Address family=AF_INET, addr=%p>",
 			(void *)&addr->addr);
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 	case AF_INET6:
 		return PyString_FromFormat("<Address family=AF_INET6, addr=%p>",
 			(void *)&addr->addr);
-#endif /* PINKTRACE_HAVE_IPV6 */
-#if PINKTRACE_HAVE_NETLINK
+#endif /* PINK_HAVE_IPV6 */
+#if PINK_HAVE_NETLINK
 	case AF_NETLINK:
 		return PyString_FromFormat("<Address family=AF_NETLINK, addr=%p>",
 			(void *)&addr->addr);
-#endif /* PINKTRACE_HAVE_NETLINK */
+#endif /* PINK_HAVE_NETLINK */
 	default:
 		return PyString_FromFormat("<Address family=%d, addr=NULL>",
 			addr->addr.family);
@@ -457,9 +457,9 @@ static struct PyGetSetDef Address_get_sets[] = {
 	{"abstract", Address_abstract, 0, 0, 0},
 	{"path", Address_path, 0, 0, 0},
 	{"ip", Address_ip, 0, 0, 0},
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 	{"ipv6", Address_ipv6, 0, 0, 0},
-#endif /* PINKTRACE_HAVE_IPV6 */
+#endif /* PINK_HAVE_IPV6 */
 	{"port", Address_port, 0, 0, 0},
 	{"pid", Address_pid, 0, 0, 0},
 	{"groups", Address_groups, 0, 0, 0},
@@ -481,10 +481,10 @@ static char Address_doc[] = ""
 	"    - Returns the path of the UNIX socket\n"
 	"- B{ip}:\n"
 	"    - Returns the ip address as a string\n"
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 	"- B{ipv6}:\n"
 	"    - Returns the ipv6 address as a string\n"
-#endif /* PINKTRACE_HAVE_IPV6 */
+#endif /* PINK_HAVE_IPV6 */
 	"- B{port}:\n"
 	"    - Returns the port\n"
 	"- B{pid}:\n"
@@ -556,7 +556,7 @@ static char pinkpy_socket_decode_address_doc[] = ""
 	"@param index: The index of the argument\n"
 	"@param bitness: The bitness of the traced child\n"
 	"(Optional, defaults to C{pinktrace.bitness.DEFAULT_BITNESS})\n"
-	"@raise IndexError: Raised if the index is not smaller than C{MAX_INDEX}\n"
+	"@raise IndexError: Raised if the index is not smaller than C{MAX_ARGS}\n"
 	"@raise ValueError: Raised if the given bitness is either unsupported or invalid\n"
 	"@raise OSError: Raised when the underlying I{ptrace(2)} call fails.\n"
 	"@rtype: pinktrace.socket.Address\n"
@@ -600,7 +600,7 @@ static char pinkpy_socket_decode_address_fd_doc[] = ""
 	"@param index: The index of the argument\n"
 	"@param bitness: The bitness of the traced child\n"
 	"(Optional, defaults to C{pinktrace.bitness.DEFAULT_BITNESS})\n"
-	"@raise IndexError: Raised if the index is not smaller than C{MAX_INDEX}\n"
+	"@raise IndexError: Raised if the index is not smaller than C{MAX_ARGS}\n"
 	"@raise ValueError: Raised if the given bitness is either unsupported or invalid\n"
 	"@raise OSError: Raised when the underlying I{ptrace(2)} call fails.\n"
 	"@rtype: tuple\n"

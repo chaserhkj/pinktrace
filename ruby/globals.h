@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <polatel@gmail.com>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,8 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_GUARD_RUBY_GLOBALS_H
-#define PINKTRACE_GUARD_RUBY_GLOBALS_H 1
+#ifndef _PINK_RUBY_GLOBALS_H
+#define _PINK_RUBY_GLOBALS_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -63,7 +63,7 @@
 #define INET_ADDRSTRLEN 16
 #endif
 
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 #ifndef INET6_ADDRSTRLEN
 #define INET6_ADDRSTRLEN 46
 #endif
@@ -98,7 +98,7 @@
 #error "sizeof(pid_t) is neither sizeof(int), sizeof(long) or sizeof(long long)"
 #endif
 
-#ifdef PINKTRACE_LINUX
+#if PINK_OS_LINUX
 #define IS_ABSTRACT(addr) ((addr)->u.sa_un.sun_path[0] == '\0' && (addr)->u.sa_un.sun_path[1] != '\0')
 #else
 #define IS_ABSTRACT(addr) 0
@@ -170,4 +170,4 @@ VALUE pinkrb_Address_groups(VALUE self);
 
 void Init_PinkTrace(void);
 
-#endif /* !PINKTRACE_GUARD_RUBY_GLOBALS_H */
+#endif

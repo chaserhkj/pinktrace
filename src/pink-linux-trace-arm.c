@@ -128,7 +128,7 @@ pink_util_get_arg(pid_t pid, PINK_GCC_ATTR((unused)) pink_bitness_t bitness, uns
 {
 	long sp;
 
-	assert(ind < PINK_MAX_INDEX);
+	assert(ind < PINK_MAX_ARGS);
 	assert(res != NULL);
 
 	if (ind < 5)
@@ -142,7 +142,7 @@ pink_util_set_arg(pid_t pid, PINK_GCC_ATTR((unused)) pink_bitness_t bitness, uns
 {
 	long sp;
 
-	assert(ind < PINK_MAX_INDEX);
+	assert(ind < PINK_MAX_ARGS);
 
 	if (ind < 5)
 		return pink_util_poke(pid, ind * sizeof(long), arg);

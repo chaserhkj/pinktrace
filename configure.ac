@@ -93,8 +93,6 @@ case "$host_os" in
 freebsd*)
 	opsys="freebsd"
 	AC_MSG_RESULT([$host_os])
-	PINKTRACE_CFLAGS="${PINKTRACE_CFLAGS} -DPINKTRACE_FREEBSD"
-	PINKTRACE_PC_CFLAGS="${PINKTRACE_PC_CFLAGS} -DPINKTRACE_FREEBSD"
 	dnl Check for kernel sources, required to generate syscall names.
 	AC_MSG_CHECKING([for kernel sources])
 	if test x"$SYSSRC" = x ; then
@@ -133,8 +131,6 @@ linux*)
 		AC_MSG_ERROR([Linux kernel version $kernel_version is not supported by pinktrace!])
 		;;
 	esac
-	PINKTRACE_CFLAGS="${PINKTRACE_CFLAGS} -DPINKTRACE_LINUX"
-	PINKTRACE_PC_CFLAGS="${PINKTRACE_PC_CFLAGS} -DPINKTRACE_LINUX"
 	;;
 *)
 	AC_MSG_RESULT([NO!])
@@ -143,6 +139,20 @@ linux*)
 esac
 AM_CONDITIONAL([FREEBSD], test x"$opsys" = x"freebsd")
 AM_CONDITIONAL([LINUX], test x"$opsys" = x"linux")
+
+if test x"$opsys" = x"freebsd"; then
+	OS_FREEBSD=1
+else
+	OS_FREEBSD=0
+fi
+AC_SUBST([OS_FREEBSD])
+
+if test x"$opsys" = x"linux"; then
+	OS_LINUX=1
+else
+	OS_LINUX=0
+fi
+AC_SUBST([OS_LINUX])
 
 dnl Check for supported architecture
 AC_MSG_CHECKING([for supported architecture])
@@ -201,6 +211,43 @@ AM_CONDITIONAL(POWERPC, test x"$arch" = x"powerpc")
 AM_CONDITIONAL(POWERPC64, test x"$arch" = x"powerpc64")
 AM_CONDITIONAL(ARM, test x"$arch" = x"arm")
 
+if test x"$arch" = x"i386"; then
+	ARCH_I386=1
+else
+	ARCH_I386=0
+fi
+if test x"$arch" = x"x86_64"; then
+	ARCH_X86_64=1
+else
+	ARCH_X86_64=0
+fi
+if test x"$arch" = x"ia64"; then
+	ARCH_IA64=1
+else
+	ARCH_IA64=0
+fi
+if test x"$arch" = x"powerpc"; then
+	ARCH_POWERPC=1
+else
+	ARCH_POWERPC=0
+fi
+if test x"$arch" = x"powerpc64"; then
+	ARCH_POWERPC64=1
+else
+	ARCH_POWERPC64=0
+fi
+if test x"$arch" = x"arm"; then
+	ARCH_ARM=1
+else
+	ARCH_ARM=0
+fi
+AC_SUBST([ARCH_X86])
+AC_SUBST([ARCH_X86_64])
+AC_SUBST([ARCH_IA64])
+AC_SUBST([ARCH_POWERPC])
+AC_SUBST([ARCH_POWERPC64])
+AC_SUBST([ARCH_ARM])
+
 if test x"$arch" = x"x86_64" ; then
 	PINKTRACE_BITNESS_COUNT_SUPPORTED=2
 else
@@ -232,12 +279,11 @@ fi
 AC_SUBST([PINKTRACE_BITNESS_32_SUPPORTED])
 
 if test x"$arch" = x"arm" ; then
-	PINKTRACE_CFLAGS="${PINKTRACE_CFLAGS} -DPINKTRACE_INVALID_SYSCALL=0xbad"
-	PINKTRACE_PC_CFLAGS="${PINKTRACE_PC_CFLAGS} -DPINKTRACE_INVALID_SYSCALL=0xbad"
+	PINK_SYSCALL_INVALID="0xbad"
 else
-	PINKTRACE_CFLAGS="${PINKTRACE_CFLAGS} -DPINKTRACE_INVALID_SYSCALL=0xbadca11"
-	PINKTRACE_PC_CFLAGS="${PINKTRACE_PC_CFLAGS} -DPINKTRACE_INVALID_SYSCALL=0xbadca11"
+	PINK_SYSCALL_INVALID="0xbadca11"
 fi
+AC_SUBST([PINK_SYSCALL_INVALID])
 
 dnl Check for types
 AC_TYPE_PID_T
@@ -256,7 +302,7 @@ if test x"$opsys" = x"linux" ; then
 fi
 for header in $REQUIRED_HEADERS ; do
 	AC_CHECK_HEADER([$header], [],
-					AC_MSG_ERROR([Required header $header not found!]))
+			AC_MSG_ERROR([Required header $header not found!]))
 done
 AC_CHECK_HEADERS([machine/reg.h machine/psl.h sys/reg.h], [], [])
 
@@ -269,59 +315,51 @@ AM_CONDITIONAL(GCC, test x"$GCC" = x"yes")
 dnl Check for IPV6 support
 AC_ARG_ENABLE([ipv6],
 	      [AS_HELP_STRING([--disable-ipv6], [disable IPV6 support])],
-	      WANT_IPV6="$enableval",
-	      WANT_IPV6="yes")
+	      [WANT_IPV6="$enableval"],
+	      [WANT_IPV6="yes"])
 if test x"$WANT_IPV6" = x"yes" ; then
-	APR_CHECK_SOCKADDR_IN6
-	CHECK_AF_INET6_DEFINE
-	AC_MSG_CHECKING([for IPV6 support])
-	if test x"$have_sockaddr_in6" = x"1" ; then
-		if test x"$have_af_inet6" = x"1" ; then
-			AC_MSG_RESULT([yes])
-		else
-			AC_MSG_RESULT([no -- no AF_INET6 define])
-			WANT_IPV6=no
-		fi
-	else
-		AC_MSG_RESULT([no -- no sockaddr_in6])
-		WANT_IPV6=no
-	fi
-else
-	AC_MSG_CHECKING([for IPV6 support])
-	AC_MSG_RESULT([no])
+	AC_CHECK_DECL([AF_INET6], [],
+		      [AC_MSG_ERROR([I need AF_INET6 for IPV6])],
+		      [#include <sys/types.h>
+		       #include <sys/socket.h>
+		       #include <netinet/in.h>])
+	AC_CHECK_TYPE([struct sockaddr_in6], [],
+		      [AC_MSG_ERROR([I need struct sockaddr_in6 for IPV6])],
+		      [#include <sys/types.h>
+		       #include <netinet/in.h>])
 fi
-AM_CONDITIONAL(WANT_IPV6, test x"$WANT_IPV6" = x"yes")
-if test x"$WANT_IPV6" = x"yes" ; then
-	PINKTRACE_CFLAGS="${PINKTRACE_CFLAGS} -DPINKTRACE_HAVE_IPV6=1"
-	PINKTRACE_PC_CFLAGS="${PINKTRACE_PC_CFLAGS} -DPINKTRACE_HAVE_IPV6=1"
+AC_MSG_CHECKING([for IPV6 support])
+AC_MSG_RESULT([yes])
+if test x"$WANT_IPV6" = x"yes"; then
+	HAVE_IPV6=1
 else
-	PINKTRACE_CFLAGS="${PINKTRACE_CFLAGS} -DPINKTRACE_HAVE_IPV6=0"
-	PINKTRACE_PC_CFLAGS="${PINKTRACE_PC_CFLAGS} -DPINKTRACE_HAVE_IPV6=0"
+	HAVE_IPV6=0
 fi
+AC_SUBST([HAVE_IPV6])
+AM_CONDITIONAL(HAVE_IPV6, test x"$HAVE_IPV6" = x"1")
 
 dnl Check for Netlink support
 AC_CHECK_HEADER([linux/netlink.h],
-		[AC_CHECK_TYPES([struct sockaddr_nl],
-				[WANT_NETLINK="yes"],
-				[WANT_NETLINK="no"],
-				[#include <stddef.h>
-				 #include <sys/socket.h>
-				 #include <asm/types.h>
-				 #include <linux/netlink.h>])],
+		[AC_CHECK_TYPE([struct sockaddr_nl],
+			       [WANT_NETLINK="yes"],
+			       [WANT_NETLINK="no"],
+			       [#include <stddef.h>
+				#include <sys/socket.h>
+				#include <asm/types.h>
+				#include <linux/netlink.h>])],
 		[WANT_NETLINK="no"],
 		[#include <stddef.h>
 		 #include <sys/socket.h>
 		 #include <asm/types.h>])
 AC_MSG_CHECKING([for Netlink support])
 AC_MSG_RESULT([$WANT_NETLINK])
-AM_CONDITIONAL(WANT_NETLINK, test x"$WANT_NETLINK" = x"yes")
-if test x"$WANT_NETLINK" = x"yes" ; then
-	PINKTRACE_CFLAGS="${PINKTRACE_CFLAGS} -DPINKTRACE_HAVE_NETLINK=1"
-	PINKTRACE_PC_CFLAGS="${PINKTRACE_PC_CFLAGS} -DPINKTRACE_HAVE_NETLINK=1"
+if test x"$WANT_NETLINK" = x"yes"; then
+	HAVE_NETLINK=1
 else
-	PINKTRACE_CFLAGS="${PINKTRACE_CFLAGS} -DPINKTRACE_HAVE_NETLINK=0"
-	PINKTRACE_PC_CFLAGS="${PINKTRACE_PC_CFLAGS} -DPINKTRACE_HAVE_NETLINK=0"
+	HAVE_NETLINK=0
 fi
+AC_SUBST([HAVE_NETLINK])
+AM_CONDITIONAL(HAVE_NETLINK, test x"$HAVE_NETLINK" = x"1")
 
 dnl pinktrace-easy
 AC_ARG_ENABLE([easy],
@@ -667,6 +705,7 @@ AC_CONFIG_FILES([
 		 examples/ruby/Makefile
 		 include/pinktrace/about.h
 		 include/pinktrace/bitness.h
+		 include/pinktrace/system.h
 		 python/Makefile
 		 python/pinktrace/Makefile
 		 ruby/Makefile

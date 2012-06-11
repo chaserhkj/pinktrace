@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -130,11 +130,11 @@ START_TEST(t_util_set_syscall)
 		event = pink_event_decide(status);
 		fail_unless(event == PINK_EVENT_SYSCALL, "%d != %d", PINK_EVENT_SYSCALL, event);
 
-		fail_unless(pink_util_set_syscall(pid, PINKTRACE_BITNESS_DEFAULT, PINKTRACE_INVALID_SYSCALL),
+		fail_unless(pink_util_set_syscall(pid, PINKTRACE_BITNESS_DEFAULT, PINK_SYSCALL_INVALID),
 			"%d(%s)", errno, strerror(errno));
 		fail_unless(pink_util_get_syscall(pid, PINKTRACE_BITNESS_DEFAULT, &scno),
 			"%d(%s)", errno, strerror(errno));
-		fail_unless(scno == PINKTRACE_INVALID_SYSCALL, "%ld != %ld", PINKTRACE_INVALID_SYSCALL, scno);
+		fail_unless(scno == PINK_SYSCALL_INVALID, "%ld != %ld", PINK_SYSCALL_INVALID, scno);
 
 		pink_trace_kill(pid);
 	}

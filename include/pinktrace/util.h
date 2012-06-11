@@ -40,20 +40,6 @@
 #include <sys/types.h>
 #include <pinktrace/macros.h>
 
-/**
- * The index arguments must be smaller than this define.
- *
- * @see pink_util_get_arg
- * @see pink_decode_simple
- * @see pink_decode_string
- * @see pink_decode_string_persistent
- * @see pink_decode_socket_fd
- * @see pink_decode_socket_address
- * @see pink_encode_simple
- * @see pink_encode_simple_safe
- **/
-#define PINK_MAX_INDEX 6
-
 PINK_BEGIN_DECL
 
 /**
@@ -138,8 +124,7 @@ bool pink_util_get_regs(pid_t pid, void *regs);
  * @param regs Same as pink_util_get_regs()
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool
-pink_util_set_regs(pid_t pid, const void *regs);
+bool pink_util_set_regs(pid_t pid, const void *regs);
 
 /**
  * Move len bytes of data of process pid, at address addr, to our address space
@@ -153,8 +138,7 @@ pink_util_set_regs(pid_t pid, const void *regs);
  * @param len Number of bytes of data to move.
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool
-pink_util_moven(pid_t pid, long addr, char *dest, size_t len);
+bool pink_util_moven(pid_t pid, long addr, char *dest, size_t len);
 
 /**
  * Convenience macro to read an object
@@ -207,7 +191,7 @@ bool pink_util_putn(pid_t pid, long addr, const char *src, size_t len);
 #define pink_util_put(pid, addr, objp) \
 	pink_util_putn((pid), (addr), (const char *)(objp), sizeof *(objp))
 
-#if defined(PINKTRACE_LINUX) || defined(DOXYGEN)
+#if PINK_OS_LINUX || defined(DOXYGEN)
 /**
  * Like pink_util_putn() but make the additional effort not to overwrite
  * unreadable addresses. Use this e.g. to write strings safely.
@@ -233,7 +217,7 @@ bool pink_util_putn_safe(pid_t pid, long addr, const char *src, size_t len);
 #define pink_util_put_safe(pid, addr, objp) \
 	pink_util_putn_safe((pid), (addr), (const char *)(objp), sizeof *(objp))
 
-#endif /* defined(PINKTRACE_LINUX)... */
+#endif /* PINK_OS_LINUX... */
 
 /**
  * Gets the last system call called by child with the given process ID.
@@ -287,7 +271,7 @@ bool pink_util_set_return(pid_t pid, long ret);
  *
  * @param pid Process ID
  * @param bitness Bitness
- * @param ind The index of the argument (0-5, see #PINK_MAX_INDEX)
+ * @param ind The index of the argument (0-5, see #PINK_MAX_ARGS)
  * @param res Pointer to store the argument
  * @return true on success, false on failure and sets errno accordingly
  **/
@@ -302,7 +286,7 @@ bool pink_util_get_arg(pid_t pid, pink_bitness_t bitness, unsigned ind,
  *
  * @param pid Process ID
  * @param bitness Bitness
- * @param ind Index of the argument (0-5, see #PINK_MAX_INDEX)
+ * @param ind Index of the argument (0-5, see #PINK_MAX_ARGS)
  * @param arg Value of the argument
  * @return true on success, false on failure and sets errno accordingly
  **/

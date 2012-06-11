@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -899,7 +899,7 @@ START_TEST(t_decode_socket_address_inet_second)
 }
 END_TEST
 
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 START_TEST(t_decode_socket_address_inet6_second)
 {
 	int status;
@@ -978,7 +978,7 @@ START_TEST(t_decode_socket_address_inet6_second)
 	}
 }
 END_TEST
-#endif /* PINKTRACE_HAVE_IPV6 */
+#endif /* PINK_HAVE_IPV6 */
 
 START_TEST(t_decode_socket_address_null_fifth)
 {
@@ -1205,7 +1205,7 @@ START_TEST(t_decode_socket_address_inet_fifth)
 }
 END_TEST
 
-#if PINKTRACE_HAVE_IPV6
+#if PINK_HAVE_IPV6
 START_TEST(t_decode_socket_address_inet6_fifth)
 {
 	int status;
@@ -1284,7 +1284,7 @@ START_TEST(t_decode_socket_address_inet6_fifth)
 	}
 }
 END_TEST
-#endif /* PINKTRACE_HAVE_IPV6 */
+#endif /* PINK_HAVE_IPV6 */
 
 Suite *
 decode_suite_create(void)
@@ -1316,12 +1316,16 @@ decode_suite_create(void)
 	tcase_add_test(tc_pink_decode, t_decode_socket_address_null_second);
 	tcase_add_test(tc_pink_decode, t_decode_socket_address_unix_second);
 	tcase_add_test(tc_pink_decode, t_decode_socket_address_inet_second);
+#if PINK_HAVE_IPV6
 	tcase_add_test(tc_pink_decode, t_decode_socket_address_inet6_second);
+#endif
 
 	tcase_add_test(tc_pink_decode, t_decode_socket_address_null_fifth);
 	tcase_add_test(tc_pink_decode, t_decode_socket_address_unix_fifth);
 	tcase_add_test(tc_pink_decode, t_decode_socket_address_inet_fifth);
+#if PINK_HAVE_IPV6
 	tcase_add_test(tc_pink_decode, t_decode_socket_address_inet6_fifth);
+#endif
 
 	suite_add_tcase(s, tc_pink_decode);
 

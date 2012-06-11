@@ -98,7 +98,7 @@ pinkrb_decode_string(int argc, VALUE *argv, VALUE mod)
 VALUE
 pinkrb_encode_string_safe(int argc, VALUE *argv, VALUE mod)
 {
-#ifdef PINKTRACE_LINUX
+#if PINK_OS_LINUX
 	pid_t pid;
 	unsigned bit, ind;
 	size_t len;
