@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2012 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,14 +25,36 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_INTERNAL_UTIL_H
-#define _PINK_EASY_INTERNAL_UTIL_H
+#ifndef _PINK_EASY_INIT_H
+#define _PINK_EASY_INIT_H
 
-#include <pinktrace/pink.h>
+/**
+ * @file pinktrace/easy/init.h
+ * @brief Pink's easy initialization
+ * @defgroup pink_easy_init Pink's easy initilization
+ * @ingroup pinktrace-easy
+ * @{
+ **/
+
+#include <stdbool.h>
+
 PINK_BEGIN_DECL
 
-/** Simple waitpid() wrapper which handles EINTR **/
-pid_t _pink_easy_waitpid_nointr(pid_t pid, int *status);
+/**
+ * Kernel release which pinktrace uses to make certain decisions on how
+ * ptrace() works.
+ **/
+extern unsigned pink_easy_os_release;
+
+/**
+ * Initialize pinktrace-easy's internal variables.
+ *
+ * @warning This function @b must be called before any library interaction!
+ *
+ * @return true on success, false on failure and sets errno accordingly
+ **/
+bool pink_easy_init(void);
 
 PINK_END_DECL
+/** @} */
 #endif

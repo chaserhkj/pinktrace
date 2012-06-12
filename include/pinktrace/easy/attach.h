@@ -36,6 +36,7 @@
  * @{
  **/
 
+#include <stdbool.h>
 #include <sys/types.h>
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/context.h>
@@ -53,9 +54,9 @@ PINK_BEGIN_DECL
  *             in case the process is a clone. This is useful when attaching to
  *             all threads of a process and makes pinktrace track whether the
  *             process is a thread. Specify -1 for non-clones.
- * @return Depends on the callbacks
+ * @return true on success, false on failure and sets errno accordingly
  **/
-int pink_easy_attach(pink_easy_context_t *ctx, pid_t pid, pid_t ppid)
+bool pink_easy_attach(pink_easy_context_t *ctx, pid_t pid, pid_t ppid)
 	PINK_GCC_ATTR((nonnull(1)));
 
 PINK_END_DECL

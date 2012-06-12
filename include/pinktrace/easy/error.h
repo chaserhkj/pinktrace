@@ -60,61 +60,23 @@ typedef enum {
 	/** Operation aborted by a callback **/
 	PINK_EASY_ERROR_CALLBACK_ABORT,
 
-	/** Allocating memory for the eldest child failed **/
-	PINK_EASY_ERROR_ALLOC_ELDEST,
-	/** Allocating memory for a new child failed **/
+	/** Failure during memory allocation **/
 	PINK_EASY_ERROR_ALLOC,
 
-	/** Attaching to the child failed **/
+	/** Failure during process attach **/
 	PINK_EASY_ERROR_ATTACH,
 
-	/** @e fork(2) failed **/
+	/** Failed to @e fork(2) **/
 	PINK_EASY_ERROR_FORK,
-	/** @e vfork(2) failed **/
-	PINK_EASY_ERROR_VFORK,
 
-	/** Initial wait(2) failed **/
-	PINK_EASY_ERROR_WAIT_ELDEST,
-	/** wait(2) failed **/
+	/** @e waitpid(2) failed **/
 	PINK_EASY_ERROR_WAIT,
 
-	/** Eldest child didn't stop **/
-	PINK_EASY_ERROR_STOP_ELDEST,
+	/** @e ptrace(2) failed **/
+	PINK_EASY_ERROR_TRACE,
 
-	/** Setting up @e ptrace(2) options for the eldest child failed **/
-	PINK_EASY_ERROR_SETUP_ELDEST,
-	/** Setting up @e ptrace(2) options for the new child failed **/
-	PINK_EASY_ERROR_SETUP,
-
-	/** Failed to get the bitness of the eldest child **/
-	PINK_EASY_ERROR_BITNESS_ELDEST,
-	/** Failed to get the bitness of a child after successful @e execve(2) **/
-	PINK_EASY_ERROR_BITNESS,
-
-	/** Initial step (e.g. pink_trace_syscall()) failed **/
-	PINK_EASY_ERROR_STEP_INITIAL,
-	/** Stepping after event #PINK_EVENT_STOP failed **/
-	PINK_EASY_ERROR_STEP_STOP,
-	/** Stepping after event #PINK_EVENT_TRAP failed **/
-	PINK_EASY_ERROR_STEP_TRAP,
-	/** Stepping after event #PINK_EVENT_SYSCALL failed **/
-	PINK_EASY_ERROR_STEP_SYSCALL,
-	/** Stepping after event #PINK_EVENT_EXIT failed **/
-	PINK_EASY_ERROR_STEP_EXIT,
-	/** Stepping after @e fork(2), @e vfork(2) or @e clone(2) failed **/
-	PINK_EASY_ERROR_STEP_FORK,
-	/** Stepping after @e execve(2) failed **/
-	PINK_EASY_ERROR_STEP_EXEC,
-	/** Stepping after genuine signal failed **/
-	PINK_EASY_ERROR_STEP_SIGNAL,
-
-	/** pink_trace_geteventmsg() failed after #PINK_EVENT_FORK **/
-	PINK_EASY_ERROR_GETEVENTMSG_FORK,
-	/** pink_trace_geteventmsg() failed after #PINK_EVENT_EXIT **/
-	PINK_EASY_ERROR_GETEVENTMSG_EXIT,
-
-	/** Received unknown event **/
-	PINK_EASY_ERROR_EVENT_UNKNOWN,
+	/** Process misbehave (i.e. indication of a pinktrace bug)**/
+	PINK_EASY_ERROR_PROCESS,
 
 	/** Maximum error number **/
 	PINK_EASY_ERROR_MAX,

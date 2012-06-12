@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,16 @@
  */
 
 #include <pinktrace/easy/internal.h>
+#include <pinktrace/pink.h>
+#include <pinktrace/easy/pink.h>
 
-#include <assert.h>
-#include <alloca.h>
-#include <errno.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <alloca.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
-#include <pinktrace/pink.h>
-#include <pinktrace/easy/pink.h>
 
 enum {
 	PINK_INTERNAL_FUNC_EXECVE,
@@ -45,30 +43,19 @@ enum {
 	PINK_INTERNAL_FUNC_EXECVP,
 };
 
-static int
-pink_easy_exec_helper(pink_easy_context_t *ctx, int type, const char *filename, char *const argv[], char *const envp[])
+static bool pink_easy_exec_helper(pink_easy_context_t *ctx, int type,
+		const char *filename, char *const argv[], char *const envp[])
 {
-	pink_easy_process_t *proc;
+	pid_t pid;
+	pink_easy_process_t *current;
 
-	assert(ctx != NULL);
-
-	proc = calloc(1, sizeof(pink_easy_process_t));
-	if (!proc) {
-		ctx->error = PINK_EASY_ERROR_ALLOC_ELDEST;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx);
-		return -ctx->error;
-	}
-
-	if ((proc->pid = fork()) < 0) {
-		ctx->error = PINK_EASY_ERROR_VFORK;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx);
-		goto fail;
-	}
-	else if (!proc->pid) { /* child */
+	pid = fork();
+	if (pid < 0) {
+		ctx->callback_table.error(ctx, PINK_EASY_ERROR_FORK, "fork");
+		return false;
+	} else if (pid == 0) { /* child */
 		if (!pink_trace_me())
-			_exit(ctx->callback_table.cerror ? ctx->callback_table.cerror(PINK_EASY_CHILD_ERROR_SETUP) : EXIT_FAILURE);
+			_exit(ctx->callback_table.cerror(PINK_EASY_CHILD_ERROR_SETUP));
 		switch (type) {
 		case PINK_INTERNAL_FUNC_EXECVE:
 			execve(filename, argv, envp);
@@ -80,28 +67,30 @@ pink_easy_exec_helper(pink_easy_context_t *ctx, int type, const char *filename, 
 			execvp(filename, argv);
 			break;
 		default:
-			abort();
+			abort(); /* TODO assert_not_reached() */
 		}
 		/* execve() failed */
-		_exit(ctx->callback_table.cerror ? ctx->callback_table.cerror(PINK_EASY_CHILD_ERROR_EXEC) : EXIT_FAILURE);
+		_exit(ctx->callback_table.cerror(PINK_EASY_CHILD_ERROR_EXEC));
 	}
 	/* parent */
-
-	if (!_pink_easy_init(ctx, proc))
-		return 0;
-fail:
-	free(proc);
-	return -ctx->error;
+	PINK_EASY_INSERT_PROCESS(ctx, current);
+	if (current == NULL) {
+		kill(pid, SIGKILL);
+		return false;
+	}
+	current->pid = pid;
+	current->flags = PINK_EASY_PROCESS_STARTUP | PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP;
+	return true;
 }
 
-int
-pink_easy_execve(pink_easy_context_t *ctx, const char *filename, char *const argv[], char *const envp[])
+bool pink_easy_execve(pink_easy_context_t *ctx, const char *filename,
+		char *const argv[], char *const envp[])
 {
 	return pink_easy_exec_helper(ctx, PINK_INTERNAL_FUNC_EXECVE, filename, argv, envp);
 }
 
-int
-pink_easy_execl(pink_easy_context_t *ctx, const char *file, const char *arg, ...)
+bool pink_easy_execl(pink_easy_context_t *ctx, const char *file,
+		const char *arg, ...)
 {
 	unsigned int narg;
 	char *foo;
@@ -130,11 +119,11 @@ pink_easy_execl(pink_easy_context_t *ctx, const char *file, const char *arg, ...
 	/* OOM */
 	va_end(orig_ap);
 	errno = ENOMEM;
-	return -1;
+	return false;
 }
 
-int
-pink_easy_execlp(pink_easy_context_t *ctx, const char *file, const char *arg, ...)
+bool pink_easy_execlp(pink_easy_context_t *ctx, const char *file,
+		const char *arg, ...)
 {
 	unsigned int narg;
 	char *foo;
@@ -163,17 +152,17 @@ pink_easy_execlp(pink_easy_context_t *ctx, const char *file, const char *arg, ..
 	/* OOM */
 	va_end(orig_ap);
 	errno = ENOMEM;
-	return -1;
+	return false;
 }
 
-int
-pink_easy_execv(pink_easy_context_t *ctx, const char *path, char *const argv[])
+bool pink_easy_execv(pink_easy_context_t *ctx, const char *path,
+		char *const argv[])
 {
 	return pink_easy_exec_helper(ctx, PINK_INTERNAL_FUNC_EXECV, path, argv, NULL);
 }
 
-int
-pink_easy_execvp(pink_easy_context_t *ctx, const char *file, char *const argv[])
+bool pink_easy_execvp(pink_easy_context_t *ctx, const char *file,
+		char *const argv[])
 {
 	return pink_easy_exec_helper(ctx, PINK_INTERNAL_FUNC_EXECVP, file, argv, NULL);
 }

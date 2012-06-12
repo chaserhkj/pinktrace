@@ -4,6 +4,7 @@
  *   Copyright (c) 1991, 1992 Paul Kranenburg <pk@cs.few.eur.nl>
  *   Copyright (c) 1993 Branko Lankester <branko@hacktic.nl>
  *   Copyright (c) 1993, 1994, 1995, 1996 Rick Sladkey <jrs@world.std.com>
+ *   Copyright (c) 1996-1999 Wichert Akkerman <wichert@cistron.nl>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,29 +38,31 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <stdbool.h>
-#include <sys/queue.h>
+#include <stdlib.h>
 #include <sys/types.h>
+#include <sys/queue.h>
 
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/callback.h>
 #include <pinktrace/easy/error.h>
 
-/** We have just begun ptracing this process. **/
-#define PINK_EASY_PROCESS_STARTUP		00001
+#undef KERNEL_VERSION
+#define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
+
 /** This table entry is in use **/
-#define PINK_EASY_PROCESS_INUSE			00002
+#define PINK_EASY_PROCESS_INUSE			00001
+/** We have just begun ptracing this process. **/
+#define PINK_EASY_PROCESS_STARTUP		00002
+/** Next SIGSTOP is to be ignored */
+#define PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP	00004
 /** A system call is in progress **/
-#define PINK_EASY_PROCESS_INSYSCALL		00004
+#define PINK_EASY_PROCESS_INSYSCALL		00010
 /** Process is not our own child **/
-#define PINK_EASY_PROCESS_ATTACHED		00010
-/** As far as we know, this process is exiting **/
-#define PINK_EASY_PROCESS_EXITING		00020
-/** Process can not be allowed to resume just now **/
-#define PINK_EASY_PROCESS_SUSPENDED		00040
+#define PINK_EASY_PROCESS_ATTACHED		00020
 /** Process should have forks followed **/
-#define PINK_EASY_PROCESS_FOLLOWFORK		00100
+#define PINK_EASY_PROCESS_FOLLOWFORK		00040
 /** Process is a clone **/
-#define PINK_EASY_PROCESS_CLONE_THREAD		00200
+#define PINK_EASY_PROCESS_CLONE_THREAD		00100
 
 PINK_BEGIN_DECL
 
@@ -95,11 +98,8 @@ SLIST_HEAD(pink_easy_process_list, pink_easy_process);
 
 /** Tracing context **/
 struct pink_easy_context {
-	/** Process list **/
-	struct pink_easy_process_list process_list;
-
-	/** Callback table **/
-	pink_easy_callback_table_t callback_table;
+	/** Number of processes */
+	unsigned nprocs;
 
 	/** pink_trace_setup() options **/
 	int ptrace_options;
@@ -110,15 +110,37 @@ struct pink_easy_context {
 	/** Was the error fatal? **/
 	bool fatal;
 
+	/** Process list */
+	struct pink_easy_process_list process_list;
+
+	/** Callback table **/
+	pink_easy_callback_table_t callback_table;
+
 	/** User data **/
 	void *userdata;
 
 	/** Destructor for the user data **/
 	pink_easy_free_func_t userdata_destroy;
 };
-
-/** Initialize tracing **/
-int _pink_easy_init(struct pink_easy_context *ctx, pink_easy_process_t *proc);
+#define PINK_EASY_FOREACH_PROCESS(node, ctx)	SLIST_FOREACH((node), &(ctx)->process_list, entries)
+#define PINK_EASY_INSERT_PROCESS(ctx, current)							\
+	do {											\
+		(current) = calloc(1, sizeof(*(current)));					\
+		if ((current) == NULL) {							\
+			(ctx)->callback_table.error((ctx), PINK_EASY_ERROR_ALLOC, "calloc");	\
+		}										\
+		SLIST_INSERT_HEAD(&(ctx)->process_list, (current), entries);			\
+		(ctx)->nprocs++;								\
+	} while (0)
+#define PINK_EASY_REMOVE_PROCESS(ctx, current)							\
+	do {											\
+		SLIST_REMOVE(&(ctx)->process_list, (current), pink_easy_process, entries);	\
+		if ((current)->userdata_destroy && (current)->userdata) {			\
+			(current)->userdata_destroy((current)->userdata);			\
+		}										\
+		free(current);									\
+		(ctx)->nprocs--;								\
+	} while (0)
 
 PINK_END_DECL
 #endif

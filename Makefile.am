@@ -64,13 +64,13 @@ pinktrace_easy_DIST= \
 		     include/pinktrace/easy/error.h \
 		     include/pinktrace/easy/exec.h \
 		     include/pinktrace/easy/func.h \
+		     include/pinktrace/easy/init.h \
 		     include/pinktrace/easy/loop.h \
 		     include/pinktrace/easy/process.h \
 		     include/pinktrace/easy/pink.h
 EXTRA_DIST+= \
 	     $(pinktrace_easy_DIST) \
-	     include/pinktrace/easy/internal.h \
-	     include/pinktrace/easy/internal-util.h
+	     include/pinktrace/easy/internal.h
 if WANT_EASY
 pinktrace_easy_includedir=$(includedir)/pinktrace-$(PINKTRACE_PC_SLOT)/pinktrace/easy
 pinktrace_easy_include_HEADERS= $(pinktrace_easy_DIST)

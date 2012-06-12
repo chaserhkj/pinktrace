@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,18 +25,16 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/types.h>
-#include <errno.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <errno.h>
+#include <signal.h>
+#include <sys/types.h>
 #include <pinktrace/easy/pink.h>
 
-static int
-eb_child(pink_easy_child_error_t error)
+static int eb_child(pink_easy_child_error_t error)
 {
 	fprintf(stderr, "%s:%d: child[%i]: %s\n",
 			__func__, __LINE__,
@@ -44,28 +42,23 @@ eb_child(pink_easy_child_error_t error)
 	return -1;
 }
 
-static void
-cb_death(PINK_GCC_ATTR((unused)) const pink_easy_context_t *ctx, const pink_easy_process_t *current)
+static void cb_teardown(const pink_easy_context_t *ctx, const pink_easy_process_t *current)
 {
 	fprintf(stderr, "%s:%d: child:%i died\n",
 			__func__, __LINE__,
 			pink_easy_process_get_pid(current));
 }
 
-static int
-cb_signal(PINK_GCC_ATTR((unused)) const pink_easy_context_t *ctx, PINK_GCC_ATTR((unused)) pink_easy_process_t *current, int sig)
+static int cb_signal(const pink_easy_context_t *ctx, PINK_GCC_ATTR((unused)) pink_easy_process_t *current, int status)
 {
-	int f;
+	int r = 0;
 
-	f = 0;
-	if (sig != SIGTTIN) {
-		fprintf(stderr, "%s:%d: %d (%s) != %d (%s)\n",
-				__func__, __LINE__,
-				sig, strsignal(sig),
-				SIGTTIN, strsignal(SIGTTIN));
-		f |= PINK_EASY_CFLAG_ABRT;
-	}
-	return f;
+	if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTTIN)
+		return r;
+
+	fprintf(stderr, "%s:%d: status:%#x\n", __func__, __LINE__, (unsigned)status);
+	r |= PINK_EASY_CFLAG_ABORT;
+	return r;
 }
 
 static int
@@ -79,14 +72,14 @@ signal_immediately_func(void *data)
 int
 main(void)
 {
-	int ret, sig;
+	int sig;
 	pink_easy_error_t error;
 	pink_easy_callback_table_t tbl;
 	pink_easy_context_t *ctx;
 
 	memset(&tbl, 0, sizeof(pink_easy_callback_table_t));
 	tbl.cerror = eb_child;
-	tbl.death = cb_death;
+	tbl.teardown = cb_teardown;
 	tbl.signal = cb_signal;
 
 	ctx = pink_easy_context_new(PINK_TRACE_OPTION_SYSGOOD, &tbl, NULL, NULL);
@@ -96,10 +89,10 @@ main(void)
 	}
 
 	sig = SIGTTIN;
-	if ((ret = pink_easy_call(ctx, signal_immediately_func, &sig))) {
-		fprintf(stderr, "%s:%d: pink_easy_call: %d %d(%s)\n",
+	if (!pink_easy_call(ctx, signal_immediately_func, &sig)) {
+		fprintf(stderr, "%s:%d: pink_easy_call failed (errno:%d %s)\n",
 				__func__, __LINE__,
-				ret, errno, strerror(errno));
+				errno, strerror(errno));
 		abort();
 	}
 	pink_easy_loop(ctx);
@@ -113,13 +106,14 @@ main(void)
 				errno, strerror(errno));
 		abort();
 	}
+
 	pink_easy_context_clear_error(ctx);
 
 	sig = SIGTTOU;
-	if ((ret = pink_easy_call(ctx, signal_immediately_func, &sig))) {
-		fprintf(stderr, "%s:%d: pink_easy_call: %d %d(%s)\n",
+	if (!pink_easy_call(ctx, signal_immediately_func, &sig)) {
+		fprintf(stderr, "%s:%d: pink_easy_call failed (errno:%d %s)\n",
 				__func__, __LINE__,
-				ret, errno, strerror(errno));
+				errno, strerror(errno));
 		abort();
 	}
 	pink_easy_loop(ctx);

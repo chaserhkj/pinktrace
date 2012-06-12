@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,9 @@
  */
 
 #include <pinktrace/easy/internal.h>
+#include <pinktrace/pink.h>
+#include <pinktrace/easy/pink.h>
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -36,9 +37,6 @@
 #include <sys/queue.h>
 #include <sys/syscall.h>
 #include <asm/unistd.h>
-
-#include <pinktrace/pink.h>
-#include <pinktrace/easy/pink.h>
 
 int
 pink_easy_process_kill(const pink_easy_process_t *proc, int sig)
@@ -114,8 +112,6 @@ pink_easy_process_list_lookup(const pink_easy_process_list_t *list, pid_t pid)
 {
 	pink_easy_process_t *node;
 
-	assert(list != NULL);
-
 	SLIST_FOREACH(node, list, entries) {
 		if (node->pid == pid)
 			return node;
@@ -127,19 +123,14 @@ pink_easy_process_list_lookup(const pink_easy_process_list_t *list, pid_t pid)
 void
 pink_easy_process_list_remove(pink_easy_process_list_t *list, const pink_easy_process_t *proc)
 {
-	assert(list != NULL);
-
 	SLIST_REMOVE(list, proc, pink_easy_process, entries);
 }
 
-unsigned
-pink_easy_process_list_walk(const pink_easy_process_list_t *list, pink_easy_walk_func_t func, void *userdata)
+unsigned pink_easy_process_list_walk(const pink_easy_process_list_t *list,
+		pink_easy_walk_func_t func, void *userdata)
 {
 	unsigned count;
 	pink_easy_process_t *node;
-
-	assert(list != NULL);
-	assert(func != NULL);
 
 	count = 0;
 	SLIST_FOREACH(node, list, entries) {

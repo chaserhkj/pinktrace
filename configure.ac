@@ -296,7 +296,7 @@ AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([pid_t])
 
 dnl Check headers
-REQUIRED_HEADERS="sys/ptrace.h sys/types.h sys/wait.h netinet/in.h sys/un.h"
+REQUIRED_HEADERS="sys/ptrace.h sys/types.h sys/wait.h sys/queue.h sys/utsname.h netinet/in.h sys/un.h"
 if test x"$opsys" = x"linux" ; then
 	REQUIRED_HEADERS="${REQUIRED_HEADERS} linux/ptrace.h"
 fi
@@ -414,7 +414,7 @@ fi
 AM_CONDITIONAL([WANT_EASY], test x"$WANT_EASY" = x"yes")
 
 dnl Extra CFLAGS
-WANTED_CFLAGS="-pedantic -Wall -W -Wextra -Wbad-function-cast -Wcast-align -Wcast-qual -Wfloat-equal -Wformat=2 -Wformat-security -Wformat-nonliteral -Winit-self -Winline -Wlogical-op -Wmissing-prototypes -Wmissing-declarations -Wmissing-format-attribute -Wmissing-noreturn -Wpointer-arith -Wredundant-decls -Wshadow -Wswitch-default -Wunused -Wvla"
+WANTED_CFLAGS="-pedantic -W -Wall -Wextra -Wno-unused"
 for flag in $WANTED_CFLAGS; do
 	AX_CHECK_COMPILER_FLAGS([$flag], [PINKTRACE_CFLAGS="$PINKTRACE_CFLAGS $flag"],)
 done

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,47 +25,71 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <pinktrace/easy/internal.h>
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/pink.h>
 
-const char *
-pink_easy_child_strerror(pink_easy_child_error_t e)
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+
+int pink_easy_errback_child_stderr(pink_easy_child_error_t e)
 {
-	switch (e) {
-	case PINK_EASY_CHILD_ERROR_SUCCESS:
-		return "Success";
-	case PINK_EASY_CHILD_ERROR_SETUP:
-		return "Failed to set up trace";
-	case PINK_EASY_CHILD_ERROR_EXEC:
-		return "execve() failed";
-	case PINK_EASY_CHILD_ERROR_MAX:
-	default:
-		return "Unknown error";
-	}
+	fprintf(stderr, "pinktrace child error: %s (errno:%d %s)\n",
+			pink_easy_child_strerror(e),
+			errno, strerror(errno));
+	return EXIT_FAILURE;
 }
 
-const char *
-pink_easy_strerror(pink_easy_error_t e)
+void pink_easy_errback_stderr(const struct pink_easy_context *ctx, ...)
 {
-	switch (e) {
-	case PINK_EASY_ERROR_SUCCESS:
-		return "Success";
+	va_list ap;
+	const char *errctx;
+	pid_t pid;
+	pink_easy_process_t *current;
+
+	fprintf(stderr, "pinktrace error: ");
+
+	va_start(ap, ctx);
+	switch (ctx->error) {
 	case PINK_EASY_ERROR_CALLBACK_ABORT:
-		return "Operation aborted by callback";
-	case PINK_EASY_ERROR_ATTACH:
-		return "Failed to attach";
-	case PINK_EASY_ERROR_ALLOC:
-		return "Failed to allocate memory";
-	case PINK_EASY_ERROR_FORK:
-		return "Failed to spawn new process";
 	case PINK_EASY_ERROR_WAIT:
-		return "waitpid() failed";
+		fprintf(stderr, "%s (errno:%d %s)\n",
+				pink_easy_strerror(ctx->error),
+				errno, strerror(errno));
+		break;
+	case PINK_EASY_ERROR_ALLOC:
+	case PINK_EASY_ERROR_FORK:
+		errctx = va_arg(ap, const char *);
+		fprintf(stderr, "%s: %s (errno:%d %s)\n",
+				pink_easy_strerror(ctx->error),
+				errctx, errno, strerror(errno));
+		break;
+	case PINK_EASY_ERROR_ATTACH:
+		pid = va_arg(ap, pid_t);
+		fprintf(stderr, "%s (pid:%lu errno:%d %s)\n",
+				pink_easy_strerror(ctx->error),
+				(unsigned long)pid,
+				errno, strerror(errno));
+		break;
 	case PINK_EASY_ERROR_TRACE:
-		return "ptrace() failed";
 	case PINK_EASY_ERROR_PROCESS:
-		return "Process misbehave";
-	case PINK_EASY_ERROR_MAX:
+		current = va_arg(ap, pink_easy_process_t *);
+		errctx = va_arg(ap, const char *);
+		fprintf(stderr, "%s (pid:%lu[%s]",
+				pink_easy_strerror(ctx->error),
+				(unsigned long)current->pid,
+				pink_bitness_name(current->bitness));
+		if (ctx->error == PINK_EASY_ERROR_TRACE) {
+			fprintf(stderr, " errno:%d %s",
+					errno,
+					strerror(errno));
+		}
+		fprintf(stderr, ")\n");
+		break;
 	default:
-		return "Unknown error";
+		fprintf(stderr, "unknown:%u\n", ctx->error);
+		break;
 	}
 }

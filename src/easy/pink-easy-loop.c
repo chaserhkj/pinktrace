@@ -25,631 +25,269 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <pinktrace/internal.h> /* TODO: Fix pink_event_decide() */
 #include <pinktrace/easy/internal.h>
-#include <pinktrace/easy/internal-util.h>
-
-#include <assert.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/queue.h>
-#include <sys/wait.h>
-
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/pink.h>
 
-inline
-static pink_easy_error_t
-error_step(pink_event_t event)
-{
-	switch (event) {
-	case PINK_EVENT_STOP:
-		return PINK_EASY_ERROR_STEP_STOP;
-	case PINK_EVENT_TRAP:
-		return PINK_EASY_ERROR_STEP_TRAP;
-	case PINK_EVENT_SYSCALL:
-		return PINK_EASY_ERROR_STEP_SYSCALL;
-	case PINK_EVENT_EXEC:
-		return PINK_EASY_ERROR_STEP_EXEC;
-	case PINK_EVENT_EXIT:
-		return PINK_EASY_ERROR_STEP_EXIT;
-	case PINK_EVENT_FORK:
-	case PINK_EVENT_VFORK:
-	case PINK_EVENT_CLONE:
-		return PINK_EASY_ERROR_STEP_FORK;
-	case PINK_EVENT_GENUINE:
-	case PINK_EVENT_UNKNOWN:
-		return PINK_EASY_ERROR_STEP_SIGNAL;
-	default:
-		abort();
-	}
+#include <stdbool.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/queue.h>
+#include <sys/wait.h>
+#include <sys/utsname.h>
 
-	/* never reached */
-	assert(0);
-}
-
-static void
-handle_death(pink_easy_context_t *ctx, pink_easy_process_t *proc)
-{
-	assert(proc != NULL);
-
-	pink_easy_process_list_remove(&ctx->process_list, proc);
-
-	/* R.I.P. */
-	if (ctx->callback_table.death)
-		ctx->callback_table.death(ctx, proc);
-	if (proc->userdata_destroy && proc->userdata)
-		proc->userdata_destroy(proc->userdata);
-	free(proc);
-}
-
-static bool
-handle_ptrace_error(pink_easy_context_t *ctx, pink_easy_error_t error, pink_easy_process_t *proc, pid_t pid)
+static void handle_ptrace_error(pink_easy_context_t *ctx,
+		pink_easy_process_t *current,
+		const char *errctx)
 {
 	if (errno == ESRCH) {
-		/* Child is dead! */
-		if (proc)
-			handle_death(ctx, proc);
-		return true;
+		if (ctx->callback_table.teardown)
+			ctx->callback_table.teardown(ctx, current);
+	} else {
+		ctx->callback_table.error(ctx, PINK_EASY_ERROR_TRACE, current, errctx);
 	}
-
-	/* Fatal ptrace() error! */
-	ctx->error = error;
-	if (ctx->callback_table.error) {
-		if (proc)
-			ctx->callback_table.error(ctx, proc);
-		else
-			ctx->callback_table.error(ctx, pid);
-	}
-
-	return false;
+	PINK_EASY_REMOVE_PROCESS(ctx, current);
 }
 
-static bool
-handle_step(pink_easy_context_t *ctx, pink_easy_process_t *proc, int sig, pink_event_t event)
+static bool handle_startup(pink_easy_context_t *ctx, pink_easy_process_t *current)
 {
-	assert(proc != NULL);
-
-	if (pink_trace_syscall(proc->pid, sig))
-		return true;
-	return handle_ptrace_error(ctx, error_step(event), proc, -1);
-}
-
-static pink_easy_tribool_t
-handle_stop(pink_easy_context_t *ctx, pid_t pid, pink_easy_process_t **nproc)
-{
-	pink_easy_process_t *proc, *pproc;
-
-	proc = pink_easy_process_list_lookup(&ctx->process_list, pid);
-	if (proc) {
-		if (!(proc->flags & PINK_EASY_PROCESS_STARTUP)) {
-			/*
-			 * FIXME: Process is not starting but received a SIGSTOP.
-			 * Just ignore the signal for now, maybe there is a
-			 * saner way to treat this?
-			 */
-			*nproc = proc;
-			return PINK_EASY_TRIBOOL_NONE;
-		}
-
-		assert(proc->ppid > 0);
-		pproc = pink_easy_process_list_lookup(&ctx->process_list, proc->ppid);
-		assert(pproc != NULL);
-
-		/* Set up the child */
-		if (!pink_trace_setup(proc->pid, ctx->ptrace_options))
-			return handle_ptrace_error(ctx, PINK_EASY_ERROR_SETUP, proc, -1)
-				? PINK_EASY_TRIBOOL_TRUE
-				: PINK_EASY_TRIBOOL_FALSE;
-
-		/*
-		 * Happy birthday kiddo!
-		 */
-		if (ctx->callback_table.birth)
-			ctx->callback_table.birth(ctx, proc, pproc);
-
-		proc->flags &= ~PINK_EASY_PROCESS_STARTUP;
-		*nproc = proc;
-
-		return PINK_EASY_TRIBOOL_NONE;
+	/* Set up tracing options */
+	if (!pink_trace_setup(current->pid, ctx->ptrace_options)) {
+		handle_ptrace_error(ctx, current, "setup");
+		return false;
 	}
 
-	/*
-	 * Child is born before PINK_EVENT_FORK
-	 * Not much we can do other than allocating the process structure,
-	 * inserting into the list and marking it suspended.
-	 */
-	proc = calloc(1, sizeof(pink_easy_process_t));
-	if (!proc) {
-		/* OOM */
-		ctx->error = PINK_EASY_ERROR_ALLOC;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx, pid);
-		return PINK_EASY_TRIBOOL_FALSE;
+	/* Figure out bitness */
+	current->bitness = pink_bitness_get(current->pid);
+	if (current->bitness == PINK_BITNESS_UNKNOWN) {
+		handle_ptrace_error(ctx, current, "bitness");
+		return false;
 	}
 
-	/*
-	 * fork() handler will take care of the rest.
-	 */
-	proc->pid = pid;
-	proc->flags |= PINK_EASY_PROCESS_SUSPENDED;
-	SLIST_INSERT_HEAD(&ctx->process_list, proc, entries);
+	/* Set up flags */
+	if (ctx->ptrace_options & PINK_TRACE_OPTION_FORK
+			|| ctx->ptrace_options & PINK_TRACE_OPTION_VFORK
+			|| ctx->ptrace_options & PINK_TRACE_OPTION_CLONE)
+		current->flags |= PINK_EASY_PROCESS_FOLLOWFORK;
 
-	return PINK_EASY_TRIBOOL_NONE;
-}
-
-static pink_easy_tribool_t
-handle_trap(pink_easy_context_t *ctx, pink_easy_process_t *proc)
-{
-	bool abrt;
-	int flags;
-
-	/* Run the "trap" callback */
-	if (ctx->callback_table.trap) {
-		flags = ctx->callback_table.trap(ctx, proc);
-
-		abrt = flags & PINK_EASY_CFLAG_ABRT;
-		if (abrt)
-			ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-
-		if (flags & PINK_EASY_CFLAG_DROP) {
-			handle_death(ctx, proc);
-			return abrt ? PINK_EASY_TRIBOOL_FALSE : PINK_EASY_TRIBOOL_TRUE;
-		}
-		else if (abrt)
-			return PINK_EASY_TRIBOOL_FALSE;
-	}
-
-	return PINK_EASY_TRIBOOL_NONE;
-}
-
-static pink_easy_tribool_t
-handle_syscall(pink_easy_context_t *ctx, pink_easy_process_t *proc)
-{
-	bool abrt, entering;
-	int flags;
-
-	entering = !(proc->flags & PINK_EASY_PROCESS_INSYSCALL);
-	proc->flags ^= PINK_EASY_PROCESS_INSYSCALL;
-
-	if (ctx->callback_table.syscall) {
-		flags = ctx->callback_table.syscall(ctx, proc, entering);
-
-		abrt = flags & PINK_EASY_CFLAG_ABRT;
-		if (abrt)
-			ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-
-		if (flags & PINK_EASY_CFLAG_DROP) {
-			handle_death(ctx, proc);
-			return abrt ? PINK_EASY_TRIBOOL_FALSE : PINK_EASY_TRIBOOL_TRUE;
-		}
-		else if (abrt)
-			return PINK_EASY_TRIBOOL_FALSE;
-	}
-
-	return PINK_EASY_TRIBOOL_NONE;
-}
-
-static pink_easy_tribool_t
-handle_exec(pink_easy_context_t *ctx, pink_easy_process_t *proc)
-{
-	bool abrt;
-	int flags;
-	pink_bitness_t old_bitness;
-
-	/* Update bitness */
-	old_bitness = proc->bitness;
-	if ((proc->bitness = pink_bitness_get(proc->pid)) == PINK_BITNESS_UNKNOWN)
-		return handle_ptrace_error(ctx, PINK_EASY_ERROR_BITNESS, proc, -1)
-			? PINK_EASY_TRIBOOL_TRUE
-			: PINK_EASY_TRIBOOL_FALSE;
-
-	/* Run the "exec" callback */
-	if (ctx->callback_table.exec) {
-		flags = ctx->callback_table.exec(ctx, proc, old_bitness);
-
-		abrt = flags & PINK_EASY_CFLAG_ABRT;
-		if (abrt)
-			ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-
-		if (flags & PINK_EASY_CFLAG_DROP) {
-			handle_death(ctx, proc);
-			return abrt ? PINK_EASY_TRIBOOL_FALSE : PINK_EASY_TRIBOOL_TRUE;
-		}
-		else if (abrt)
-			return PINK_EASY_TRIBOOL_FALSE;
-	}
-
-	return PINK_EASY_TRIBOOL_NONE;
-}
-
-static pink_easy_tribool_t
-handle_pre_exit(pink_easy_context_t *ctx, pid_t pid, pink_easy_process_t *proc)
-{
-	bool abrt;
-	int flags;
-	unsigned long status;
-
-	/* Run the "pre_exit" callback */
-	if (ctx->callback_table.pre_exit) {
-		if (!pink_trace_geteventmsg(pid, &status))
-			return handle_ptrace_error(ctx, PINK_EASY_ERROR_GETEVENTMSG_EXIT, proc, pid)
-				? PINK_EASY_TRIBOOL_TRUE
-				: PINK_EASY_TRIBOOL_FALSE;
-
-		flags = ctx->callback_table.pre_exit(ctx, pid, status);
-
-		abrt = flags & PINK_EASY_CFLAG_ABRT;
-		if (abrt)
-			ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-
-		if (flags & PINK_EASY_CFLAG_DROP) {
-			if (proc)
-				handle_death(ctx, proc);
-			return abrt ? PINK_EASY_TRIBOOL_FALSE : PINK_EASY_TRIBOOL_TRUE;
-		}
-		else if (abrt)
-			return PINK_EASY_TRIBOOL_FALSE;
-	}
-
-	return PINK_EASY_TRIBOOL_NONE;
-}
-
-PINK_GCC_ATTR((nonnull(1,4)))
-static pink_easy_tribool_t
-handle_fork(pink_easy_context_t *ctx, pink_easy_process_t *proc, pink_event_t event, pink_easy_process_t **nproc)
-{
-	bool abrt, suspended;
-	int flags;
-	unsigned long cpid;
-	pink_easy_process_t *cproc;
-	pink_easy_callback_fork_t cbfork;
-
-	if (!pink_trace_geteventmsg(proc->pid, &cpid))
-		return handle_ptrace_error(ctx, PINK_EASY_ERROR_GETEVENTMSG_FORK, proc, -1)
-			? PINK_EASY_TRIBOOL_TRUE
-			: PINK_EASY_TRIBOOL_FALSE;
-
-	cproc = pink_easy_process_list_lookup(&ctx->process_list, (pid_t)cpid);
-	if (cproc) {
-		/* Child was born before PINK_EVENT_FORK */
-		assert(cproc->flags & PINK_EASY_PROCESS_SUSPENDED);
-
-		/* Inherit crucial data */
-		cproc->bitness = proc->bitness;
-		if (proc->flags & PINK_EASY_PROCESS_ATTACHED)
-			cproc->flags |= PINK_EASY_PROCESS_ATTACHED;
-		if (proc->flags & PINK_EASY_PROCESS_FOLLOWFORK)
-			cproc->flags |= PINK_EASY_PROCESS_FOLLOWFORK;
-
-		/* Set the child up */
-		if (!pink_trace_setup(cproc->pid, ctx->ptrace_options))
-			return handle_ptrace_error(ctx, PINK_EASY_ERROR_SETUP, proc, -1)
-				? PINK_EASY_TRIBOOL_TRUE
-				: PINK_EASY_TRIBOOL_FALSE;
-
-		return PINK_EASY_TRIBOOL_NONE;
-	}
-
-	/* Child hasn't been born yet! */
-	cproc = calloc(1, sizeof(pink_easy_process_t));
-	if (!cproc) {
-		ctx->error = PINK_EASY_ERROR_ALLOC;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx, proc, cpid);
-		return PINK_EASY_TRIBOOL_FALSE;
-	}
-
-	cproc->pid = (pid_t)cpid;
-	cproc->ppid = proc->pid;
-	cproc->bitness = proc->bitness;
-	cproc->flags |= PINK_EASY_PROCESS_STARTUP;
-	if (proc->flags & PINK_EASY_PROCESS_ATTACHED)
-		cproc->flags |= PINK_EASY_PROCESS_ATTACHED;
-	if (proc->flags & PINK_EASY_PROCESS_FOLLOWFORK)
-		cproc->flags |= PINK_EASY_PROCESS_FOLLOWFORK;
-	SLIST_INSERT_HEAD(&ctx->process_list, cproc, entries);
-
-	/* Last but not least, run the callback */
-	cbfork = (event == PINK_EVENT_FORK)
-		? ctx->callback_table.fork
-		: ((event == PINK_EVENT_VFORK)
-				? ctx->callback_table.vfork
-				: ctx->callback_table.clone);
-
-	if (cbfork) {
-		suspended = cproc->flags & PINK_EASY_PROCESS_SUSPENDED;
-		flags = cbfork(ctx, proc, cproc, suspended);
-
-		abrt = flags & PINK_EASY_CFLAG_ABRT;
-		if (abrt)
-			ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-
-		if (flags & PINK_EASY_CFLAG_DROP_CHILD) {
-			/* Received ESRCH from the new-born child */
-
-			/*
-			 * No way to receive ESRCH from child if she is not yet
-			 * born, hence the assertion.
-			 */
-			assert(suspended);
-
-			handle_death(ctx, cproc);
-		}
-		else
-			*nproc = cproc;
-
-		if (flags & PINK_EASY_CFLAG_DROP) {
-			handle_death(ctx, proc);
-			return abrt ? PINK_EASY_TRIBOOL_FALSE : PINK_EASY_TRIBOOL_TRUE;
-		}
-		else if (abrt)
-			return PINK_EASY_TRIBOOL_FALSE;
-	}
-
-	return PINK_EASY_TRIBOOL_NONE;
-}
-
-static bool
-handle_exit(pink_easy_context_t *ctx, pid_t pid, int status)
-{
-	int flags;
-	pink_easy_process_t *proc;
-
-	/* R.I.P. */
-	proc = pink_easy_process_list_lookup(&ctx->process_list, pid);
-	if (proc) {
-		/* Child is not dead yet!
-		 * Kill it with fire!
-		 */
-		handle_death(ctx, proc);
-	}
-
-	if (WIFSIGNALED(status)) {
-		if (ctx->callback_table.exit_signal) {
-			flags = ctx->callback_table.exit_signal(ctx, pid, WTERMSIG(status));
-			if (flags & PINK_EASY_CFLAG_ABRT) {
-				ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-				return false;
-			}
-		}
-	}
-	else if (ctx->callback_table.exit) {
-		flags = ctx->callback_table.exit(ctx, pid, WEXITSTATUS(status));
-		if (flags & PINK_EASY_CFLAG_ABRT) {
-			ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-			return false;
-		}
+	/* Happy birthday! */
+	current->flags &= ~PINK_EASY_PROCESS_STARTUP;
+	if (ctx->callback_table.startup) {
+		pink_easy_process_t *parent = NULL;
+		if (current->ppid != -1)
+			parent = pink_easy_process_list_lookup(&(ctx->process_list), current->ppid);
+		ctx->callback_table.startup(ctx, current, parent);
 	}
 
 	return true;
 }
 
-static pink_easy_tribool_t
-handle_signal(pink_easy_context_t *ctx, pink_easy_process_t *proc, int status, bool unknown, int *mysig)
+int pink_easy_loop(pink_easy_context_t *ctx)
 {
-	bool abrt;
-	int flags;
-	int stopsig;
-
-	assert(mysig);
-
-	if (unknown && !WIFSTOPPED(status)) {
-		/* In an ideal world, this should not happen,
-		 * but it does...
-		 */
-		ctx->error = PINK_EASY_ERROR_EVENT_UNKNOWN;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx, proc, status);
-		return false;
-	}
-
-	stopsig = WSTOPSIG(status);
-	*mysig = stopsig;
-
-	/* Run the "signal" callback */
-	if (ctx->callback_table.signal) {
-		flags = ctx->callback_table.signal(ctx, proc, stopsig);
-
-		if (flags & PINK_EASY_CFLAG_SIGIGN)
-			*mysig = 0;
-
-		abrt = flags & PINK_EASY_CFLAG_ABRT;
-		if (abrt)
-			ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-
-		if (flags & PINK_EASY_CFLAG_DROP) {
-			handle_death(ctx, proc);
-			return abrt ? PINK_EASY_TRIBOOL_FALSE : PINK_EASY_TRIBOOL_TRUE;
-		}
-		else if (abrt)
-			return PINK_EASY_TRIBOOL_FALSE;
-	}
-
-	return PINK_EASY_TRIBOOL_NONE;
-}
-
-int
-pink_easy_loop(pink_easy_context_t *ctx)
-{
-	int status, mysig;
-	pid_t pid;
-	pink_event_t event;
-	pink_easy_tribool_t ret;
-	pink_easy_process_t *proc, *nproc;
-
-	assert(ctx != NULL);
-
 	/* Enter the event loop */
-	for (;;) {
-		/* Wait for children */
-		if ((pid = _pink_easy_waitpid_nointr(-1, &status)) < 0) {
-			if (errno == ECHILD) {
-				/* Received ECHILD, end of tracing */
-				return ctx->callback_table.end ? ctx->callback_table.end(ctx, true) : EXIT_SUCCESS;
-			}
+	while (ctx->nprocs != 0) {
+		pid_t pid;
+		int r, status, sig;
+		unsigned event;
+		pink_easy_process_t *current;
 
-			/*
-			 * wait(2) error. ECHILD and EINTR are handled.
-			 * The rest are fatal errors.
-			 */
-			ctx->error = PINK_EASY_ERROR_WAIT, ctx->fatal = true;
-			if (ctx->callback_table.error)
+		pid = waitpid(-1, &status, __WALL);
+		if (pid < 0) {
+			switch (errno) {
+			case EINTR:
+				continue;
+			case ECHILD:
+				return ctx->callback_table.cleanup
+					? ctx->callback_table.cleanup(ctx)
+					: EXIT_SUCCESS;
+			default:
+				ctx->fatal = true;
+				ctx->error = PINK_EASY_ERROR_WAIT;
 				ctx->callback_table.error(ctx);
-			return -ctx->error;
+				return -ctx->error;
+			}
 		}
 
-		/* Decide the event */
-		event = pink_event_decide(status);
+		current = pink_easy_process_list_lookup(&(ctx->process_list), pid);
+		/* FIXME: pink_event_decide() is broken by design! */
+		event = ((unsigned) status >> 16);
 
-		switch (event) {
-		case PINK_EVENT_STOP:
-			/* Search the child in the process list */
-			nproc = NULL;
-			ret = handle_stop(ctx, pid, &nproc);
-			if (ret == PINK_EASY_TRIBOOL_NONE) {
-				if (nproc && !(nproc->flags & PINK_EASY_PROCESS_SUSPENDED)) {
-					/* Push the process to move! */
-					ret = handle_step(ctx, nproc, 0, event);
-					if (ret == PINK_EASY_TRIBOOL_FALSE)
-						return -ctx->error;
+		/* Under Linux, execve changes pid to thread leader's pid,
+		 * and we see this changed pid on EVENT_EXEC and later,
+		 * execve sysexit. Leader "disappears" without exit
+		 * notification. Let user know that, drop leader's tcb,
+		 * and fix up pid in execve thread's tcb.
+		 * Effectively, execve thread's tcb replaces leader's tcb.
+		 *
+		 * BTW, leader is 'stuck undead' (doesn't report WIFEXITED
+		 * on exit syscall) in multithreaded programs exactly
+		 * in order to handle this case.
+		 *
+		 * PTRACE_GETEVENTMSG returns old pid starting from Linux 3.0.
+		 * On 2.6 and earlier, it can return garbage.
+		 */
+		if (event == PTRACE_EVENT_EXEC) {
+			pink_bitness_t old_bitness = current->bitness;
+			pink_easy_process_t *execve_thread = current;
+			long old_pid = 0;
+
+			if (pink_easy_os_release < KERNEL_VERSION(3,0,0))
+				goto dont_switch_procs;
+			if (!pink_trace_geteventmsg(pid, (unsigned long *)&old_pid))
+				goto dont_switch_procs;
+			if (old_pid <= 0 || old_pid == pid)
+				goto dont_switch_procs;
+			execve_thread = pink_easy_process_list_lookup(&(ctx->process_list), old_pid);
+			if (!execve_thread)
+				goto dont_switch_procs;
+
+			/* Drop leader, switch to the thread, reusing leader's pid */
+			PINK_EASY_REMOVE_PROCESS(ctx, current);
+			current = execve_thread;
+			current->pid = pid;
+dont_switch_procs:
+			/* Update bitness */
+			current->bitness = pink_bitness_get(current->pid);
+			if (current->bitness == PINK_BITNESS_UNKNOWN) {
+				handle_ptrace_error(ctx, current, "bitness");
+				continue;
+			}
+			if (ctx->callback_table.exec) {
+				r = ctx->callback_table.exec(ctx, current, old_bitness);
+				if (r & PINK_EASY_CFLAG_ABORT) {
+					ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
+					return -ctx->error;
+				}
+				if (r & PINK_EASY_CFLAG_DROP) {
+					PINK_EASY_REMOVE_PROCESS(ctx, current);
+					continue;
 				}
 			}
-			else if (ret == PINK_EASY_TRIBOOL_FALSE) {
-				/* Nothing is fine, abort the loop! */
-				return -ctx->error;
-			}
-			/* else if (ret == PINK_EASY_TRIBOOL_TRUE); */
-			break;
-		case PINK_EVENT_TRAP:
-			/* Search the child in the process list */
-			proc = pink_easy_process_list_lookup(&ctx->process_list, pid);
-			assert(proc != NULL);
-			ret = handle_trap(ctx, proc);
-			if (ret == PINK_EASY_TRIBOOL_NONE) {
-				/* Push the process to move! */
-				ret = handle_step(ctx, proc, SIGTRAP, event);
-				if (ret == PINK_EASY_TRIBOOL_FALSE)
-					return -ctx->error;
-			}
-			else if (ret == PINK_EASY_TRIBOOL_FALSE) {
-				/* Nothing is fine, abort the loop! */
-				return -ctx->error;
-			}
-			/* else if (ret == PINK_EASY_TRIBOOL_TRUE); */
-			break;
-		case PINK_EVENT_SYSCALL:
-			/* Search the child in the process list */
-			proc = pink_easy_process_list_lookup(&ctx->process_list, pid);
-			assert(proc != NULL);
-			ret = handle_syscall(ctx, proc);
-			if (ret == PINK_EASY_TRIBOOL_NONE) {
-				/* "Alles in Ordnung", continue to step */
-				ret = handle_step(ctx, proc, 0, event);
-				if (ret == PINK_EASY_TRIBOOL_FALSE)
-					return -ctx->error;
-			}
-			else if (ret == PINK_EASY_TRIBOOL_FALSE) {
-				/* Nothing is fine, abort the loop! */
-				return -ctx->error;
-			}
-			/* else if (ret == PINK_EASY_TRIBOOL_TRUE); */
-			break;
-		case PINK_EVENT_EXEC:
-			/* Search the child in the process list */
-			proc = pink_easy_process_list_lookup(&ctx->process_list, pid);
-			assert(proc != NULL);
-			ret = handle_exec(ctx, proc);
-			if (ret == PINK_EASY_TRIBOOL_NONE) {
-				/* "Alles in Ordnung", continue to step */
-				ret = handle_step(ctx, proc, 0, event);
-				if (ret == PINK_EASY_TRIBOOL_FALSE)
-					return -ctx->error;
-			}
-			else if (ret == PINK_EASY_TRIBOOL_FALSE) {
-				/* Nothing is fine, abort the loop! */
-				return -ctx->error;
-			}
-			/* else if (ret == PINK_EASY_TRIBOOL_TRUE); */
-			break;
-		case PINK_EVENT_EXIT:
-			/* Search the child in the process list,
-			 * she may or may not exist in the list at this point.
+		}
+
+		if (current == NULL) {
+			/* We might see the child's initial trap before we see the parent
+			 * return from the clone syscall. Leave the child suspended until
+			 * the parent returns from its system call. Only then we will have
+			 * the association between parent and child.
 			 */
-			proc = pink_easy_process_list_lookup(&ctx->process_list, pid);
-			ret = handle_pre_exit(ctx, pid, proc);
-			if (ret == PINK_EASY_TRIBOOL_NONE) {
-				/* "Alles in Ordnung", resume the child */
-				if (!pink_trace_resume(pid, 0)) {
-					ret = handle_ptrace_error(ctx, error_step(event), proc, pid);
-					if (ret == PINK_EASY_TRIBOOL_FALSE)
-						return -ctx->error;
-				}
-			}
-			else if (ret == PINK_EASY_TRIBOOL_FALSE) {
-				/* Nothing is fine, abort the loop! */
-				return -ctx->error;
-			}
-			/* else if (ret == PINK_EASY_TRIBOOL_TRUE); */
-			break;
-		case PINK_EVENT_FORK:
-		case PINK_EVENT_VFORK:
-		case PINK_EVENT_CLONE:
-			/* Search the child in the process list */
-			proc = pink_easy_process_list_lookup(&ctx->process_list, pid);
-			assert(proc != NULL);
-			nproc = NULL;
-			ret = handle_fork(ctx, proc, event, &nproc);
-			if (ret == PINK_EASY_TRIBOOL_NONE) {
-				/* Step the parent first */
-				ret = handle_step(ctx, proc, 0, event);
-				if (ret == PINK_EASY_TRIBOOL_FALSE)
-					return -ctx->error;
-				/* And then the child */
-				if (nproc) {
-					ret = handle_step(ctx, proc, 0, event);
-					if (ret == PINK_EASY_TRIBOOL_FALSE)
-						return -ctx->error;
-				}
-			}
-			else if (ret == PINK_EASY_TRIBOOL_FALSE) {
-				/* It all went wrong, abort the loop! */
-				return -ctx->error;
-			}
-			/* else if (ret == PINK_EASY_TRIBOOL_TRUE); */
-			break;
-		case PINK_EVENT_GENUINE:
-		case PINK_EVENT_UNKNOWN:
-			/* Search the child in the process list */
-			proc = pink_easy_process_list_lookup(&ctx->process_list, pid);
-			assert(proc != NULL);
-			ret = handle_signal(ctx, proc, status, event == PINK_EVENT_UNKNOWN, &mysig);
-			if (ret == PINK_EASY_TRIBOOL_NONE) {
-				/* "Alles in Ordnung", continue to step */
-				ret = handle_step(ctx, proc, mysig, event);
-				if (ret == PINK_EASY_TRIBOOL_FALSE)
-					return -ctx->error;
-			}
-			else if (ret == PINK_EASY_TRIBOOL_FALSE) {
-				/* Nothing is fine, abort the loop! */
-				return -ctx->error;
-			}
-			/* else if (ret == PINK_EASY_TRIBOOL_TRUE); */
-			break;
-		case PINK_EVENT_EXIT_GENUINE:
-		case PINK_EVENT_EXIT_SIGNAL:
-			if (!handle_exit(ctx, pid, status))
-				return -ctx->error;
-			if (SLIST_EMPTY(&ctx->process_list))
-				return ctx->callback_table.end ? ctx->callback_table.end(ctx, false) : EXIT_SUCCESS;
-			break;
-		default:
-			abort();
+			PINK_EASY_INSERT_PROCESS(ctx, current);
+			current->pid = pid;
+			current->flags = PINK_EASY_PROCESS_STARTUP;
+			continue;
 		}
+
+		if (WIFSIGNALED(status) || WIFEXITED(status)) {
+			PINK_EASY_REMOVE_PROCESS(ctx, current);
+			if (ctx->callback_table.exit) {
+				r = ctx->callback_table.exit(ctx, pid, status);
+				if (r & PINK_EASY_CFLAG_ABORT) {
+					ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
+					return -ctx->error;
+				}
+			}
+			continue;
+		}
+		if (!WIFSTOPPED(status)) {
+			ctx->callback_table.error(ctx, PINK_EASY_ERROR_PROCESS, current, "WIFSTOPPED");
+			PINK_EASY_REMOVE_PROCESS(ctx, current);
+			continue;
+		}
+
+		/* Is this the very first time we see this tracee stopped? */
+		if (current->flags & PINK_EASY_PROCESS_STARTUP && !handle_startup(ctx, current))
+			continue;
+
+		if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK || event == PTRACE_EVENT_CLONE) {
+			pink_easy_process_t *new_thread;
+			long new_pid;
+			if (!pink_trace_geteventmsg(current->pid, (unsigned long *)&new_pid)) {
+				handle_ptrace_error(ctx, current, "geteventmsg");
+				continue;
+			}
+			new_thread = pink_easy_process_list_lookup(&(ctx->process_list), new_pid);
+			if (new_thread == NULL) {
+				/* Not attached to the thread yet, nor is it alive... */
+				PINK_EASY_INSERT_PROCESS(ctx, new_thread);
+				new_thread->pid = pid;
+				new_thread->flags = (PINK_EASY_PROCESS_STARTUP | PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP);
+				new_thread->ppid = current->pid;
+			} else {
+				/* Thread is waiting for Pink to let her go on... */
+				new_thread->ppid = current->pid;
+				new_thread->bitness = current->bitness;
+				new_thread->flags &= ~PINK_EASY_PROCESS_STARTUP;
+				/* Happy birthday! */
+				if (ctx->callback_table.startup)
+					ctx->callback_table.startup(ctx, new_thread, current);
+				if (!pink_trace_syscall(new_thread->pid, 0))
+					handle_ptrace_error(ctx, current, "syscall");
+			}
+		} else if (event == PTRACE_EVENT_EXIT && ctx->callback_table.pre_exit) {
+			unsigned long status;
+			if (!pink_trace_geteventmsg(current->pid, &status)) {
+				handle_ptrace_error(ctx, current, "geteventmsg");
+				continue;
+			}
+			r = ctx->callback_table.pre_exit(ctx, current, (int)status);
+			if (r & PINK_EASY_CFLAG_ABORT) {
+				ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
+				return -ctx->error;
+			}
+			if (r & PINK_EASY_CFLAG_DROP) {
+				PINK_EASY_REMOVE_PROCESS(ctx, current);
+				continue;
+			}
+		}
+
+		sig = WSTOPSIG(status);
+
+		/* Is this post-attach SIGSTOP? */
+		if (sig == SIGSTOP && (current->flags & PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP)) {
+			current->flags &= ~PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP;
+			goto restart_tracee_with_sig_0;
+		}
+		if (sig != (SIGTRAP|0x80)) {
+			if (ctx->callback_table.signal) {
+				r = ctx->callback_table.signal(ctx, current, status);
+				if (r & PINK_EASY_CFLAG_ABORT) {
+					ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
+					return -ctx->error;
+				}
+				if (r & PINK_EASY_CFLAG_DROP) {
+					PINK_EASY_REMOVE_PROCESS(ctx, current);
+					continue;
+				}
+				if (r & PINK_EASY_CFLAG_SIGIGN)
+					goto restart_tracee_with_sig_0;
+			}
+			goto restart_tracee;
+		}
+
+		/* System call trap! */
+		current->flags ^= PINK_EASY_PROCESS_INSYSCALL;
+		if (ctx->callback_table.syscall) {
+			bool entering = current->flags & PINK_EASY_PROCESS_INSYSCALL;
+			r = ctx->callback_table.syscall(ctx, current, entering);
+			if (r & PINK_EASY_CFLAG_ABORT) {
+				ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
+				return -ctx->error;
+			}
+			if (r & PINK_EASY_CFLAG_DROP) {
+				PINK_EASY_REMOVE_PROCESS(ctx, current);
+				continue;
+			}
+		}
+
+restart_tracee_with_sig_0:
+		sig = 0;
+restart_tracee:
+		if (!pink_trace_syscall(current->pid, sig))
+			handle_ptrace_error(ctx, current, "syscall");
 	}
 
-	/* never reached */
-	assert(0);
+	return 0;
 }

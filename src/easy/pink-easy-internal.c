@@ -1,5 +1,10 @@
 /*
  * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
+ * Based in part upon strace which is:
+ *   Copyright (c) 1991, 1992 Paul Kranenburg <pk@cs.few.eur.nl>
+ *   Copyright (c) 1993 Branko Lankester <branko@hacktic.nl>
+ *   Copyright (c) 1993, 1994, 1995, 1996 Rick Sladkey <jrs@world.std.com>
+ *   Copyright (c) 1996-1999 Wichert Akkerman <wichert@cistron.nl>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,99 +31,16 @@
  */
 
 #include <pinktrace/easy/internal.h>
-#include <pinktrace/easy/internal-util.h>
+#include <pinktrace/pink.h>
+#include <pinktrace/easy/pink.h>
 
-#include <assert.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/queue.h>
+#include <sys/utsname.h>
 
-#include <pinktrace/pink.h>
-#include <pinktrace/easy/pink.h>
 
-pid_t
-_pink_easy_waitpid_nointr(pid_t pid, int *status)
-{
-	pid_t p;
-
-	for (;;) {
-		if ((p = waitpid(pid, status,
-#ifdef __WALL
-						__WALL
-#else
-						0
-#endif /* __WALL */
-				)) >= 0)
-			return p;
-
-		if (errno != EINTR)
-			return p;
-	}
-	/* never reached */
-	assert(false);
-}
-
-/** Initialize tracing **/
-int
-_pink_easy_init(pink_easy_context_t *ctx, pink_easy_process_t *proc)
-{
-	int status;
-
-	/* Wait for the initial sig */
-	if (_pink_easy_waitpid_nointr(proc->pid, &status) < 0) {
-		ctx->error = PINK_EASY_ERROR_WAIT_ELDEST;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx, proc->pid);
-		return -ctx->error;
-	}
-	if (!WIFSTOPPED(status) /* || WSTOPSIG(status) != SIGTRAP */) {
-		ctx->error = PINK_EASY_ERROR_STOP_ELDEST;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx, proc->pid, status);
-		return -ctx->error;
-	}
-
-	/* Set up tracing options */
-	if (!pink_trace_setup(proc->pid, ctx->ptrace_options)) {
-		ctx->error = PINK_EASY_ERROR_SETUP_ELDEST;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx, proc->pid);
-		return -ctx->error;
-	}
-
-	/* Figure out bitness */
-	if ((proc->bitness = pink_bitness_get(proc->pid)) == PINK_BITNESS_UNKNOWN) {
-		ctx->error = PINK_EASY_ERROR_BITNESS_ELDEST;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx, proc->pid);
-		return -ctx->error;
-	}
-
-	/* Set up flags */
-	proc->flags |= PINK_EASY_PROCESS_STARTUP;
-	if (ctx->ptrace_options & PINK_TRACE_OPTION_FORK
-			|| ctx->ptrace_options & PINK_TRACE_OPTION_VFORK
-			|| ctx->ptrace_options & PINK_TRACE_OPTION_CLONE)
-		proc->flags |= PINK_EASY_PROCESS_FOLLOWFORK;
-
-	/* Insert the process into the list */
-	proc->ppid = -1;
-	proc->flags &= ~PINK_EASY_PROCESS_STARTUP;
-	SLIST_INSERT_HEAD(&ctx->process_list, proc, entries);
-
-	/* Happy birthday! */
-	if (ctx->callback_table.birth)
-		ctx->callback_table.birth(ctx, proc, NULL);
-
-	/* Push the child to move! */
-	if (!pink_trace_syscall(proc->pid, 0)) {
-		ctx->error = PINK_EASY_ERROR_STEP_INITIAL;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx, proc);
-		return -ctx->error;
-	}
-
-	return 0;
-}

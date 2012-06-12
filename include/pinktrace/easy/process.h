@@ -51,7 +51,7 @@ PINK_BEGIN_DECL
 typedef struct pink_easy_process pink_easy_process_t;
 
 /**
- * @struct pink_easy_process_tree_t
+ * @struct pink_easy_process_list_t
  * @brief Opaque structure which represents a process list
  * @note This list is maintained internally by the tracing context.
  **/
@@ -123,8 +123,8 @@ bool pink_easy_process_is_attached(const pink_easy_process_t *proc)
  * @param proc Process entry
  * @return true if the process is a clone, false otherwise
  **/
-bool
-pink_easy_process_is_clone(const pink_easy_process_t *proc)  PINK_GCC_ATTR((nonnull(1)));
+bool pink_easy_process_is_clone(const pink_easy_process_t *proc)
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
  * Set the user data of the process entry.

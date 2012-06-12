@@ -40,31 +40,33 @@
 #include <pinktrace/easy/error.h>
 #include <pinktrace/easy/process.h>
 
-/** Implies that the loop should be aborted immediately */
-#define PINK_EASY_CFLAG_ABRT		(1 << 0)
+/**
+ * Implies that the loop should be aborted immediately,
+ * with error set to #PINK_EASY_ERROR_CALLBACK_ABORT.
+ **/
+#define PINK_EASY_CFLAG_ABORT		(1 << 0)
 
 /**
  * Implies that the current process should be removed from the
- * process tree. Useful for handling -ESRCH in callbacks.
+ * process list. Useful for handling @e -ESRCH in callbacks.
  **/
 #define PINK_EASY_CFLAG_DROP		(1 << 1)
 
 /**
- * Implies that the child of the current process should be removed from the
- * process tree. Useful for handling -ESRCH.
- *
- * @note This only makes sense for fork, vfork and clone events.
+ * Implies that the signal won't be delivered to the tracee.
+ * Only makes sense for "signal" callback.
  **/
-#define PINK_EASY_CFLAG_DROP_CHILD	(1 << 2)
-
-/** Do not deliver the signal to the traced child. */
-#define PINK_EASY_CFLAG_SIGIGN		(1 << 3)
+#define PINK_EASY_CFLAG_SIGIGN		(1 << 2)
 
 struct pink_easy_context;
 
 /**
  * Errback for errors in the main process.
  * - Use pink_easy_context_get_error() to get the error code.
+ *
+ * @attention This errback @b must exist. Unless the user assigns a function,
+ * the library uses a simple default implementation which is
+ * pink_easy_errback_stderr()
  *
  * There are a few important points about this callback:
  * - The variable arguments give extra information about the error condition
@@ -75,39 +77,30 @@ struct pink_easy_context;
  * Here's a list of possible error conditions, in no particular order:
  *
  * @verbatim
-     ----------------------------------------------------------------------
-     - Error             errno  Arguments                                 -
-     ----------------------------------------------------------------------
-     - ALLOC_ELDEST      +      -                                         -
-     - ALLOC             +      pid_t pid                                 -
-     - ATTACH            +      pid_t pid                                 -
-     - FORK              +      -                                         -
-     - VFORK             +      -                                         -
-     - WAIT_ELDEST       +      pid_t pid                                 -
-     - WAIT              +      -                                         -
-     - STOP_ELDEST       -      pid_t pid, int status                     -
-     - SETUP_ELDEST      +      pid_t pid                                 -
-     - SETUP             -      pink_easy_process_t *current              -
-     - BITNESS_ELDEST    +      pid_t pid                                 -
-     - BITNESS           +      pink_easy_process_t *current              -
-     - STEP_INITIAL      +      pink_easy_process_t *current              -
-     - STEP_STOP         +      pink_easy_process_t *current              -
-     - STEP_TRAP         +      pink_easy_process_t *current              -
-     - STEP_SYSCALL      +      pink_easy_process_t *current              -
-     - STEP_FORK         +      pink_easy_process_t *current              -
-     - STEP_EXEC         +      pink_easy_process_t *current              -
-     - STEP_EXIT         +      pink_easy_process_t *current              -
-     - STEP_SIGNAL       +      pink_easy_process_t *current, int status  -
-     - GETEVENTMSG_FORK  +      pink_easy_process_t *current              -
-     - GETEVENTMSG_EXIT  +      pid_t pid                                 -
-     - EVENT_UNKNOWN     -      pink_easy_process_t *current, int status  -
-     ----------------------------------------------------------------------
+     -----------------------------------------------------------------------------
+     - Error             errno  Arguments                                        -
+     -----------------------------------------------------------------------------
+     - CALLBACK_ABORT    X      X (no errback, direct exit from loop)            -
+     - ALLOC             +      const char *errctx                               -
+     - ATTACH            +      pid_t pid                                        -
+     - FORK              +      const char *errctx                               -
+     - WAIT              +      -                                                -
+     - TRACE             +      pink_easy_process_t *current, const char *errctx -
+     - PROCESS           -      pink_easy_process_t *current, const char *errctx -
+     -----------------------------------------------------------------------------
    @endverbatim
  *
  * @param ctx Tracing context
  * @param ... Variable arguments give extra information about the error.
  **/
 typedef void (*pink_easy_errback_t) (const struct pink_easy_context *ctx, ...);
+
+/**
+ * Default errback which prints an informative message on standard error.
+ *
+ * @param ctx Tracing context
+ **/
+void pink_easy_errback_stderr(const struct pink_easy_context *ctx, ...);
 
 /**
  * Errback for errors in the spawned child.
@@ -118,85 +111,64 @@ typedef void (*pink_easy_errback_t) (const struct pink_easy_context *ctx, ...);
 typedef int (*pink_easy_errback_child_t) (pink_easy_child_error_t e);
 
 /**
- * Callback for child birth.
+ * Default child errback which prints an informative message on standard error
+ * and returns @e EXIT_FAILURE
  *
- * This is called when a new process is created.
+ * @param e Child error code
+ **/
+int pink_easy_errback_child_stderr(pink_easy_child_error_t e);
+
+/**
+ * Callback for process trace startup
  *
  * @param ctx Tracing context
- * @param current New born child
- * @param parent The parent of the new child or NULL for the eldest child.
+ * @param current Attached process
+ * @param parent Parent of the new process or NULL for initial processes
  **/
-typedef void (*pink_easy_callback_birth_t) (const struct pink_easy_context *ctx,
+typedef void (*pink_easy_callback_startup_t) (const struct pink_easy_context *ctx,
 		pink_easy_process_t *current, pink_easy_process_t *parent);
 
 /**
- * Callback for child death.
+ * Callback for process teardown
  *
- * This is called in case a process exited.
- *
- * In this case, the process is removed from the process tree.
- * This is the last callback that is called before the child is freed.
+ * This is the last callback which is called before the process is detached and
+ * her entry is freed.
  *
  * @param ctx Tracing context
- * @param current Dead child
+ * @param current Detached process
  **/
-typedef void (*pink_easy_callback_death_t) (const struct pink_easy_context *ctx,
+typedef void (*pink_easy_callback_teardown_t) (const struct pink_easy_context *ctx,
 		const pink_easy_process_t *current);
 
 /**
  * Callback for the end of tracing.
  *
- * This is called when the count of the process tree dropped to zero, or
- * @e waitpid(2) returned -ECHILD. If this callback is NULL, pink_easy_loop()
- * will just return with success, which may not always be what you want.
+ * This is called when the count of the process list drops to zero, or
+ * @e waitpid(2) returns @e -ECHILD.
  *
- * @see pink_easy_loop
+ * @attention If this callback is NULL, pink_easy_loop() will just return with
+ * success, which may not always be what you expect!
+ *
+ * @see pink_easy_loop()
  *
  * @param ctx Tracing context
- * @param echild true if @e waitpid(2) failed with -ECHILD, false if count of
- *               leaves in the process tree dropped to zero.
  * @return This value is returned by pink_easy_loop()
  **/
-typedef int (*pink_easy_callback_end_t) (const struct pink_easy_context *ctx,
-		bool echild);
+typedef int (*pink_easy_callback_cleanup_t) (const struct pink_easy_context *ctx);
 
 /**
- * Callback for #PINK_EVENT_TRAP
+ * Callback for system call traps
  *
  * @param ctx Tracing context
  * @param current Current child
- * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
- **/
-typedef int (*pink_easy_callback_trap_t) (const struct pink_easy_context *ctx,
-		pink_easy_process_t *current);
-
-/**
- * Callback for #PINK_EVENT_SYSCALL
- *
- * @param ctx Tracing context
- * @param current Current child
- * @param entering true if the child is entering the system call, false
- *                 otherwise.
+ * @param entering true if the child is entering the system call, false otherwise
  * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
 typedef int (*pink_easy_callback_syscall_t) (const struct pink_easy_context *ctx,
 		pink_easy_process_t *current, bool entering);
 
 /**
- * Callback for #PINK_EVENT_FORK, #PINK_EVENT_VFORK and #PINK_EVENT_CLONE
- *
- * @param ctx Tracing context
- * @param current Current child
- * @param alive true if the child was born and suspended before, false
- *              otherwise.
- * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
- **/
-typedef int (*pink_easy_callback_fork_t) (const struct pink_easy_context *ctx,
-		pink_easy_process_t *current, pink_easy_process_t *child, bool
-		alive);
-
-/**
- * Callback for #PINK_EVENT_EXEC
+ * Callback for successful @e execve(2)
  *
  * @note The bitness of the child is updated before this callback is called.
  *
@@ -209,12 +181,7 @@ typedef int (*pink_easy_callback_exec_t) (const struct pink_easy_context *ctx,
 		pink_easy_process_t *current, pink_bitness_t old_bitness);
 
 /**
- * Callback for #PINK_EVENT_EXIT
- *
- * @warning The current child may or may not exist in the process tree at this
- *          point so this callback is called with a pid_t value. You may
- *          manually use pink_easy_process_tree_search() to get a
- *          #pink_easy_process_t value.
+ * Callback for pre-exit notification
  *
  * @param ctx Tracing context
  * @param current Process ID
@@ -222,30 +189,29 @@ typedef int (*pink_easy_callback_exec_t) (const struct pink_easy_context *ctx,
  * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
 typedef int (*pink_easy_callback_pre_exit_t) (const struct pink_easy_context *ctx,
-		pid_t pid, unsigned long status);
+		pink_easy_process_t *current, int status);
 
 /**
- * Callback for #PINK_EVENT_GENUINE
+ * Callback for stopping signal delivery
  *
  * @param ctx Tracing context
  * @param current Current process
- * @param stopsig Stop signal
+ * @param status Stop status
  * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
 typedef int (*pink_easy_callback_signal_t) (const struct pink_easy_context *ctx,
-		pink_easy_process_t *current, int stopsig);
+		pink_easy_process_t *current, int status);
 
 /**
- * Callback for #PINK_EVENT_EXIT_GENUINE and #PINK_EVENT_EXIT_SIGNAL
+ * Callback for genuine exit notification
  *
  * @param ctx Tracing context
  * @param pid Process ID of the child
- * @param cs Exit code for #PINK_EVENT_EXIT_GENUINE
- *           Termination signal for #PINK_EVENT_EXIT_SIGNAL
+ * @param status Exit status
  * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
 typedef int (*pink_easy_callback_exit_t) (const struct pink_easy_context *ctx,
-		pid_t pid, int cs);
+		pid_t pid, int status);
 
 /**
  * @brief Structure which represents a callback table
@@ -256,34 +222,23 @@ typedef struct pink_easy_callback_table {
 	/** "cerror" errback **/
 	pink_easy_errback_child_t cerror;
 
-	/** "birth" callback **/
-	pink_easy_callback_birth_t birth;
-	/** "death" callback **/
-	pink_easy_callback_death_t death;
-	/** "end" callback **/
-	pink_easy_callback_end_t end;
+	/** "startup" callback **/
+	pink_easy_callback_startup_t startup;
+	/** "teardown" callback **/
+	pink_easy_callback_teardown_t teardown;
+	/** "cleanup" callback **/
+	pink_easy_callback_cleanup_t cleanup;
 
-	/** "trap" callback **/
-	pink_easy_callback_trap_t trap;
 	/** "syscall" callback **/
 	pink_easy_callback_syscall_t syscall;
-	/** "fork" callback **/
-	pink_easy_callback_fork_t fork;
-	/** "vfork" callback **/
-	pink_easy_callback_fork_t vfork;
-	/** "clone" callback **/
-	pink_easy_callback_fork_t clone;
 	/** "exec" callback **/
 	pink_easy_callback_exec_t exec;
 	/** "pre_exit" callback **/
 	pink_easy_callback_pre_exit_t pre_exit;
 	/** "signal" callback **/
 	pink_easy_callback_signal_t signal;
-
 	/** "exit" callback **/
 	pink_easy_callback_exit_t exit;
-	/** "exit_signal" callback **/
-	pink_easy_callback_exit_t exit_signal;
 } pink_easy_callback_table_t;
 
 PINK_END_DECL

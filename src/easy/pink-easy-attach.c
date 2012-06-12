@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,50 +26,36 @@
  */
 
 #include <pinktrace/easy/internal.h>
-
-#include <assert.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <unistd.h>
-
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/pink.h>
 
-int
-pink_easy_attach(pink_easy_context_t *ctx, pid_t pid, pid_t ppid)
+#include <assert.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+bool pink_easy_attach(pink_easy_context_t *ctx, pid_t pid, pid_t ppid)
 {
-	int ret;
-	pink_easy_process_t *proc;
+	struct pink_easy_process *current;
 
-	assert(ctx != NULL);
-
-	proc = calloc(1, sizeof(pink_easy_process_t));
-	if (!proc) {
-		ctx->error = PINK_EASY_ERROR_ALLOC_ELDEST;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx);
-		return -ctx->error;
-	}
-	proc->pid = pid;
-	proc->ppid = ppid;
-	proc->flags |= PINK_EASY_PROCESS_ATTACHED;
-	if (proc->ppid > 0) /* clone */
-		proc->flags |= PINK_EASY_PROCESS_CLONE_THREAD;
-
-	if (!pink_trace_attach(proc->pid)) {
-		ctx->error = PINK_EASY_ERROR_ATTACH;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx, proc->pid);
-		free(proc);
-		return -ctx->error;
+	if (!pink_trace_attach(pid)) {
+		ctx->callback_table.error(ctx, PINK_EASY_ERROR_ATTACH, pid);
+		goto fail;
 	}
 
-	if ((ret = _pink_easy_init(ctx, proc)) < 0) {
-		free(proc);
-		return ret;
-	}
+	PINK_EASY_INSERT_PROCESS(ctx, current);
+	if (current == NULL)
+		goto fail;
 
-	return 0;
+	current->ppid = ppid;
+	current->flags |= PINK_EASY_PROCESS_ATTACHED | PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP;
+	if (current->ppid > 0) /* clone */
+		current->flags |= PINK_EASY_PROCESS_CLONE_THREAD;
+	return true;
+fail:
+	kill(pid, SIGCONT);
+	return false;
 }

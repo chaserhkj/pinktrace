@@ -50,10 +50,9 @@ PINK_BEGIN_DECL
  * @param ctx Tracing context
  * @param func Function which will be executed under the tracing environment
  * @param userdata User data to be passed to the child function
- *
- * @return Depends on the callbacks
+ * @return true on success, false on failure and sets errno accordingly
  **/
-int pink_easy_call(pink_easy_context_t *ctx, pink_easy_child_func_t func, void *userdata)
+bool pink_easy_call(pink_easy_context_t *ctx, pink_easy_child_func_t func, void *userdata)
 	PINK_GCC_ATTR((nonnull(1,2)));
 
 PINK_END_DECL

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,17 +25,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/types.h>
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <errno.h>
+#include <sys/types.h>
 #include <pinktrace/easy/pink.h>
 
-static int
-eb_child(pink_easy_child_error_t error)
+static int eb_child(pink_easy_child_error_t error)
 {
 	fprintf(stderr, "%s:%d: child[%i]: %s\n",
 			__func__, __LINE__,
@@ -43,17 +41,16 @@ eb_child(pink_easy_child_error_t error)
 	return -1;
 }
 
-static int
-cb_exit_genuine(PINK_GCC_ATTR((unused)) const pink_easy_context_t *ctx, PINK_GCC_ATTR((unused)) pid_t pid, int code)
+static int cb_exit(const pink_easy_context_t *ctx, pid_t pid, int status)
 {
-	int f;
+	int r = 0;
 
-	f = 0;
-	if (code != 127) {
-		fprintf(stderr, "%s:%d: 127 != %i\n", __func__, __LINE__, code);
-		f |= PINK_EASY_CFLAG_ABRT;
-	}
-	return f;
+	if (WIFEXITED(status) && WEXITSTATUS(status) == 127)
+		return r;
+
+	fprintf(stderr, "%s:%d: status:%#x", __func__, __LINE__, (unsigned)status);
+	r |= PINK_EASY_CFLAG_ABORT;
+	return r;
 }
 
 static int
@@ -66,14 +63,14 @@ exit_immediately_func(void *data)
 int
 main(void)
 {
-	int ret, cret;
+	int cret;
 	pink_easy_error_t error;
 	pink_easy_callback_table_t tbl;
 	pink_easy_context_t *ctx;
 
 	memset(&tbl, 0, sizeof(pink_easy_callback_table_t));
 	tbl.cerror = eb_child;
-	tbl.exit = cb_exit_genuine;
+	tbl.exit = cb_exit;
 
 	ctx = pink_easy_context_new(0, &tbl, NULL, NULL);
 	if (!ctx) {
@@ -82,10 +79,10 @@ main(void)
 	}
 
 	cret = 127;
-	if ((ret = pink_easy_call(ctx, exit_immediately_func, &cret))) {
-		fprintf(stderr, "%s:%d: pink_easy_call: %d %d(%s)\n",
+	if (!pink_easy_call(ctx, exit_immediately_func, &cret)) {
+		fprintf(stderr, "%s:%d: pink_easy_call failed (errno:%d %s)\n",
 				__func__, __LINE__,
-				ret, errno, strerror(errno));
+				errno, strerror(errno));
 		abort();
 	}
 	pink_easy_loop(ctx);
@@ -103,10 +100,10 @@ main(void)
 	pink_easy_context_clear_error(ctx);
 
 	cret = 128;
-	if ((ret = pink_easy_call(ctx, exit_immediately_func, &cret))) {
-		fprintf(stderr, "%s:%d: pink_easy_call: %d %d(%s)\n",
+	if (!pink_easy_call(ctx, exit_immediately_func, &cret)) {
+		fprintf(stderr, "%s:%d: pink_easy_call failed (errno:%d %s)\n",
 				__func__, __LINE__,
-				cret, errno, strerror(errno));
+				errno, strerror(errno));
 		abort();
 	}
 	pink_easy_loop(ctx);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,96 +25,90 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PINKTRACE_GUARD_EASY_EXEC_H
-#define PINKTRACE_GUARD_EASY_EXEC_H 1
+#ifndef _PINK_EASY_EXEC_H
+#define _PINK_EASY_EXEC_H
+
+/**
+ * @file pinktrace/easy/exec.h
+ * @brief Pink's easy execve() wrappers
+ * @defgroup pink_easy_exec Pink's easy execve() wrappers
+ * @ingroup pinktrace-easy
+ * @{
+ **/
 
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/context.h>
 
-/**
- * \file
- * \brief Pink's easy execve() wrappers
- *
- * \ingroup g_easy_exec
- **/
+PINK_BEGIN_DECL
 
 /**
- * This function calls vfork() to spawn a new child, does the necessary
+ * This function calls fork() to spawn a new child, does the necessary
  * preparation for tracing and then calls execve().
  *
- * \ingroup g_easy_exec
- *
- * \param ctx Tracing context
- * \param filename Path of the executable
- * \param argv Arguments
- * \param envp An array of strings, which are passed as environment to the new
- * program
- *
- * \return Depends on the callbacks, see pink_easy_loop()
+ * @param ctx Tracing context
+ * @param filename Path of the executable
+ * @param argv Arguments
+ * @param envp Array of strings, which are passed as environment to the new program
+ * @return true on success, false on failure and sets errno accordingly
  **/
-int
-pink_easy_execve(pink_easy_context_t *ctx, const char *filename, char *const argv[], char *const envp[]) PINK_GCC_ATTR((nonnull(1)));
+bool pink_easy_execve(pink_easy_context_t *ctx, const char *filename,
+		char *const argv[], char *const envp[])
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
- * This function calls vfork() to spawn a new child, does the necessary
- * preparation for tracing, handles the arguments and calls execve().
+ * This function calls fork() to spawn a new child, does the necessary
+ * preparation for tracing, handles the arguments and calls execl().
  *
- * \ingroup g_easy_exec
- *
- * \param ctx Tracing context
- * \param file Filename of the executable
- * \param arg Initial argument, filename of the executable
- * \param ... Variable arguments which must be terminated by a NULL pointer
- *
- * \return Depends on the callbacks, see pink_easy_loop()
+ * @param ctx Tracing context
+ * @param file Filename of the executable
+ * @param arg Initial argument, filename of the executable
+ * @param ... Variable arguments which must be terminated by a NULL pointer
+ * @return true on success, false on failure and sets errno accordingly
  **/
-int
-pink_easy_execl(pink_easy_context_t *ctx, const char *file, const char *arg, ...) PINK_GCC_ATTR((nonnull(1), sentinel(0)));
+bool pink_easy_execl(pink_easy_context_t *ctx, const char *file,
+		const char *arg, ...)
+	PINK_GCC_ATTR((nonnull(1), sentinel(0)));
 
 /**
- * This function calls vfork() to spawn a new child, does the necessary
- * preparation for tracing, handles the arguments and calls execvp().
+ * This function calls fork() to spawn a new child, does the necessary
+ * preparation for tracing, handles the arguments and calls execlp().
  *
- * \ingroup g_easy_exec
- *
- * \param ctx Tracing context
- * \param file Filename of the executable
- * \param arg Initial argument, filename of the executable
- * \param ... Variable arguments which must be terminated by a NULL pointer
- *
- * \return Depends on the callbacks, see pink_easy_loop()
+ * @param ctx Tracing context
+ * @param file Filename of the executable
+ * @param arg Initial argument, filename of the executable
+ * @param ... Variable arguments which must be terminated by a NULL pointer
+ * @return true on success, false on failure and sets errno accordingly
  **/
-int
-pink_easy_execlp(pink_easy_context_t *ctx, const char *file, const char *arg, ...) PINK_GCC_ATTR((nonnull(1), sentinel(0)));
+bool pink_easy_execlp(pink_easy_context_t *ctx, const char *file,
+		const char *arg, ...)
+	PINK_GCC_ATTR((nonnull(1), sentinel(0)));
 
 /**
- * This function calls vfork() to spawn a new child, does the necessary
+ * This function calls fork() to spawn a new child, does the necessary
  * preparation for tracing and then calls execv().
  *
- * \ingroup g_easy_exec
- *
- * \param ctx Tracing context
- * \param path Path of the executable
- * \param argv Arguments
- *
- * \return Depends on the callbacks, see pink_easy_loop()
+ * @param ctx Tracing context
+ * @param path Path of the executable
+ * @param argv Arguments
+ * @return true on success, false on failure and sets errno accordingly
  **/
-int
-pink_easy_execv(pink_easy_context_t *ctx, const char *path, char *const argv[]) PINK_GCC_ATTR((nonnull(1)));
+bool pink_easy_execv(pink_easy_context_t *ctx, const char *path,
+		char *const argv[])
+	PINK_GCC_ATTR((nonnull(1)));
 
 /**
- * This function calls vfork() to spawn a new child, does the necessary
+ * This function calls fork() to spawn a new child, does the necessary
  * preparation for tracing and then calls execvp().
  *
- * \ingroup g_easy_exec
- *
- * \param ctx Tracing context
- * \param file Name of the executable
- * \param argv Arguments
- *
- * \return Depends on the callbacks, see pink_easy_loop()
+ * @param ctx Tracing context
+ * @param file Name of the executable
+ * @param argv Arguments
+ * @return true on success, false on failure and sets errno accordingly
  **/
-int
-pink_easy_execvp(pink_easy_context_t *ctx, const char *file, char *const argv[])  PINK_GCC_ATTR((nonnull(1)));
+bool pink_easy_execvp(pink_easy_context_t *ctx, const char *file,
+		char *const argv[])
+	PINK_GCC_ATTR((nonnull(1)));
 
-#endif /* !PINKTRACE_GUARD_EASY_EXEC_H */
+PINK_END_DECL
+/** @} */
+#endif

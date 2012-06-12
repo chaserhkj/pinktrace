@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,49 +26,37 @@
  */
 
 #include <pinktrace/easy/internal.h>
-
-#include <assert.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <stdlib.h>
-#include <unistd.h>
-
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/pink.h>
 
-int
-pink_easy_call(pink_easy_context_t *ctx, pink_easy_child_func_t func, void *userdata)
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+bool pink_easy_call(pink_easy_context_t *ctx, pink_easy_child_func_t func, void *userdata)
 {
-	pink_easy_process_t *proc;
+	pid_t pid;
+	pink_easy_process_t *current;
 
-	assert(ctx != NULL);
-	assert(func != NULL);
-
-	proc = calloc(1, sizeof(pink_easy_process_t));
-	if (!proc) {
-		ctx->error = PINK_EASY_ERROR_ALLOC_ELDEST;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx);
-		return -ctx->error;
-	}
-
-	if ((proc->pid = fork()) < 0) {
-		ctx->error = PINK_EASY_ERROR_FORK;
-		if (ctx->callback_table.error)
-			ctx->callback_table.error(ctx);
-		goto fail;
-	}
-	else if (!proc->pid) { /* child */
+	pid = fork();
+	if (pid < 0) {
+		ctx->callback_table.error(ctx, PINK_EASY_ERROR_FORK, "fork");
+		return false;
+	} else if (pid == 0) { /* child */
 		if (!pink_trace_me())
-			_exit(ctx->callback_table.cerror ? ctx->callback_table.cerror(PINK_EASY_CHILD_ERROR_SETUP) : EXIT_FAILURE);
-		kill(getpid(), SIGTRAP);
+			_exit(ctx->callback_table.cerror(PINK_EASY_CHILD_ERROR_SETUP));
+		kill(getpid(), SIGSTOP);
 		_exit(func(userdata));
 	}
 	/* parent */
-
-	if (!_pink_easy_init(ctx, proc))
-		return 0;
-fail:
-	free(proc);
-	return -ctx->error;
+	PINK_EASY_INSERT_PROCESS(ctx, current);
+	if (current == NULL) {
+		kill(pid, SIGKILL);
+		return false;
+	}
+	current->pid = pid;
+	current->flags = PINK_EASY_PROCESS_STARTUP | PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP;
+	return true;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,13 +30,13 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/queue.h>
 
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/pink.h>
 
-pink_easy_context_t *
-pink_easy_context_new(int ptrace_options, const pink_easy_callback_table_t *callback_table, void *userdata, pink_easy_free_func_t userdata_destroy)
+pink_easy_context_t *pink_easy_context_new(int ptrace_options,
+		const pink_easy_callback_table_t *callback_table,
+		void *userdata, pink_easy_free_func_t userdata_destroy)
 {
 	pink_easy_context_t *ctx;
 
@@ -50,6 +50,10 @@ pink_easy_context_new(int ptrace_options, const pink_easy_callback_table_t *call
 
 	/* Callbacks */
 	memcpy(&ctx->callback_table, callback_table, sizeof(pink_easy_callback_table_t));
+	if (ctx->callback_table.cerror == NULL)
+		ctx->callback_table.cerror = pink_easy_errback_child_stderr;
+	if (ctx->callback_table.error == NULL)
+		ctx->callback_table.error = pink_easy_errback_stderr;
 
 	/* Process list */
 	SLIST_INIT(&ctx->process_list);
@@ -77,8 +81,6 @@ void
 pink_easy_context_destroy(pink_easy_context_t *ctx)
 {
 	pink_easy_process_t *current;
-
-	assert(ctx != NULL);
 
 	if (ctx->userdata_destroy && ctx->userdata)
 		ctx->userdata_destroy(ctx->userdata);
