@@ -56,6 +56,13 @@ static bool pink_easy_exec_helper(pink_easy_context_t *ctx, int type,
 	} else if (pid == 0) { /* child */
 		if (!pink_trace_me())
 			_exit(ctx->callback_table.cerror(PINK_EASY_CHILD_ERROR_SETUP));
+		/* Induce a ptrace stop. Tracer (our parent) will resume us
+		 * with PTRACE_SYSCALL and may examine the immediately
+		 * following execve syscall.  Note: This can't be done on NOMMU
+		 * systems with vfork because the parent would be blocked and
+		 * stopping would deadlock.
+		 */
+		kill(getpid(), SIGSTOP);
 		switch (type) {
 		case PINK_INTERNAL_FUNC_EXECVE:
 			execve(filename, argv, envp);

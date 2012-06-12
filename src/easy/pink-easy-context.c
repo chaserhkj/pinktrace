@@ -45,6 +45,7 @@ pink_easy_context_t *pink_easy_context_new(int ptrace_options,
 		return NULL;
 
 	/* Properties */
+	ctx->nprocs = 0;
 	ctx->ptrace_options = ptrace_options;
 	ctx->error = PINK_EASY_ERROR_SUCCESS;
 

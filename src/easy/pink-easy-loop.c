@@ -245,6 +245,9 @@ dont_switch_procs:
 
 		sig = WSTOPSIG(status);
 
+		if (event != 0) /* Ptrace event */
+			goto restart_tracee_with_sig_0;
+
 		/* Is this post-attach SIGSTOP? */
 		if (sig == SIGSTOP && (current->flags & PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP)) {
 			current->flags &= ~PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP;
