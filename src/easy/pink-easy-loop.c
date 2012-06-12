@@ -100,14 +100,12 @@ int pink_easy_loop(pink_easy_context_t *ctx)
 			case EINTR:
 				continue;
 			case ECHILD:
-				return ctx->callback_table.cleanup
-					? ctx->callback_table.cleanup(ctx)
-					: EXIT_SUCCESS;
+				goto cleanup;
 			default:
 				ctx->fatal = true;
 				ctx->error = PINK_EASY_ERROR_WAIT;
 				ctx->callback_table.error(ctx);
-				return -ctx->error;
+				goto cleanup;
 			}
 		}
 
@@ -159,7 +157,7 @@ dont_switch_procs:
 				r = ctx->callback_table.exec(ctx, current, old_bitness);
 				if (r & PINK_EASY_CFLAG_ABORT) {
 					ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-					return -ctx->error;
+					goto cleanup;
 				}
 				if (r & PINK_EASY_CFLAG_DROP) {
 					PINK_EASY_REMOVE_PROCESS(ctx, current);
@@ -186,7 +184,7 @@ dont_switch_procs:
 				r = ctx->callback_table.exit(ctx, pid, status);
 				if (r & PINK_EASY_CFLAG_ABORT) {
 					ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-					return -ctx->error;
+					goto cleanup;
 				}
 			}
 			continue;
@@ -235,7 +233,7 @@ dont_switch_procs:
 			r = ctx->callback_table.pre_exit(ctx, current, (int)status);
 			if (r & PINK_EASY_CFLAG_ABORT) {
 				ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-				return -ctx->error;
+				goto cleanup;
 			}
 			if (r & PINK_EASY_CFLAG_DROP) {
 				PINK_EASY_REMOVE_PROCESS(ctx, current);
@@ -258,7 +256,7 @@ dont_switch_procs:
 				r = ctx->callback_table.signal(ctx, current, status);
 				if (r & PINK_EASY_CFLAG_ABORT) {
 					ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-					return -ctx->error;
+					goto cleanup;
 				}
 				if (r & PINK_EASY_CFLAG_DROP) {
 					PINK_EASY_REMOVE_PROCESS(ctx, current);
@@ -277,7 +275,7 @@ dont_switch_procs:
 			r = ctx->callback_table.syscall(ctx, current, entering);
 			if (r & PINK_EASY_CFLAG_ABORT) {
 				ctx->error = PINK_EASY_ERROR_CALLBACK_ABORT;
-				return -ctx->error;
+				goto cleanup;
 			}
 			if (r & PINK_EASY_CFLAG_DROP) {
 				PINK_EASY_REMOVE_PROCESS(ctx, current);
@@ -292,5 +290,8 @@ restart_tracee:
 			handle_ptrace_error(ctx, current, "syscall");
 	}
 
-	return 0;
+cleanup:
+	return ctx->callback_table.cleanup
+		? ctx->callback_table.cleanup(ctx)
+		: (ctx->error ? EXIT_FAILURE : EXIT_SUCCESS);
 }
