@@ -32,11 +32,11 @@ pink_bitness_name(pink_bitness_t bitness)
 {
 	switch (bitness) {
 	case PINK_BITNESS_32:
-		return "32 bit";
+		return "32bit";
 	case PINK_BITNESS_64:
-		return "64 bit";
+		return "64bit";
 	case PINK_BITNESS_UNKNOWN:
 	default:
-		return "unknown";
+		return "??bit";
 	}
 }
