@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2012 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LpIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
  * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
@@ -25,27 +25,44 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_PINK_H
-#define _PINK_EASY_PINK_H
+#ifndef _PINK_EASY_VM_H
+#define _PINK_EASY_VM_H
 
 /**
- * @file
- * @brief A header file including all other header files part of pinktrace-easy
- * @defgroup pinktrace-easy Pink's Easy Tracing Library
+ * @file pinktrace/easy/vm.h
+ * @brief Pink's easy data transfer between address spaces
+ * @defgroup pink_easy_init Pink's easy data transfer between address spaces
+ * @ingroup pinktrace-easy
+ * @{
  **/
 
-#include <pinktrace/pink.h>
+#include <stdbool.h>
+#include <sys/types.h>
 
-#include <pinktrace/easy/init.h>
-#include <pinktrace/easy/attach.h>
-#include <pinktrace/easy/call.h>
-#include <pinktrace/easy/callback.h>
-#include <pinktrace/easy/context.h>
-#include <pinktrace/easy/error.h>
-#include <pinktrace/easy/exec.h>
-#include <pinktrace/easy/func.h>
-#include <pinktrace/easy/loop.h>
-#include <pinktrace/easy/process.h>
-#include <pinktrace/easy/vm.h>
+PINK_BEGIN_DECL
 
+/**
+ * Transfer data from the remote process (tracee) to the local process (tracer)
+ *
+ * @param pid Process ID
+ * @param addr Address in remote process' address space
+ * @param dest Pointer to store the data
+ * @param len Length of data
+ * @return true on success, false on failure and sets errno accordingly
+ **/
+bool pink_easy_process_vm_readv(pid_t pid, long addr, void *dest, size_t len);
+
+/**
+ * Transfer data from the local process (tracer) to the remote process (tracee)
+ *
+ * @param pid Process ID
+ * @param addr Address in remote process' address space
+ * @param src Pointer to the data
+ * @param len Length of data
+ * @return true on success, false on failure and sets errno accordingly
+ **/
+bool pink_easy_process_vm_writev(pid_t pid, long addr, const void *dest, size_t len);
+
+PINK_END_DECL
+/** @} */
 #endif

@@ -15,7 +15,8 @@ easy_SRCS= \
 	   pink-easy-error.c \
 	   pink-easy-init.c \
 	   pink-easy-loop.c \
-	   pink-easy-process.c
+	   pink-easy-process.c \
+	   pink-easy-vm.c
 EXTRA_DIST= $(easy_SRCS)
 
 if WANT_EASY

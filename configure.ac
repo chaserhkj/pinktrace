@@ -304,10 +304,13 @@ for header in $REQUIRED_HEADERS ; do
 	AC_CHECK_HEADER([$header], [],
 			AC_MSG_ERROR([Required header $header not found!]))
 done
-AC_CHECK_HEADERS([machine/reg.h machine/psl.h sys/reg.h], [], [])
+AC_CHECK_HEADERS([machine/reg.h machine/psl.h sys/reg.h sys/uio.h], [], [])
 
 dnl Check types
 AC_CHECK_TYPES([struct pt_all_user_regs, struct ia64_fpreg],,,[#include <sys/ptrace.h>])
+
+dnl Check functions
+AC_CHECK_FUNCS([process_vm_readv process_vm_writev])
 
 dnl Check for gcc
 AM_CONDITIONAL(GCC, test x"$GCC" = x"yes")
