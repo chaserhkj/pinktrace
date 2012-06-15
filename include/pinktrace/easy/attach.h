@@ -49,14 +49,14 @@ PINK_BEGIN_DECL
  * processes.
  *
  * @param ctx Tracing context
- * @param pid Process ID
- * @param ppid Parent process ID. Use this to specify the parent of the process
- *             in case the process is a clone. This is useful when attaching to
- *             all threads of a process and makes pinktrace track whether the
- *             process is a thread. Specify -1 for non-clones.
+ * @param tid Thread ID
+ * @param tgid Thread group ID. Use this to specify the thread group in case
+ *             the process is a clone. This is useful when attaching to all
+ *             threads of a process and makes pinktrace track whether the
+ *             process is a clone. Specify -1 for non-clones.
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_easy_attach(pink_easy_context_t *ctx, pid_t pid, pid_t ppid)
+bool pink_easy_attach(pink_easy_context_t *ctx, pid_t tid, pid_t tgid)
 	PINK_GCC_ATTR((nonnull(1)));
 
 PINK_END_DECL

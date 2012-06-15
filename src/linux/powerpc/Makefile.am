@@ -1,2 +1,4 @@
 SUBDIRS= .
-noinst_HEADERS= pink-syscallent.h
+noinst_HEADERS= \
+		syscallent.h \
+		syscallent1.h

@@ -663,7 +663,6 @@ INPUT                  = @abs_top_builddir@/include/pinktrace \
                          @abs_top_builddir@/include/pinktrace/easy \
                          @abs_top_srcdir@/include/pinktrace \
                          @abs_top_srcdir@/include/pinktrace/easy \
-                         @abs_top_srcdir@/examples/c \
                          ./
 
 # This tag can be used to specify the character encoding of the source files
@@ -726,7 +725,7 @@ EXCLUDE_SYMBOLS        = _PINK_
 # directories that contain example code fragments that are included (see
 # the \include command).
 
-EXAMPLE_PATH           = @abs_top_srcdir@/examples/c
+#EXAMPLE_PATH           = @abs_top_srcdir@/examples/c
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp

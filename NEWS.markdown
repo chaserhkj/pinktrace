@@ -3,6 +3,11 @@
 This file lists the major changes between versions. For a more detailed list of
 every change, see git log.
 
+* Add experimental support for x32 architecture
+* Drop FreeBSD support
+* Drop ruby bindings
+* Drop python bindings
+* Rework pinktrace API
 * Introduce system.h for system specific definitions
 
 ### 0.1.2

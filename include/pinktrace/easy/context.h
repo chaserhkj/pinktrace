@@ -65,7 +65,7 @@ typedef struct pink_easy_context pink_easy_context_t;
  * @param callback_table Callback table
  * @param userdata User data
  * @param userdata_destroy Destructor function for the user data
- * @return The tracing context on success, NULL on failure and sets errno
+ * @return The tracing context on success, @e NULL on failure and sets errno
  *         accordingly
  **/
 pink_easy_context_t *pink_easy_context_new(int ptrace_options,

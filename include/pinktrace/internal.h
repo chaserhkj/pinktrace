@@ -32,54 +32,77 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <limits.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <limits.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/wait.h>
+#include <asm/unistd.h>
 
 #include <netinet/in.h>
 #include <sys/un.h>
+
+#include <pinktrace/system.h>
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif /*  HAVE_SYS_REG_H */
 
-#ifdef HAVE_MACHINE_PSL_H
-#include <machine/psl.h>
-#endif /* HAVE_MACHINE_PSL_H */
-
-#ifdef HAVE_MACHINE_REG_H
-#include <machine/reg.h>
-#endif /* HAVE_MACHINE_REG_H */
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif /* HAVE_SYS_UIO_H */
 
 /* We need additional hackery on IA64 to include linux/ptrace.h. */
-#if PINK_OS_LINUX
-#if defined(IA64)
-#ifdef HAVE_STRUCT_IA64_FPREG
-#define ia64_fpreg XXX_ia64_fpreg
-#endif /* HAVE_STRUCT_IA64_FPREG */
-#ifdef HAVE_STRUCT_PT_ALL_USER_REGS
-#define pt_all_user_regs XXX_pt_all_user_regs
-#endif /* HAVE_STRUCT_PT_ALL_USER_REGS */
-#endif /* defined(IA64) */
+#if PINK_ARCH_IA64
+# ifdef HAVE_STRUCT_IA64_FPREG
+# define ia64_fpreg XXX_ia64_fpreg
+# endif
+# ifdef HAVE_STRUCT_PT_ALL_USER_REGS
+# define pt_all_user_regs XXX_pt_all_user_regs
+# endif
+#endif
 #include <linux/ptrace.h>
-#if defined(IA64)
-#undef ia64_fpreg
-#undef pt_all_user_regs
-#endif /* defined(IA64) */
-#endif /* PINK_OS_LINUX */
+#if PINK_ARCH_IA64
+# undef ia64_fpreg
+# undef pt_all_user_regs
+#endif
 
-#define ADDR_MUL	((64 == __WORDSIZE) ? 8 : 4)
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(a)	(sizeof(a) / sizeof(a[0]))
+#endif
 
-#include <pinktrace/macros.h>
-#include <pinktrace/bitness.h>
-#include <pinktrace/socket.h>
+#ifndef MIN
+#define MIN(a,b)	(((a) < (b)) ? (a) : (b))
+#endif
+#ifndef MAX
+#define MAX(a,b)	(((a) > (b)) ? (a) : (b))
+#endif
 
-PINK_BEGIN_DECL
+#define _pink_assert_not_implemented()					\
+	do {								\
+		fprintf(stderr, "pinktrace assertion failure "		\
+				"in %s() at %s:%u\n"			\
+				"not implemented!\n",			\
+				__func__, __FILE__, __LINE__);		\
+		abort();						\
+	} while (0)
+#define _pink_assert_not_reached()					\
+	do {								\
+		fprintf(stderr, "pinktrace assertion failure "		\
+				"in %s() at %s:%u\n"			\
+				"code must not be reached!\n",		\
+				__func__, __FILE__, __LINE__);		\
+		abort();						\
+	} while (0)
 
-bool _pink_decode_socket_address(pid_t pid, long addr, long addrlen,
-		pink_socket_address_t *paddr);
+#if PINK_ARCH_X86_64
+#define _PINK_ABI_X32 2
+#elif PINK_ARCH_X32
+#define _PINK_ABI_X32 0
+#endif
 
-PINK_END_DECL
 #endif

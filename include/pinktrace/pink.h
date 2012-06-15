@@ -55,17 +55,19 @@
  * @defgroup pinktrace Pink's Tracing Library
  **/
 
+#include <pinktrace/about.h>
+
 #include <pinktrace/compat.h>
 #include <pinktrace/macros.h>
+#include <pinktrace/system.h>
+#include <pinktrace/abi.h>
+#include <pinktrace/regs.h>
 
-#include <pinktrace/about.h>
-#include <pinktrace/bitness.h>
-#include <pinktrace/decode.h>
-#include <pinktrace/encode.h>
 #include <pinktrace/event.h>
-#include <pinktrace/name.h>
-#include <pinktrace/socket.h>
+#include <pinktrace/syscall.h>
 #include <pinktrace/trace.h>
-#include <pinktrace/util.h>
+#include <pinktrace/read.h>
+#include <pinktrace/write.h>
+#include <pinktrace/socket.h>
 
 #endif

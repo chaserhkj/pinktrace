@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/queue.h>
 
+#include <pinktrace/internal.h> /* _pink_assert_not_reached() */
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/callback.h>
 #include <pinktrace/easy/error.h>
@@ -77,14 +78,14 @@ struct pink_easy_process {
 	/** PINK_EASY_PROCESS_* flags **/
 	short flags;
 
-	/** Process Id of this entry **/
-	pid_t pid;
+	/** Thread ID of this entry **/
+	pid_t tid;
 
-	/** Parent of this process **/
-	pid_t ppid;
+	/** Thread group of this entry **/
+	pid_t tgid;
 
-	/** Bitness (e.g. 32bit, 64bit) of this process **/
-	pink_bitness_t bitness;
+	/** System call ABI (e.g. 32bit, 64bit) of this process **/
+	pink_abi_t abi;
 
 	/** Per-process user data **/
 	void *userdata;

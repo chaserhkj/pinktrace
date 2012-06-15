@@ -28,6 +28,21 @@
 #ifndef _PINK_SOCKET_H
 #define _PINK_SOCKET_H
 
+#include <stdbool.h>
+#include <sys/types.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/un.h>
+#if PINK_HAVE_NETLINK || defined(DOXYGEN)
+#include <linux/netlink.h>
+#endif
+
+#include <pinktrace/macros.h>
+#include <pinktrace/system.h>
+#include <pinktrace/abi.h>
+#include <pinktrace/regs.h>
+
 /**
  * @file pinktrace/socket.h
  * @brief Pink's socket related data structures and functions
@@ -35,34 +50,14 @@
  * @ingroup pinktrace
  * @{
  **/
+PINK_BEGIN_DECL
 
-#include <pinktrace/macros.h>
-#include <pinktrace/system.h>
-
-#if PINK_OS_FREEBSD || defined(DOXYGEN)
-#include <sys/socket.h>
-#endif
-
-#include <netinet/in.h>
-#include <sys/un.h>
-
-#if PINK_HAVE_NETLINK || defined(DOXYGEN)
-#include <linux/netlink.h>
-#endif
-
-
-/**
- * @brief Structure which defines a decoded socket address
- **/
+/** Structure which defines a decoded socket address. */
 typedef struct {
 	/** Family of the socket address **/
 	int family;
 
-	/**
-	 * Length of the socket address
-	 *
-	 * @since 0.0.5
-	 **/
+	/** Length of the socket address */
 	socklen_t length;
 
 	/**
@@ -70,46 +65,39 @@ typedef struct {
 	 * Check the family before attempting to obtain the real object.
 	 **/
 	union {
-		/** Padding, for internal use only **/
-		char _pad[128];
+		/** Padding, mostly for internal use */
+		char pad[128];
 
-		/** Socket address, for internal use only **/
-		struct sockaddr _sa;
+		/** Socket address, mostly for internal use */
+		struct sockaddr sa;
 
-		/** Unix socket address, only valid if family is AF_UNIX. **/
+		/** Unix socket address, only valid if family is AF_UNIX */
 		struct sockaddr_un sa_un;
 
-		/** Inet socket address, only valid if family is AF_INET. **/
+		/** Inet socket address, only valid if family is AF_INET */
 		struct sockaddr_in sa_in;
 
 #if PINK_HAVE_IPV6 || defined(DOXYGEN)
 		/**
 		 * Inet6 socket address, only valid if family is AF_INET6.
 		 * This member is only available if IPV6 support was enabled at
-		 * compile time. Check with #PINK_HAVE_IPV6.
+		 * compile time. Check with PINK_HAVE_IPV6.
 		 **/
 		struct sockaddr_in6 sa6;
-#endif /* PINK_HAVE_IPV6... */
+#endif
 
 #if PINK_HAVE_NETLINK || defined(DOXYGEN)
 		/**
 		 * Netlink socket address, only valid if family is AF_NETLINK.
 		 * This member is only available if Netlink support was enabled
-		 * at compile time. Check with #PINK_HAVE_NETLINK.
-		 *
-		 * @since 0.0.5
+		 * at compile time. Check with PINK_HAVE_NETLINK.
 		 **/
 		struct sockaddr_nl nl;
-#endif /* PINK_HAVE_NETLINK... */
+#endif
 	} u;
 } pink_socket_address_t;
 
-#if PINK_OS_LINUX || defined(DOXYGEN)
-/**
- * Decoded socket subcalls
- *
- * @note Availability: Linux
- **/
+/** Decoded socket subcalls */
 typedef enum {
 	/** socket() subcall **/
 	PINK_SOCKET_SUBCALL_SOCKET = 1,
@@ -149,36 +137,79 @@ typedef enum {
 	PINK_SOCKET_SUBCALL_ACCEPT4,
 } pink_socket_subcall_t;
 
-PINK_BEGIN_DECL
-
 /**
- * Decide whether the socketcall() system call is defined for the given
- * bitness. On some architectures the socket system calls - socket, connect,
- * bind etc. - are implemented as separate system calls. On others these calls
- * are subcalls of the socketcall() system call.
- *
- * @note Availability: Linux
- *
- * @see pink_socket_subcall_t
- *
- * @param bitness Bitness
- * @return true if socketcall() system call is available, false otherwise
- **/
-bool pink_has_socketcall(pink_bitness_t bitness)
-	PINK_GCC_ATTR((pure));
-
-/**
- * Name the given socket subcall
+ * Name socket subcall
  *
  * @note Availability: Linux
  *
  * @param subcall Socket subcall
- * @return Name of the subcall
+ * @return The name of the subcall
  **/
-const char *pink_name_socket_subcall(pink_socket_subcall_t subcall)
+const char *pink_socket_subcall_name(pink_socket_subcall_t subcall)
 	PINK_GCC_ATTR((pure));
 
+/**
+ * Convenience macro to read socket subcall
+ *
+ * @see pink_socket_subcall
+ * @see pink_read_argument
+ * @see pink_read_syscall
+ *
+ * @param tid Thread ID
+ * @param abi System call ABI; see pink_read_abi()
+ * @param regs Pointer to the structure of registers; see pink_trace_get_regs()
+ * @param decode_socketcall Boolean to specify decoding @e socketcall(2)
+ * @param subcall Pointer to store the result, must not be @e NULL
+ * @return true on success, false on failure and sets errno accordingly
+ **/
+#define pink_read_socket_subcall(tid, abi, regs, decode_socketcall, subcall) \
+		(decode_socketcall) \
+			? pink_read_argument((tid), (abi), (regs), 0, (subcall)) \
+			: pink_read_syscall((tid), (abi), (regs), (subcall))
+
+/**
+ * Read the specified socket call argument
+ *
+ * @param tid Thread ID
+ * @param abi System call ABI; see pink_read_abi()
+ * @param regs Pointer to the structure of registers; see pink_trace_get_regs()
+ * @param decode_socketcall Boolean to specify decoding @e socketcall(2)
+ * @param arg_index Index of the argument, first argument is 0
+ * @param argval Pointer to store the value, must @b not be @e NULL
+ * @return true on success, false on failure and sets errno accordingly
+ **/
+bool pink_read_socket_argument(pid_t tid, pink_abi_t abi,
+		const pink_regs_t *regs,
+		bool decode_socketcall,
+		unsigned arg_index, long *argval)
+	PINK_GCC_ATTR((nonnull(6)));
+
+/**
+ * Read the specified socket call address
+ *
+ * @note If the address argument of the system call was NULL, this function
+ *       returns true and sets sockaddr->family to -1.
+ *
+ * @param tid Thread ID
+ * @param abi System call ABI; see pink_read_abi()
+ * @param regs Pointer to the structure of registers; see pink_trace_get_regs()
+ * @param decode_socketcall Boolean to specify decoding @e socketcall(2)
+ * @param arg_index The index of the argument. One of:
+ *  - 1 (for connect, bind etc.)
+ *  - 4 (for sendto)
+ * @param fd The pointer to store the socket file descriptor that resides in
+ *           argument one with index zero. Caller may set this to @e NULL in
+ *           case the file descriptor is not requested.
+ * @param sockaddr Pointer to store the socket address, must @b not be @e NULL
+ * @return true on success, false on failure and sets errno accordingly
+ **/
+bool pink_read_socket_address(pid_t tid, pink_abi_t abi,
+		const pink_regs_t *regs,
+		bool decode_socketcall,
+		unsigned arg_index, long *fd,
+		pink_socket_address_t *sockaddr)
+	PINK_GCC_ATTR((nonnull(7)));
+
 PINK_END_DECL
-#endif
 /** @} */
 #endif

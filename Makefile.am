@@ -1,6 +1,6 @@
-SUBDIRS= src tests python ruby doc pkg-config examples
+SUBDIRS= src doc pkg-config
 ACLOCAL_AMFLAGS= -I m4
-AUTOMAKE_OPTIONS= dist-bzip2 no-dist-gzip std-options foreign
+AUTOMAKE_OPTIONS= foreign dist-bzip2 no-dist-gzip std-options
 
 CLEANFILES= *~
 MAINTAINERCLEANFILES= \
@@ -18,10 +18,7 @@ EXTRA_DIST= \
 
 DISTCHECK_CONFIGURE_FLAGS= \
 			   --enable-ipv6 \
-			   --enable-doxygen \
-			   --enable-python --enable-python-doc \
-			   --enable-ruby --enable-ruby-doc \
-			   --with-ruby-install-dir='$${DESTDIR}$${prefix}/ruby-bindings'
+			   --enable-doxygen
 
 doc_DATA= \
 	  README.markdown \
@@ -32,26 +29,24 @@ EXTRA_DIST+= $(doc_DATA)
 pinktrace_includedir=$(includedir)/pinktrace-$(PINKTRACE_PC_SLOT)/pinktrace/
 pinktrace_include_HEADERS= \
 			  include/pinktrace/about.h \
-			  include/pinktrace/bitness.h \
 			  include/pinktrace/system.h \
+			  include/pinktrace/abi.h \
 			  include/pinktrace/compat.h \
-			  include/pinktrace/decode.h \
-			  include/pinktrace/encode.h \
 			  include/pinktrace/event.h \
 			  include/pinktrace/macros.h \
-			  include/pinktrace/name.h \
+			  include/pinktrace/read.h \
+			  include/pinktrace/regs.h \
 			  include/pinktrace/socket.h \
+			  include/pinktrace/syscall.h \
 			  include/pinktrace/trace.h \
-			  include/pinktrace/util.h \
+			  include/pinktrace/write.h \
 			  include/pinktrace/pink.h
 
 EXTRA_DIST+= \
 	     include/pinktrace/about.h.in \
-	     include/pinktrace/bitness.h.in \
 	     include/pinktrace/system.h.in
 MAINTAINERCLEANFILES+= \
 		       include/pinktrace/about.h \
-		       include/pinktrace/bitness.h \
 		       include/pinktrace/system.h
 noinst_HEADERS= \
 		include/pinktrace/internal.h
@@ -67,7 +62,6 @@ pinktrace_easy_DIST= \
 		     include/pinktrace/easy/init.h \
 		     include/pinktrace/easy/loop.h \
 		     include/pinktrace/easy/process.h \
-		     include/pinktrace/easy/vm.h \
 		     include/pinktrace/easy/pink.h
 EXTRA_DIST+= \
 	     $(pinktrace_easy_DIST) \
@@ -77,28 +71,28 @@ pinktrace_easy_includedir=$(includedir)/pinktrace-$(PINKTRACE_PC_SLOT)/pinktrace
 pinktrace_easy_include_HEADERS= $(pinktrace_easy_DIST)
 endif # WANT_EASY
 
+.PHONY: doxygen
 doxygen: all
 	$(MAKE) -C doc $@
 
-epydoc: all
-	$(MAKE) -C doc $@
-
-rdoc: all
-	$(MAKE) -C doc $@
-
-site: doxygen epydoc rdoc
+.PHONY: site
+site: doxygen
 	$(MAKE) -C doc $@
 	$(MAKE) -C examples $@
 
+.PHONY: site
 site-check: site
 	$(MAKE) -C doc $@
 
+.PHONY: checksum
 checksum: dist
 	sha1sum $(PACKAGE)-$(VERSION).tar.bz2 > $(PACKAGE)-$(VERSION).tar.bz2.sha1sum
 
+.PHONY: sign
 sign: dist
 	gpg --detach-sign --armor $(PACKAGE)-$(VERSION).tar.bz2
 
+.PHONY: release
 release: site dist checksum sign
 	if ! test -d $(SITE_INSTALL_DIR)/release; then echo "No SITE_INSTALL_DIR/release"; exit 1; fi
 	$(INSTALL) \
@@ -108,11 +102,10 @@ release: site dist checksum sign
 		$(PACKAGE)-$(VERSION).tar.bz2.sha1sum \
 		$(PACKAGE)-$(VERSION).tar.bz2.asc
 
+.PHONY: git-release
 git-release: release
 	git --git-dir=$(SITE_INSTALL_DIR) add --update
 	$(SED) \
 		-e 's/@VERSION@/$(VERSION)/' \
 		$(top_srcdir)/misc/site-commit-template.txt |\
 		git --git-dir=$(SITE_INSTALL_DIR) commit -F - -m
-
-.PHONY: doxygen epydoc rdoc site site-check checksum sign release git-release

@@ -36,7 +36,6 @@
 
 #include <pinktrace/pink.h>
 
-#include <pinktrace/easy/init.h>
 #include <pinktrace/easy/attach.h>
 #include <pinktrace/easy/call.h>
 #include <pinktrace/easy/callback.h>
@@ -46,6 +45,7 @@
 #include <pinktrace/easy/func.h>
 #include <pinktrace/easy/loop.h>
 #include <pinktrace/easy/process.h>
-#include <pinktrace/easy/vm.h>
+
+#include <pinktrace/easy/init.h>
 
 #endif

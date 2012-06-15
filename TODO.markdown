@@ -2,7 +2,7 @@
 
 pinktrace is a work in progress.  
 To contribute start by searching the source tree for TODO and FIXME.
-In addition you may:
+In addition you may help with the ideas below:
 
 ### Porting
 Port pinktrace to different architectures.  
@@ -14,15 +14,3 @@ Currently we support:
 - [ppc](http://en.wikipedia.org/wiki/PowerPC): unstable, needs testing
 - [ppc64](http://en.wikipedia.org/wiki/Ppc64): unstable, needs testing
 - [arm](http://en.wikipedia.org/wiki/ARM_architecture): preliminary, needs testing
-
-### Bindings
-Write bindings for interpreted languages.  
-Currently we have bindings for:
-
-- [Python](http://www.python.org/): stable, in master
-- [Ruby](http://www.ruby-lang.org/): stable, in master
-
-### /proc & ioctl() based tracing
-Right now, pinktrace is just a **ptrace()** wrapper library.  
-Long term ideas include writing a */proc* && <tt>ioctl()</tt> based tracing interface as well.  
-Some preliminary work was done in [proc](http://github.com/alip/pinktrace/tree/proc) branch.

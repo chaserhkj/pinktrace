@@ -37,6 +37,7 @@
  **/
 
 #include <stdbool.h>
+#include <pinktrace/pink.h>
 #include <pinktrace/easy/error.h>
 #include <pinktrace/easy/process.h>
 
@@ -82,7 +83,7 @@ struct pink_easy_context;
      -----------------------------------------------------------------------------
      - CALLBACK_ABORT    X      X (no errback, direct exit from loop)            -
      - ALLOC             +      const char *errctx                               -
-     - ATTACH            +      pid_t pid                                        -
+     - ATTACH            +      pid_t tid                                        -
      - FORK              +      const char *errctx                               -
      - WAIT              +      -                                                -
      - TRACE             +      pink_easy_process_t *current, const char *errctx -
@@ -161,30 +162,36 @@ typedef int (*pink_easy_callback_cleanup_t) (const struct pink_easy_context *ctx
  *
  * @param ctx Tracing context
  * @param current Current child
+ * @param regs Pointer to the structure of registers; see pink_trace_get_regs()
  * @param entering true if the child is entering the system call, false otherwise
  * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
 typedef int (*pink_easy_callback_syscall_t) (const struct pink_easy_context *ctx,
-		pink_easy_process_t *current, bool entering);
+		pink_easy_process_t *current,
+		const pink_regs_t *regs,
+		bool entering);
 
 /**
  * Callback for successful @e execve(2)
  *
- * @note The bitness of the child is updated before this callback is called.
+ * @note The system call ABI is updated before this callback is called.
  *
  * @param ctx Tracing context
  * @param current Current child
- * @param old_bitness Old bitness of the child
+ * @param regs Pointer to the structure of registers; see pink_trace_get_regs()
+ * @param old_abi Old system call ABI
  * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
 typedef int (*pink_easy_callback_exec_t) (const struct pink_easy_context *ctx,
-		pink_easy_process_t *current, pink_bitness_t old_bitness);
+		pink_easy_process_t *current,
+		const pink_regs_t *regs,
+		pink_abi_t old_abi);
 
 /**
  * Callback for pre-exit notification
  *
  * @param ctx Tracing context
- * @param current Process ID
+ * @param current Thread ID
  * @param status Exit status
  * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
@@ -206,12 +213,12 @@ typedef int (*pink_easy_callback_signal_t) (const struct pink_easy_context *ctx,
  * Callback for genuine exit notification
  *
  * @param ctx Tracing context
- * @param pid Process ID of the child
+ * @param tid Thread ID
  * @param status Exit status
  * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
 typedef int (*pink_easy_callback_exit_t) (const struct pink_easy_context *ctx,
-		pid_t pid, int status);
+		pid_t tid, int status);
 
 /**
  * @brief Structure which represents a callback table

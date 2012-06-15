@@ -70,40 +70,40 @@ int pink_easy_process_kill(const pink_easy_process_t *proc, int sig);
 
 /**
  * Detach from a process as necessary and resume its execution. This function
- * calls pink_trace_detach() if the process is attached and pink_trace_resume() if
- * the process is spawned.
+ * calls pink_trace_detach() if the process was attached and pink_trace_resume()
+ * if the process was spawned.
  *
  * @param proc Process entry
  * @param sig Same as pink_trace_cont()
- * \return true on success, false on failure and sets errno accordingly
+ * @return true on success, false on failure and sets errno accordingly
  **/
 bool pink_easy_process_resume(const pink_easy_process_t *proc, int sig);
 
 /**
- * Returns the process ID of the entry
+ * Returns the thread ID of the entry
  *
  * @param proc Process entry
- * @return Process ID
+ * @return Thread ID
  **/
-pid_t pink_easy_process_get_pid(const pink_easy_process_t *proc)
+pid_t pink_easy_process_get_tid(const pink_easy_process_t *proc)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
- * Returns the process ID of this entry's parent or -1 for the eldest entries.
+ * Returns the thread group ID of this entry or -1
  *
  * @param proc Process entry
- * @return Parent Process ID or -1
+ * @return Thread group ID or -1
  **/
-pid_t pink_easy_process_get_ppid(const pink_easy_process_t *proc)
+pid_t pink_easy_process_get_tgid(const pink_easy_process_t *proc)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
- * Returns the bitness of the entry
+ * Returns the execution type of the entry
  *
  * @param proc Process entry
- * @return Bitness
+ * @return System call ABI
  **/
-pink_bitness_t pink_easy_process_get_bitness(const pink_easy_process_t *proc)
+int pink_easy_process_get_abi(const pink_easy_process_t *proc)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
@@ -170,11 +170,11 @@ void pink_easy_process_list_remove(pink_easy_process_list_t *list,
  * Look up the process list for the given process ID.
  *
  * @param list The process list
- * @param pid Process ID
+ * @param tid Thread ID
  * @return The process on successful look up, NULL on failure
  **/
 pink_easy_process_t *pink_easy_process_list_lookup(const pink_easy_process_list_t *list,
-		pid_t pid)
+		pid_t tid)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**

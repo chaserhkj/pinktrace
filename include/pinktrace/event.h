@@ -30,90 +30,72 @@
 
 /**
  * @file pinktrace/event.h
- * @brief Pink's event handling
- * @defgroup pink_event Pink's event handling
+ * @brief Pink's ptrace(2) event handling for Linux
+ * @defgroup pink_event Pink's ptrace(2) event handling for Linux
  * @ingroup pinktrace
  * @{
  **/
 
-#include <stdbool.h>
 #include <pinktrace/macros.h>
 
 /**
- * Event constants
+ * @e ptrace(2) event constants
  *
- * @note Some of these events are only available on Linux.
+ * @note Availability: Linux
  **/
 typedef enum {
-	/** Child has been stopped **/
-	PINK_EVENT_STOP,
-	/** Child has been trapped **/
-	PINK_EVENT_TRAP,
+	/** No event */
+	PINK_EVENT_NONE = 0,
 	/**
-	 * Child has entered/exited a system call
+	 * Child called @e fork(2)
 	 *
-	 * @note Availability: Linux
+	 * @see #PINK_HAVE_EVENT_FORK
 	 **/
-	PINK_EVENT_SYSCALL,
+	PINK_EVENT_FORK = 1,
 	/**
-	 * Child has called fork()
+	 * Child has called @e vfork(2)
 	 *
-	 * @note Availability: Linux
+	 * @see #PINK_HAVE_EVENT_VFORK
 	 **/
-	PINK_EVENT_FORK,
+	PINK_EVENT_VFORK = 2,
 	/**
-	 * Child has called vfork()
+	 * Child called @e clone(2)
 	 *
-	 * @note Availability: Linux
+	 * @see #PINK_HAVE_EVENT_CLONE
 	 **/
-	PINK_EVENT_VFORK,
+	PINK_EVENT_CLONE = 3,
 	/**
-	 * Child has called clone()
+	 * Child called @e execve(2)
 	 *
-	 * @note Availability: Linux
+	 * @see #PINK_HAVE_EVENT_EXEC
 	 **/
-	PINK_EVENT_CLONE,
+	PINK_EVENT_EXEC = 4,
 	/**
-	 * Child has exited a vfork() call
+	 * Child returned from @e vfork(2)
 	 *
-	 * @note Availability: Linux
+	 * @see #PINK_HAVE_EVENT_VFORK_DONE
 	 **/
-	PINK_EVENT_VFORK_DONE,
-	/**
-	 * Child has called execve()
-	 *
-	 * @note Availability: Linux
-	 **/
-	PINK_EVENT_EXEC,
+	PINK_EVENT_VFORK_DONE = 5,
 	/**
 	 * Child is exiting (ptrace way, stopped before exit)
 	 *
-	 * @note Availability: Linux
+	 * @see #PINK_HAVE_EVENT_EXIT
 	 **/
-	PINK_EVENT_EXIT,
-	/** Child has received a genuine signal **/
-	PINK_EVENT_GENUINE,
-	/** Child has exited normally **/
-	PINK_EVENT_EXIT_GENUINE,
-	/** Child has been terminated with a signal **/
-	PINK_EVENT_EXIT_SIGNAL,
-	/** Unknown event, shouldn't happen **/
-	PINK_EVENT_UNKNOWN,
+	PINK_EVENT_EXIT = 6,
 } pink_event_t;
 
 PINK_BEGIN_DECL
 
 /**
- * Get the event from the status argument as returned by @e waitpid(2)
+ * Calculate the event from the status argument as returned by @e waitpid(2)
  *
- * @note On FreeBSD, this function gives only limited information about the
- *       event. To get more information use pink_trace_lwpinfo()
+ * @note Available on Linux, on other systems this function always returns
+ * #PINK_EVENT_NONE and sets errno to @e ENOSYS
  *
  * @param status Status argument as returned by @e waitpid(2)
- * @return One of PINK_EVENT_* constants
+ * @return One of PINK_EVENT constants
  **/
-pink_event_t pink_event_decide(int status)
-	PINK_GCC_ATTR((pure));
+pink_event_t pink_event_decide(int status);
 
 /**
  * Return a string representation of the event

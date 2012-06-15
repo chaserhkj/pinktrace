@@ -37,14 +37,6 @@ Version {{ site.version }} has an unstable [API](http://en.wikipedia.org/wiki/Ap
 ## Documentation
 An extensive API reference is [available]({{ site.url }}api/c).
 
-## Bindings
-Bindings are available for:
-
-- [Ruby]({{ site.url }}api/ruby)
-- [Python]({{ site.url }}api/python)
-
-**Note**: Bindings for pinktrace-easy have not been written yet.
-
 ## Building
 This package is made with the GNU autotools, you should run `./configure` inside the distribution directory for
 configuring the source tree. Some notable options you may pass to `./configure` are:
@@ -52,11 +44,6 @@ configuring the source tree. Some notable options you may pass to `./configure` 
 * `--enable-easy` Build pinktrace-easy (default)
 * `--enable-ipv6` Enable support for [IPV6](http://en.wikipedia.org/wiki/Ipv6)
 * `--enable-doxygen` Build API documentation using [Doxygen](http://www.doxygen.org/)
-* `--enable-python` Build [Python](http://www.python.org/) bindings
-* `--enable-python-doc` Build API documentation of [Python](http://www.python.org/) using
-  [epydoc](http://epydoc.sourceforge.net/)
-* `--enable-ruby` Build [Ruby](http://ruby-lang.org/) bindings
-* `--enable-ruby-doc` Build API documentation of [Ruby](http://ruby-lang.org/) using [rdoc](http://rdoc.sourceforge.net/)
 
 After that you should run `make` for compilation and `make install` (as **root**) for installation of **pinktrace**.
 Optionally you may run `make check` to run the unit tests.
@@ -79,43 +66,23 @@ There are examples how to use the various parts of the library.
 <table border="0" summary="examples">
     <tr>
         <th>Example</th>
-        <th colspan="3">Language</th>
+        <th colspan="1">Language</th>
         <th>Description</th>
     </tr>
     <tr>
         <td>about</td>
         <td><a href="{{ site.url }}c-pink-about.html">C</a></td>
-        <td><a href="{{ site.url }}py-pink-about.html">Python</a></td>
-        <td><a href="{{ site.url }}rb-pink-about.html">Ruby</a></td>
         <td>How to use pinktrace version macros</td>
-    </tr>
-    <tr>
-        <td>fork_freebsd</td>
-        <td><a href="{{ site.url }}c-pink-fork-freebsd.html">C</a></td>
-        <td><a href="{{ site.url }}py-pink-fork-freebsd.html">Python</a></td>
-        <td><a href="{{ site.url }}rb-pink-fork-freebsd.html">Ruby</a></td>
-        <td>How to do tracing fork on FreeBSD</td>
     </tr>
     <tr>
         <td>fork_linux</td>
         <td><a href="{{ site.url }}c-pink-fork-linux.html">C</a></td>
-        <td><a href="{{ site.url }}py-pink-fork-linux.html">Python</a></td>
-        <td><a href="{{ site.url }}rb-pink-fork-linux.html">Ruby</a></td>
-        <td>How to do tracing fork on Linux</td>
-    </tr>
-    <tr>
-        <td>simple_strace_freebsd</td>
-        <td><a href="{{ site.url }}c-pink-simple-strace-freebsd.html">C</a></td>
-        <td><a href="{{ site.url }}py-pink-simple-strace-freebsd.html">Python</a></td>
-        <td><a href="{{ site.url }}rb-pink-simple-strace-freebsd.html">Ruby</a></td>
-        <td>A simple strace-like program for FreeBSD</td>
+        <td>How to do tracing fork</td>
     </tr>
     <tr>
         <td>simple_strace_linux</td>
-        <td><a href="{{ site.url }}c-pink-simple-strace-linux.html">C</a></td>
-        <td><a href="{{ site.url }}py-pink-simple-strace-linux.html">Python</a></td>
-        <td><a href="{{ site.url }}rb-pink-simple-strace-linux.html">Ruby</a></td>
-        <td>A simple strace-like program for Linux</td>
+        <td><a href="{{ site.url }}c-pink-simple-strace.html">C</a></td>
+        <td>A simple strace-like program</td>
     </tr>
 </table>
 
@@ -127,21 +94,19 @@ Format patches are preferred. Either send a mail to me or poke me on IRC.
 My personal e-mail address is [{{ site.mail }}](mailto://{{ site.mail }})  
 
 ## Supported Platforms
-FreeBSD and Linux operating systems are supported.  
+Linux operating system is supported.  
 The supported architectures are:
 
 - [x86](http://en.wikipedia.org/wiki/X86)
 - [x86\_64](http://en.wikipedia.org/wiki/X86_64)
-- [ia64](http://en.wikipedia.org/wiki/Ia64) (Linux only)
-- [ppc](http://en.wikipedia.org/wiki/PowerPC) (Linux only)
-- [ppc64](http://en.wikipedia.org/wiki/Ppc64) (Linux only)
-- [arm](http://en.wikipedia.org/wiki/ARM_architecture) (Linux only)
-
-**Note**: pinktrace-easy does **not** support FreeBSD at the moment, but support is planned.
+- [ia64](http://en.wikipedia.org/wiki/Ia64)
+- [ppc](http://en.wikipedia.org/wiki/PowerPC)
+- [ppc64](http://en.wikipedia.org/wiki/Ppc64)
+- [arm](http://en.wikipedia.org/wiki/ARM_architecture)
 
 ## License
 
-Copyright &copy; 2010, 2011 {{ site.author }} &lt;[{{ site.mail }}](mailto:{{ site.mail }})&gt;  
+Copyright &copy; 2010, 2011, 2012 {{ site.author }} &lt;[{{ site.mail }}](mailto:{{ site.mail }})&gt;  
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -169,13 +134,19 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## News
 
+*Tue Jun 28 2011:*
+
+[Version 0.1.2]({{ site.url}}release/pinktrace-0.1.2.tar.bz2) released;
+
+- autotools: fix kernel version check for Linux-3.0
+- New function pink\_name\_lookup\_with\_length()
+
 *Tue May 03 2011:*
 
 [Version 0.1.1]({{ site.url }}release/pinktrace-0.1.1.tar.bz2) released;
 
 - Include pinktrace.cabal.in and Setup.lhs.in in the tarball
 - Include examples in the tarball
-
 
 *Mon May 02 2011:*
 
@@ -187,7 +158,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - New functions pink\_trace\_lwpinfo() and pink\_trace\_followfork() for FreeBSD
 - Add new event PINK\_EVENT\_TRAP for genuine `SIGTRAP`
 - Merge Haskell bindings
-
 
 *Sat Oct 30 2010:*
 
