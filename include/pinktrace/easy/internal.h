@@ -49,7 +49,7 @@
 #undef KERNEL_VERSION
 #define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
 
-/** We have just begun ptracing this process. **/
+/** We have attached to this process, but did not see it stopping yet */
 #define PINK_EASY_PROCESS_STARTUP		00001
 /** Next SIGSTOP is to be ignored */
 #define PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP	00002
