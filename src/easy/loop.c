@@ -196,7 +196,7 @@ dont_switch_procs:
 			 */
 			PINK_EASY_INSERT_PROCESS(ctx, current);
 			current->tid = tid;
-			current->flags = PINK_EASY_PROCESS_STARTUP;
+			current->flags = PINK_EASY_PROCESS_STARTUP | PINK_EASY_PROCESS_SUSPENDED;
 			continue;
 		}
 
@@ -233,13 +233,13 @@ dont_switch_procs:
 				/* Not attached to the thread yet, nor is it alive... */
 				PINK_EASY_INSERT_PROCESS(ctx, new_thread);
 				new_thread->tid = tid;
-				new_thread->flags = (PINK_EASY_PROCESS_STARTUP | PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP);
+				new_thread->flags = PINK_EASY_PROCESS_STARTUP | PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP;
 				new_thread->tgid = current->tgid;
 			} else {
 				/* Thread is waiting for Pink to let her go on... */
 				new_thread->tgid = current->tid;
 				new_thread->abi = current->abi;
-				new_thread->flags &= ~PINK_EASY_PROCESS_STARTUP;
+				new_thread->flags &= ~PINK_EASY_PROCESS_SUSPENDED;
 				/* Happy birthday! */
 				if (ctx->callback_table.startup)
 					ctx->callback_table.startup(ctx, new_thread, current);

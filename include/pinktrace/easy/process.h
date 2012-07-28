@@ -50,14 +50,14 @@ extern "C" {
 #endif
 
 /**
- * @struct struct pink_easy_process
+ * @struct pink_easy_process
  * @brief Opaque structure which represents a process entry
  * @note These entries are allocated internally by the tracing context.
  **/
 struct pink_easy_process;
 
 /**
- * @struct struct pink_easy_process_list
+ * @struct pink_easy_process_list
  * @brief Opaque structure which represents a process list
  * @note This list is maintained internally by the tracing context.
  **/

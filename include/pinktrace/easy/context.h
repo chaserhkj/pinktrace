@@ -46,7 +46,7 @@
 struct pink_easy_callback_table;
 
 /**
- * @struct struct pink_easy_context
+ * @struct pink_easy_context
  * @brief Opaque structure which represents a tracing context.
  *
  * Use pink_easy_context_new() to create one and pink_easy_context_destroy() to

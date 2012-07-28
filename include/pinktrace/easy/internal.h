@@ -53,14 +53,16 @@
 #define PINK_EASY_PROCESS_STARTUP		00001
 /** Next SIGSTOP is to be ignored */
 #define PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP	00002
+/** Process is suspended, waiting for its parent */
+#define PINK_EASY_PROCESS_SUSPENDED		00004
 /** A system call is in progress **/
-#define PINK_EASY_PROCESS_INSYSCALL		00004
-/** Process is not our own child **/
-#define PINK_EASY_PROCESS_ATTACHED		00010
+#define PINK_EASY_PROCESS_INSYSCALL		00010
+/** It is attached already **/
+#define PINK_EASY_PROCESS_ATTACHED		00020
 /** Process should have forks followed **/
-#define PINK_EASY_PROCESS_FOLLOWFORK		00020
+#define PINK_EASY_PROCESS_FOLLOWFORK		00040
 /** Process is a clone **/
-#define PINK_EASY_PROCESS_CLONE_THREAD		00040
+#define PINK_EASY_PROCESS_CLONE_THREAD		00100
 
 #ifdef __cplusplus
 extern "C" {
