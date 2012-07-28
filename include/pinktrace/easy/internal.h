@@ -124,9 +124,10 @@ struct pink_easy_context {
 		(current) = calloc(1, sizeof(*(current)));					\
 		if ((current) == NULL) {							\
 			(ctx)->callback_table.error((ctx), PINK_EASY_ERROR_ALLOC, "calloc");	\
+		} else {									\
+			SLIST_INSERT_HEAD(&(ctx)->process_list, (current), entries);		\
+			(ctx)->nprocs++;							\
 		}										\
-		SLIST_INSERT_HEAD(&(ctx)->process_list, (current), entries);			\
-		(ctx)->nprocs++;								\
 	} while (0)
 #define PINK_EASY_REMOVE_PROCESS(ctx, current)							\
 	do {											\

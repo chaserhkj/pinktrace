@@ -213,7 +213,7 @@ dont_switch_procs:
 			if (new_thread == NULL) {
 				/* Not attached to the thread yet, nor is it alive... */
 				PINK_EASY_INSERT_PROCESS(ctx, new_thread);
-				new_thread->tid = tid;
+				new_thread->tid = new_tid;
 				new_thread->flags = PINK_EASY_PROCESS_STARTUP | PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP;
 				new_thread->tgid = current->tgid;
 			} else {
