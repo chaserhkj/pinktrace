@@ -133,6 +133,19 @@ bool pink_easy_process_is_clone(const struct pink_easy_process *proc)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
+ * Is this process at startup already?
+ *
+ * True for processes whose @e SIGTRAP signal is received yet their parent has
+ * not returned from the fork/vfork/clone system call yet. Such a process is
+ * listed in the process list but the startup callback has not been called for
+ * it yet.
+ *
+ * @param proc Process entry
+ * @return true if the process is at startup, false otherwise
+ **/
+bool pink_easy_process_is_starting(const struct pink_easy_process *proc);
+
+/**
  * Set the user data of the process entry.
  *
  * @note This function accepts a destructor function pointer which may be used

@@ -78,6 +78,11 @@ bool pink_easy_process_is_clone(const struct pink_easy_process *proc)
 	return !!(proc->flags & PINK_EASY_PROCESS_CLONE_THREAD);
 }
 
+bool pink_easy_process_is_starting(const struct pink_easy_process *proc)
+{
+	return !!(proc->flags & PINK_EASY_PROCESS_STARTUP);
+}
+
 void *pink_easy_process_get_userdata(const struct pink_easy_process *proc)
 {
 	return proc->userdata;
