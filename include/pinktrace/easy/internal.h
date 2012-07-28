@@ -49,20 +49,18 @@
 #undef KERNEL_VERSION
 #define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
 
-/** This table entry is in use **/
-#define PINK_EASY_PROCESS_INUSE			00001
 /** We have just begun ptracing this process. **/
-#define PINK_EASY_PROCESS_STARTUP		00002
+#define PINK_EASY_PROCESS_STARTUP		00001
 /** Next SIGSTOP is to be ignored */
-#define PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP	00004
+#define PINK_EASY_PROCESS_IGNORE_ONE_SIGSTOP	00002
 /** A system call is in progress **/
-#define PINK_EASY_PROCESS_INSYSCALL		00010
+#define PINK_EASY_PROCESS_INSYSCALL		00004
 /** Process is not our own child **/
-#define PINK_EASY_PROCESS_ATTACHED		00020
+#define PINK_EASY_PROCESS_ATTACHED		00010
 /** Process should have forks followed **/
-#define PINK_EASY_PROCESS_FOLLOWFORK		00040
+#define PINK_EASY_PROCESS_FOLLOWFORK		00020
 /** Process is a clone **/
-#define PINK_EASY_PROCESS_CLONE_THREAD		00100
+#define PINK_EASY_PROCESS_CLONE_THREAD		00040
 
 #ifdef __cplusplus
 extern "C" {
