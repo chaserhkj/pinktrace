@@ -54,30 +54,9 @@ static void handle_ptrace_error(struct pink_easy_context *ctx,
 
 static bool handle_startup(struct pink_easy_context *ctx, struct pink_easy_process *current)
 {
-#if PINK_HAVE_REGS_T
-	pink_regs_t regs;
-#endif
-
 	/* Set up tracing options */
 	if (!pink_trace_setup(current->tid, ctx->ptrace_options)) {
 		handle_ptrace_error(ctx, current, "setup");
-		return false;
-	}
-
-#if PINK_HAVE_REGS_T
-	if (!pink_trace_get_regs(current->tid, &regs))
-		handle_ptrace_error(ctx, current, "getregs");
-#endif
-
-	/* Read abi */
-	if (!pink_read_abi(current->tid,
-#if PINK_HAVE_REGS_T
-				&regs,
-#else
-				NULL,
-#endif
-				&current->abi)) {
-		handle_ptrace_error(ctx, current, "abi");
 		return false;
 	}
 
@@ -218,8 +197,10 @@ dont_switch_procs:
 		}
 
 		/* Is this the very first time we see this tracee stopped? */
-		if (current->flags & PINK_EASY_PROCESS_STARTUP && !handle_startup(ctx, current))
-			continue;
+		if (current->flags & PINK_EASY_PROCESS_STARTUP) {
+			if (!handle_startup(ctx, current))
+				continue;
+		}
 
 		if (event == PINK_EVENT_FORK || event == PINK_EVENT_VFORK || event == PINK_EVENT_CLONE) {
 			struct pink_easy_process *new_thread;
@@ -241,8 +222,7 @@ dont_switch_procs:
 				new_thread->abi = current->abi;
 				new_thread->flags &= ~PINK_EASY_PROCESS_SUSPENDED;
 				/* Happy birthday! */
-				if (ctx->callback_table.startup)
-					ctx->callback_table.startup(ctx, new_thread, current);
+				handle_startup(ctx, new_thread);
 				if (!pink_trace_syscall(new_thread->tid, 0))
 					handle_ptrace_error(ctx, current, "syscall");
 			}
