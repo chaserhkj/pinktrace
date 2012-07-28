@@ -1,1 +1,1 @@
-#include "i386/syscallent.h"
+#include "x86/syscallent.h"

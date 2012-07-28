@@ -1,4 +1,4 @@
-SUBDIRS= src doc pkg-config
+SUBDIRS= src pkg-config doc
 ACLOCAL_AMFLAGS= -I m4
 AUTOMAKE_OPTIONS= foreign dist-bzip2 no-dist-gzip std-options
 

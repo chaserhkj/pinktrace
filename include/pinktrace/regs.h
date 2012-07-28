@@ -57,7 +57,7 @@
  *  - arm: struct pt_regs
  *  - ppc: struct pt_regs
  *  - ppc64: struct pt_regs
- *  - i386: struct pt_regs
+ *  - x86: struct pt_regs
  *  - x32: struct user_regs_struct
  *  - x86_64: struct user_regs_struct
  *  - ia64: char (not supported)
@@ -65,7 +65,7 @@
  * @see PINK_HAVE_REGS_T
  **/
 
-#if PINK_ARCH_ARM || PINK_ARCH_I386 || PINK_ARCH_POWERPC
+#if PINK_ARCH_ARM || PINK_ARCH_POWERPC || PINK_ARCH_X86
 # include <asm/ptrace.h>
 typedef struct pt_regs pink_regs_t;
 #elif PINK_ARCH_X86_64 || PINK_ARCH_X32

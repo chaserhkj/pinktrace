@@ -128,11 +128,11 @@ dnl Check for supported architecture
 AC_MSG_CHECKING([for supported architecture])
 case "$host_cpu" in
 i[[3456]]86|pentium)
-	arch=i386
-	AC_DEFINE([I386], 1, [Define for the i386 architecture.])
+	arch=x86
+	AC_DEFINE([X86], 1, [Define for the x86 architecture.])
 	;;
 x86?64*)
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#ifndef __ILP32__
+	AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#ifndef __ILP32__
 # error not x32
 #endif]], [[]])],[arch=x32],[arch=x86_64])
 	if test "$arch" = "x86_64"; then
@@ -165,10 +165,10 @@ AC_MSG_RESULT([$arch])
 
 AC_SUBST([arch])
 
-if test x"$arch" = x"i386"; then
-	ARCH_I386=1
+if test x"$arch" = x"x86"; then
+	ARCH_X86=1
 else
-	ARCH_I386=0
+	ARCH_X86=0
 fi
 if test x"$arch" = x"x86_64"; then
 	ARCH_X86_64=1
@@ -200,7 +200,7 @@ if test x"$arch" = x"arm"; then
 else
 	ARCH_ARM=0
 fi
-AC_SUBST([ARCH_I386])
+AC_SUBST([ARCH_X86])
 AC_SUBST([ARCH_X86_64])
 AC_SUBST([ARCH_X32])
 AC_SUBST([ARCH_IA64])
@@ -510,7 +510,7 @@ AC_CONFIG_FILES([
 		 src/Makefile
 		 src/easy/Makefile
 		 src/linux/Makefile
-		 src/linux/i386/Makefile
+		 src/linux/x86/Makefile
 		 src/linux/x32/Makefile
 		 src/linux/x86_64/Makefile
 		 src/linux/ia64/Makefile
