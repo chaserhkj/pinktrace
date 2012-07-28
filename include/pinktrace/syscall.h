@@ -25,21 +25,26 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_SYSCALL_H
-#define _PINK_SYSCALL_H
-
-#include <pinktrace/macros.h>
-#include <pinktrace/abi.h>
-#include <pinktrace/event.h>
+#ifndef PINK_SYSCALL_H
+#define PINK_SYSCALL_H
 
 /**
  * @file pinktrace/syscall.h
  * @brief Pink's system call naming
+ *
+ * Do not include this file directly. Use pinktrace/pink.h directly.
+ *
  * @defgroup pink_name Pink's system call naming
  * @ingroup pinktrace
  * @{
  **/
-PINK_BEGIN_DECL
+
+#include <pinktrace/compiler.h>
+#include <pinktrace/abi.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Return the name of the given system call.
@@ -48,7 +53,7 @@ PINK_BEGIN_DECL
  * @param abi System call ABI
  * @return The name of the system call, NULL if system call name is unknown
  **/
-const char *pink_syscall_name(long scno, pink_abi_t abi)
+const char *pink_syscall_name(long scno, enum pink_abi abi)
 	PINK_GCC_ATTR((pure));
 
 /**
@@ -58,9 +63,11 @@ const char *pink_syscall_name(long scno, pink_abi_t abi)
  * @param abi System call ABI
  * @return The system call number on success, -1 on failure
  **/
-long pink_syscall_lookup(const char *name, pink_abi_t abi)
+long pink_syscall_lookup(const char *name, enum pink_abi abi)
 	PINK_GCC_ATTR((pure));
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

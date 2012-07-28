@@ -39,8 +39,8 @@
 #include <sys/wait.h>
 #include <sys/utsname.h>
 
-static void handle_ptrace_error(pink_easy_context_t *ctx,
-		pink_easy_process_t *current,
+static void handle_ptrace_error(struct pink_easy_context *ctx,
+		struct pink_easy_process *current,
 		const char *errctx)
 {
 	if (errno == ESRCH) {
@@ -52,7 +52,7 @@ static void handle_ptrace_error(pink_easy_context_t *ctx,
 	PINK_EASY_REMOVE_PROCESS(ctx, current);
 }
 
-static bool handle_startup(pink_easy_context_t *ctx, pink_easy_process_t *current)
+static bool handle_startup(struct pink_easy_context *ctx, struct pink_easy_process *current)
 {
 #if PINK_HAVE_REGS_T
 	pink_regs_t regs;
@@ -90,7 +90,7 @@ static bool handle_startup(pink_easy_context_t *ctx, pink_easy_process_t *curren
 	/* Happy birthday! */
 	current->flags &= ~PINK_EASY_PROCESS_STARTUP;
 	if (ctx->callback_table.startup) {
-		pink_easy_process_t *parent = NULL;
+		struct pink_easy_process *parent = NULL;
 		if (current->tgid != -1)
 			parent = pink_easy_process_list_lookup(&(ctx->process_list), current->tgid);
 		ctx->callback_table.startup(ctx, current, parent);
@@ -99,7 +99,7 @@ static bool handle_startup(pink_easy_context_t *ctx, pink_easy_process_t *curren
 	return true;
 }
 
-int pink_easy_loop(pink_easy_context_t *ctx)
+int pink_easy_loop(struct pink_easy_context *ctx)
 {
 	/* Enter the event loop */
 	while (ctx->nprocs != 0) {
@@ -107,7 +107,7 @@ int pink_easy_loop(pink_easy_context_t *ctx)
 		int r, status, sig;
 		unsigned event;
 		pink_regs_t regs;
-		pink_easy_process_t *current;
+		struct pink_easy_process *current;
 
 		tid = waitpid(-1, &status, __WALL);
 		if (tid < 0) {
@@ -142,8 +142,8 @@ int pink_easy_loop(pink_easy_context_t *ctx)
 		 * On 2.6 and earlier, it can return garbage.
 		 */
 		if (event == PINK_EVENT_EXEC) {
-			pink_abi_t old_abi = current->abi;
-			pink_easy_process_t *execve_thread = current;
+			enum pink_abi old_abi = current->abi;
+			struct pink_easy_process *execve_thread = current;
 			long old_tid = 0;
 
 			if (pink_easy_os_release < KERNEL_VERSION(3,0,0))
@@ -222,7 +222,7 @@ dont_switch_procs:
 			continue;
 
 		if (event == PINK_EVENT_FORK || event == PINK_EVENT_VFORK || event == PINK_EVENT_CLONE) {
-			pink_easy_process_t *new_thread;
+			struct pink_easy_process *new_thread;
 			long new_tid;
 			if (!pink_trace_geteventmsg(current->tid, (unsigned long *)&new_tid)) {
 				handle_ptrace_error(ctx, current, "geteventmsg");

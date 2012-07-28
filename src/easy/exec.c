@@ -43,11 +43,11 @@ enum {
 	PINK_INTERNAL_FUNC_EXECVP,
 };
 
-static bool pink_easy_exec_helper(pink_easy_context_t *ctx, int type,
+static bool pink_easy_exec_helper(struct pink_easy_context *ctx, int type,
 		const char *filename, char *const argv[], char *const envp[])
 {
 	pid_t tid;
-	pink_easy_process_t *current;
+	struct pink_easy_process *current;
 
 	tid = fork();
 	if (tid < 0) {
@@ -91,13 +91,13 @@ static bool pink_easy_exec_helper(pink_easy_context_t *ctx, int type,
 	return true;
 }
 
-bool pink_easy_execve(pink_easy_context_t *ctx, const char *filename,
+bool pink_easy_execve(struct pink_easy_context *ctx, const char *filename,
 		char *const argv[], char *const envp[])
 {
 	return pink_easy_exec_helper(ctx, PINK_INTERNAL_FUNC_EXECVE, filename, argv, envp);
 }
 
-bool pink_easy_execl(pink_easy_context_t *ctx, const char *file,
+bool pink_easy_execl(struct pink_easy_context *ctx, const char *file,
 		const char *arg, ...)
 {
 	unsigned int narg;
@@ -130,7 +130,7 @@ bool pink_easy_execl(pink_easy_context_t *ctx, const char *file,
 	return false;
 }
 
-bool pink_easy_execlp(pink_easy_context_t *ctx, const char *file,
+bool pink_easy_execlp(struct pink_easy_context *ctx, const char *file,
 		const char *arg, ...)
 {
 	unsigned int narg;
@@ -163,13 +163,13 @@ bool pink_easy_execlp(pink_easy_context_t *ctx, const char *file,
 	return false;
 }
 
-bool pink_easy_execv(pink_easy_context_t *ctx, const char *path,
+bool pink_easy_execv(struct pink_easy_context *ctx, const char *path,
 		char *const argv[])
 {
 	return pink_easy_exec_helper(ctx, PINK_INTERNAL_FUNC_EXECV, path, argv, NULL);
 }
 
-bool pink_easy_execvp(pink_easy_context_t *ctx, const char *file,
+bool pink_easy_execvp(struct pink_easy_context *ctx, const char *file,
 		char *const argv[])
 {
 	return pink_easy_exec_helper(ctx, PINK_INTERNAL_FUNC_EXECVP, file, argv, NULL);

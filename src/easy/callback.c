@@ -34,7 +34,7 @@
 #include <string.h>
 #include <errno.h>
 
-int pink_easy_errback_child_stderr(pink_easy_child_error_t e)
+int pink_easy_errback_child_stderr(enum pink_easy_child_error e)
 {
 	fprintf(stderr, "pinktrace child error: %s (errno:%d %s)\n",
 			pink_easy_child_strerror(e),
@@ -47,7 +47,7 @@ void pink_easy_errback_stderr(const struct pink_easy_context *ctx, ...)
 	va_list ap;
 	const char *errctx;
 	pid_t tid;
-	pink_easy_process_t *current;
+	struct pink_easy_process *current;
 
 	fprintf(stderr, "pinktrace error: ");
 
@@ -75,7 +75,7 @@ void pink_easy_errback_stderr(const struct pink_easy_context *ctx, ...)
 		break;
 	case PINK_EASY_ERROR_TRACE:
 	case PINK_EASY_ERROR_PROCESS:
-		current = va_arg(ap, pink_easy_process_t *);
+		current = va_arg(ap, struct pink_easy_process *);
 		errctx = va_arg(ap, const char *);
 		fprintf(stderr, "%s (tid:%lu[%d]",
 				pink_easy_strerror(ctx->error),

@@ -35,10 +35,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-bool pink_easy_call(pink_easy_context_t *ctx, pink_easy_child_func_t func, void *userdata)
+bool pink_easy_call(struct pink_easy_context *ctx, pink_easy_child_func_t func, void *userdata)
 {
 	pid_t tid;
-	pink_easy_process_t *current;
+	struct pink_easy_process *current;
 
 	tid = fork();
 	if (tid < 0) {

@@ -25,25 +25,28 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EVENT_H
-#define _PINK_EVENT_H
+#ifndef PINK_EVENT_H
+#define PINK_EVENT_H
 
 /**
  * @file pinktrace/event.h
  * @brief Pink's ptrace(2) event handling for Linux
+ *
+ * Do not include this file directly. Use pinktrace/pink.h instead.
+ *
  * @defgroup pink_event Pink's ptrace(2) event handling for Linux
  * @ingroup pinktrace
  * @{
  **/
 
-#include <pinktrace/macros.h>
+#include <pinktrace/compiler.h>
 
 /**
  * @e ptrace(2) event constants
  *
  * @note Availability: Linux
  **/
-typedef enum {
+enum pink_event {
 	/** No event */
 	PINK_EVENT_NONE = 0,
 	/**
@@ -82,9 +85,11 @@ typedef enum {
 	 * @see #PINK_HAVE_EVENT_EXIT
 	 **/
 	PINK_EVENT_EXIT = 6,
-} pink_event_t;
+};
 
-PINK_BEGIN_DECL
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Calculate the event from the status argument as returned by @e waitpid(2)
@@ -95,7 +100,7 @@ PINK_BEGIN_DECL
  * @param status Status argument as returned by @e waitpid(2)
  * @return One of PINK_EVENT constants
  **/
-pink_event_t pink_event_decide(int status);
+enum pink_event pink_event_decide(int status);
 
 /**
  * Return a string representation of the event
@@ -103,9 +108,11 @@ pink_event_t pink_event_decide(int status);
  * @param event Event
  * @return String representation of the event
  **/
-const char *pink_event_name(pink_event_t event)
+const char *pink_event_name(enum pink_event event)
 	PINK_GCC_ATTR((pure));
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

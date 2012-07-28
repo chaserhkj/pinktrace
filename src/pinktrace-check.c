@@ -222,7 +222,7 @@ void dump_regs_struct(const pink_regs_t *regs)
 	debug("\t --8< REGDUMP END %p >8--\n", regs);
 }
 
-void dump_socket_address(const pink_socket_address_t *sockaddr)
+void dump_socket_address(const struct pink_sockaddr *sockaddr)
 {
 	char ip[64];
 	const char *f;
@@ -398,7 +398,7 @@ bool check_stopped_or_kill(pid_t pid, int status)
 	abort();
 }
 
-void check_syscall_equal_or_kill(pid_t pid, pink_abi_t abi,
+void check_syscall_equal_or_kill(pid_t pid, enum pink_abi abi,
 		long sysnum, long sysnum_expected)
 {
 	if (sysnum == sysnum_expected)
@@ -609,9 +609,9 @@ void trace_set_regs_or_kill(pid_t pid, const pink_regs_t *regs)
 	}
 }
 
-pink_event_t event_decide_and_print(int status)
+enum pink_event event_decide_and_print(int status)
 {
-	pink_event_t e;
+	enum pink_event e;
 
 	e = pink_event_decide(status);
 
@@ -622,7 +622,7 @@ pink_event_t event_decide_and_print(int status)
 	return e;
 }
 
-void read_abi_or_kill(pid_t pid, const pink_regs_t *regs, int *abi)
+void read_abi_or_kill(pid_t pid, const pink_regs_t *regs, enum pink_abi *abi)
 {
 	bool r;
 	int saved_errno;
@@ -650,7 +650,7 @@ void read_abi_or_kill(pid_t pid, const pink_regs_t *regs, int *abi)
 	}
 }
 
-void read_syscall_or_kill(pid_t pid, pink_abi_t abi,
+void read_syscall_or_kill(pid_t pid, enum pink_abi abi,
 		const pink_regs_t *regs,
 		long *sysnum)
 {
@@ -679,7 +679,7 @@ void read_syscall_or_kill(pid_t pid, pink_abi_t abi,
 	}
 }
 
-void read_retval_or_kill(pid_t pid, pink_abi_t abi,
+void read_retval_or_kill(pid_t pid, enum pink_abi abi,
 		const pink_regs_t *regs,
 		long *retval, int *error)
 {
@@ -710,7 +710,7 @@ void read_retval_or_kill(pid_t pid, pink_abi_t abi,
 	}
 }
 
-void read_argument_or_kill(pid_t pid, pink_abi_t abi,
+void read_argument_or_kill(pid_t pid, enum pink_abi abi,
 		const pink_regs_t *regs,
 		unsigned arg_index, long *argval)
 {
@@ -742,7 +742,7 @@ void read_argument_or_kill(pid_t pid, pink_abi_t abi,
 	}
 }
 
-void read_vm_data_or_kill(pid_t pid, pink_abi_t abi, long addr,
+void read_vm_data_or_kill(pid_t pid, enum pink_abi abi, long addr,
 		char *dest, size_t len)
 {
 	ssize_t r;
@@ -774,7 +774,7 @@ void read_vm_data_or_kill(pid_t pid, pink_abi_t abi, long addr,
 	dump_basic_hex(dest, len);
 }
 
-void read_vm_data_nul_or_kill(pid_t pid, pink_abi_t abi, long addr,
+void read_vm_data_nul_or_kill(pid_t pid, enum pink_abi abi, long addr,
 		char *dest, size_t len)
 {
 	ssize_t r;
@@ -807,7 +807,7 @@ void read_vm_data_nul_or_kill(pid_t pid, pink_abi_t abi, long addr,
 	dump_basic_hex(dest, len);
 }
 
-void read_string_array_or_kill(pid_t pid, pink_abi_t abi,
+void read_string_array_or_kill(pid_t pid, enum pink_abi abi,
 		long arg, unsigned arr_index,
 		char *dest, size_t dest_len,
 		bool *nullptr)
@@ -856,7 +856,7 @@ void read_string_array_or_kill(pid_t pid, pink_abi_t abi,
 	dump_basic_hex(dest, dest_len);
 }
 
-void read_socket_argument_or_kill(pid_t pid, pink_abi_t abi,
+void read_socket_argument_or_kill(pid_t pid, enum pink_abi abi,
 		const pink_regs_t *regs,
 		bool decode_socketcall,
 		unsigned arg_index, long *argval)
@@ -901,11 +901,11 @@ void read_socket_argument_or_kill(pid_t pid, pink_abi_t abi,
 	}
 }
 
-void read_socket_address_or_kill(pid_t pid, pink_abi_t abi,
+void read_socket_address_or_kill(pid_t pid, enum pink_abi abi,
 		const pink_regs_t *regs,
 		bool decode_socketcall,
 		unsigned arg_index, long *fd,
-		pink_socket_address_t *sockaddr)
+		struct pink_sockaddr *sockaddr)
 {
 	bool r;
 	int saved_errno;
@@ -953,7 +953,7 @@ void read_socket_address_or_kill(pid_t pid, pink_abi_t abi,
 	dump_socket_address(sockaddr);
 }
 
-void write_syscall_or_kill(pid_t pid, pink_abi_t abi, long sysnum)
+void write_syscall_or_kill(pid_t pid, enum pink_abi abi, long sysnum)
 {
 	bool r;
 	int saved_errno;
@@ -976,7 +976,7 @@ void write_syscall_or_kill(pid_t pid, pink_abi_t abi, long sysnum)
 	}
 }
 
-void write_retval_or_kill(pid_t pid, pink_abi_t abi, long retval, int error)
+void write_retval_or_kill(pid_t pid, enum pink_abi abi, long retval, int error)
 {
 	bool r;
 	int saved_errno;
@@ -1000,7 +1000,7 @@ void write_retval_or_kill(pid_t pid, pink_abi_t abi, long retval, int error)
 	}
 }
 
-void write_argument_or_kill(pid_t pid, pink_abi_t abi,
+void write_argument_or_kill(pid_t pid, enum pink_abi abi,
 		unsigned arg_index, long argval)
 {
 	bool r;
@@ -1027,7 +1027,7 @@ void write_argument_or_kill(pid_t pid, pink_abi_t abi,
 	}
 }
 
-void write_vm_data_or_kill(pid_t pid, pink_abi_t abi, long addr,
+void write_vm_data_or_kill(pid_t pid, enum pink_abi abi, long addr,
 		const char *src, size_t len)
 {
 	ssize_t r;

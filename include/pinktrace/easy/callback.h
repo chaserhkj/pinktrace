@@ -25,21 +25,23 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_CALLBACK_H
-#define _PINK_EASY_CALLBACK_H
+#ifndef PINK_EASY_CALLBACK_H
+#define PINK_EASY_CALLBACK_H
 
 /**
  * @file pinktrace/easy/callback.h
  * @brief Pink's easy ptrace(2) event callbacks
+ *
+ * Do not include this file directly. Use pinktrace/easy/pink.h instead.
+ *
  * @defgroup pink_easy_callback Pink's easy ptrace(2) event callbacks
  * @ingroup pinktrace-easy
  * @{
  **/
 
-#include <stdbool.h>
-#include <pinktrace/pink.h>
 #include <pinktrace/easy/error.h>
-#include <pinktrace/easy/process.h>
+
+#include <stdbool.h>
 
 /**
  * Implies that the loop should be aborted immediately,
@@ -60,6 +62,10 @@
 #define PINK_EASY_CFLAG_SIGIGN		(1 << 2)
 
 struct pink_easy_context;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Errback for errors in the main process.
@@ -86,8 +92,8 @@ struct pink_easy_context;
      - ATTACH            +      pid_t tid                                        -
      - FORK              +      const char *errctx                               -
      - WAIT              +      -                                                -
-     - TRACE             +      pink_easy_process_t *current, const char *errctx -
-     - PROCESS           -      pink_easy_process_t *current, const char *errctx -
+     - TRACE             +      struct pink_easy_process *current, const char *errctx -
+     - PROCESS           -      struct pink_easy_process *current, const char *errctx -
      -----------------------------------------------------------------------------
    @endverbatim
  *
@@ -109,7 +115,7 @@ void pink_easy_errback_stderr(const struct pink_easy_context *ctx, ...);
  * @param e Error code
  * @return Child exists with this return value
  **/
-typedef int (*pink_easy_errback_child_t) (pink_easy_child_error_t e);
+typedef int (*pink_easy_errback_child_t) (enum pink_easy_child_error e);
 
 /**
  * Default child errback which prints an informative message on standard error
@@ -117,7 +123,7 @@ typedef int (*pink_easy_errback_child_t) (pink_easy_child_error_t e);
  *
  * @param e Child error code
  **/
-int pink_easy_errback_child_stderr(pink_easy_child_error_t e);
+int pink_easy_errback_child_stderr(enum pink_easy_child_error e);
 
 /**
  * Callback for process trace startup
@@ -127,7 +133,7 @@ int pink_easy_errback_child_stderr(pink_easy_child_error_t e);
  * @param parent Parent of the new process or NULL for initial processes
  **/
 typedef void (*pink_easy_callback_startup_t) (const struct pink_easy_context *ctx,
-		pink_easy_process_t *current, pink_easy_process_t *parent);
+		struct pink_easy_process *current, struct pink_easy_process *parent);
 
 /**
  * Callback for process teardown
@@ -139,7 +145,7 @@ typedef void (*pink_easy_callback_startup_t) (const struct pink_easy_context *ct
  * @param current Detached process
  **/
 typedef void (*pink_easy_callback_teardown_t) (const struct pink_easy_context *ctx,
-		const pink_easy_process_t *current);
+		const struct pink_easy_process *current);
 
 /**
  * Callback for the end of tracing.
@@ -167,7 +173,7 @@ typedef int (*pink_easy_callback_cleanup_t) (const struct pink_easy_context *ctx
  * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
 typedef int (*pink_easy_callback_syscall_t) (const struct pink_easy_context *ctx,
-		pink_easy_process_t *current,
+		struct pink_easy_process *current,
 		const pink_regs_t *regs,
 		bool entering);
 
@@ -183,9 +189,9 @@ typedef int (*pink_easy_callback_syscall_t) (const struct pink_easy_context *ctx
  * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
 typedef int (*pink_easy_callback_exec_t) (const struct pink_easy_context *ctx,
-		pink_easy_process_t *current,
+		struct pink_easy_process *current,
 		const pink_regs_t *regs,
-		pink_abi_t old_abi);
+		enum pink_abi old_abi);
 
 /**
  * Callback for pre-exit notification
@@ -196,7 +202,7 @@ typedef int (*pink_easy_callback_exec_t) (const struct pink_easy_context *ctx,
  * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
 typedef int (*pink_easy_callback_pre_exit_t) (const struct pink_easy_context *ctx,
-		pink_easy_process_t *current, int status);
+		struct pink_easy_process *current, int status);
 
 /**
  * Callback for stopping signal delivery
@@ -207,7 +213,7 @@ typedef int (*pink_easy_callback_pre_exit_t) (const struct pink_easy_context *ct
  * @return See PINK_EASY_CFLAG_* for flags to set in the return value.
  **/
 typedef int (*pink_easy_callback_signal_t) (const struct pink_easy_context *ctx,
-		pink_easy_process_t *current, int status);
+		struct pink_easy_process *current, int status);
 
 /**
  * Callback for genuine exit notification
@@ -223,7 +229,7 @@ typedef int (*pink_easy_callback_exit_t) (const struct pink_easy_context *ctx,
 /**
  * @brief Structure which represents a callback table
  **/
-typedef struct pink_easy_callback_table {
+struct pink_easy_callback_table {
 	/** "error" errback **/
 	pink_easy_errback_t error;
 	/** "cerror" errback **/
@@ -246,8 +252,10 @@ typedef struct pink_easy_callback_table {
 	pink_easy_callback_signal_t signal;
 	/** "exit" callback **/
 	pink_easy_callback_exit_t exit;
-} pink_easy_callback_table_t;
+};
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

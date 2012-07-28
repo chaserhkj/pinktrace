@@ -25,23 +25,30 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_ATTACH_H
-#define _PINK_EASY_ATTACH_H
+#ifndef PINK_EASY_ATTACH_H
+#define PINK_EASY_ATTACH_H
 
 /**
  * @file pinktrace/easy/attach.h
  * @brief Pink's easy process attaching
+ *
+ * Do not include this file directly. Use pinktrace/easy/pink.h instead.
+ *
  * @defgroup pink_easy_attach Pink's easy process attaching
  * @ingroup pinktrace-easy
  * @{
  **/
 
+#include <pinktrace/compiler.h>
+
 #include <stdbool.h>
 #include <sys/types.h>
-#include <pinktrace/pink.h>
-#include <pinktrace/easy/context.h>
 
-PINK_BEGIN_DECL
+struct pink_easy_context;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Attach to a process for tracing.
@@ -52,13 +59,15 @@ PINK_BEGIN_DECL
  * @param tid Thread ID
  * @param tgid Thread group ID. Use this to specify the thread group in case
  *             the process is a clone. This is useful when attaching to all
- *             threads of a process and makes pinktrace track whether the
+ *             threads of a process and lets pinktrace track whether the
  *             process is a clone. Specify -1 for non-clones.
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_easy_attach(pink_easy_context_t *ctx, pid_t tid, pid_t tgid)
+bool pink_easy_attach(struct pink_easy_context *ctx, pid_t tid, pid_t tgid)
 	PINK_GCC_ATTR((nonnull(1)));
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

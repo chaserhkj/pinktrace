@@ -107,7 +107,7 @@ static ssize_t _pink_write_vm_data_ptrace(pid_t tid, long addr, const char *src,
 	return count_written;
 }
 
-ssize_t pink_write_vm_data(pid_t tid, pink_abi_t abi, long addr,
+ssize_t pink_write_vm_data(pid_t tid, enum pink_abi abi, long addr,
 		const char *src, size_t len)
 {
 #if PINK_ABIS_SUPPORTED > 1
@@ -136,7 +136,7 @@ ssize_t pink_write_vm_data(pid_t tid, pink_abi_t abi, long addr,
 #endif
 }
 
-bool pink_write_syscall(pid_t tid, pink_abi_t abi, long sysnum)
+bool pink_write_syscall(pid_t tid, enum pink_abi abi, long sysnum)
 {
 #if PINK_ARCH_ARM
 # ifndef PTRACE_SET_SYSCALL
@@ -167,7 +167,7 @@ bool pink_write_syscall(pid_t tid, pink_abi_t abi, long sysnum)
 	return true;
 }
 
-bool pink_write_retval(pid_t tid, pink_abi_t abi, long retval, int error)
+bool pink_write_retval(pid_t tid, enum pink_abi abi, long retval, int error)
 {
 #if PINK_ARCH_ARM
 	return pink_write_word_user(tid, 0, retval);
@@ -213,7 +213,7 @@ bool pink_write_retval(pid_t tid, pink_abi_t abi, long retval, int error)
 #endif
 }
 
-bool pink_write_argument(pid_t tid, pink_abi_t abi, unsigned arg_index, long argval)
+bool pink_write_argument(pid_t tid, enum pink_abi abi, unsigned arg_index, long argval)
 {
 	if (arg_index >= PINK_MAX_ARGS) {
 		errno = EINVAL;
@@ -258,7 +258,7 @@ bool pink_write_argument(pid_t tid, pink_abi_t abi, unsigned arg_index, long arg
 		default: _pink_assert_not_reached();
 		}
 		break;
-	case _PINK_ABI_X32: /* x86-64 or x32 ABI */
+	case PINK_ABI_X32: /* x86-64 or x32 ABI */
 #if PINK_ARCH_X86_64
 	case 0:
 #endif

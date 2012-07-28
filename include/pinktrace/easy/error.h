@@ -25,23 +25,24 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_ERROR_H
-#define _PINK_EASY_ERROR_H
+#ifndef PINK_EASY_ERROR_H
+#define PINK_EASY_ERROR_H
 
 /**
  * @file pinktrace/easy/error.h
  * @brief Pink's easy error codes
+ *
+ * Do not include this file directly. Use pinktrace/easy/pink.h instead.
+ *
  * @defgroup pink_easy_error Pink's easy error codes
  * @ingroup pinktrace-easy
  * @{
  **/
 
-#include <pinktrace/pink.h>
-
-PINK_BEGIN_DECL
+#include <pinktrace/compiler.h>
 
 /** Child error codes */
-typedef enum {
+enum pink_easy_child_error {
 	/** Success **/
 	PINK_EASY_CHILD_ERROR_SUCCESS = 0,
 	/** Preparation for tracing failed. (e.g. pink_trace_me()) **/
@@ -50,10 +51,10 @@ typedef enum {
 	PINK_EASY_CHILD_ERROR_EXEC,
 	/** Maximum error number **/
 	PINK_EASY_CHILD_ERROR_MAX,
-} pink_easy_child_error_t;
+};
 
 /** Error codes */
-typedef enum {
+enum pink_easy_error {
 	/** Successful run **/
 	PINK_EASY_ERROR_SUCCESS = 0,
 
@@ -75,12 +76,16 @@ typedef enum {
 	/** @e ptrace(2) failed **/
 	PINK_EASY_ERROR_TRACE,
 
-	/** Process misbehave (i.e. indication of a pinktrace bug)**/
+	/** Process misbehave (most likely an indication of a pinktrace bug) **/
 	PINK_EASY_ERROR_PROCESS,
 
 	/** Maximum error number **/
 	PINK_EASY_ERROR_MAX,
-} pink_easy_error_t;
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Returns a string describing the child error.
@@ -88,7 +93,7 @@ typedef enum {
  * @param e Error code
  * @return String describing the error
  **/
-const char *pink_easy_child_strerror(pink_easy_child_error_t e)
+const char *pink_easy_child_strerror(enum pink_easy_child_error e)
 	PINK_GCC_ATTR((pure));
 
 /**
@@ -97,9 +102,11 @@ const char *pink_easy_child_strerror(pink_easy_child_error_t e)
  * @param e Error code
  * @return String describing the error
  **/
-const char *pink_easy_strerror(pink_easy_error_t e)
+const char *pink_easy_strerror(enum pink_easy_error e)
 	PINK_GCC_ATTR((pure));
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

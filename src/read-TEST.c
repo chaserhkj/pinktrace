@@ -57,8 +57,9 @@ START_TEST(TEST_read_abi)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		pink_regs_t regs;
 
 		tracee_pid = wait_verbose(&status);
@@ -110,8 +111,9 @@ START_TEST(TEST_read_syscall)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		long sysnum;
 		pink_regs_t regs;
 
@@ -168,8 +170,9 @@ START_TEST(TEST_read_syscall_sysgood)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		long sysnum;
 		pink_regs_t regs;
 
@@ -225,8 +228,9 @@ START_TEST(TEST_read_retval_good)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		int error = 0;
 		long rval, sysnum;
 		pink_regs_t regs;
@@ -287,8 +291,9 @@ START_TEST(TEST_read_retval_fail)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		int error = 0;
 		long rval, sysnum;
 		pink_regs_t regs;
@@ -354,8 +359,9 @@ START_TEST(TEST_read_argument)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		long argval, sysnum;
 		pink_regs_t regs;
 
@@ -415,8 +421,9 @@ START_TEST(TEST_read_vm_data)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		long argval, sysnum;
 		pink_regs_t regs;
 
@@ -479,8 +486,9 @@ START_TEST(TEST_read_vm_data_nul)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		long argval, sysnum;
 		pink_regs_t regs;
 
@@ -550,8 +558,9 @@ START_TEST(TEST_read_string_array)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi, i;
+		int i, status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		long argval, sysnum;
 		bool nullptr;
 		pink_regs_t regs;

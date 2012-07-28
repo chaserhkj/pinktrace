@@ -27,12 +27,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_SYSTEM_H
-#define _PINK_SYSTEM_H
+#ifndef PINK_SYSTEM_H
+#define PINK_SYSTEM_H
 
 /**
  * @file pinktrace/system.h
  * @brief Pink's system specific definitions
+ *
+ * Do not include this file directly. Use pinktrace/pink.h directly.
+ *
  * @defgroup pink_system Pink's system specific definitions
  * @ingroup pinktrace
  * @{

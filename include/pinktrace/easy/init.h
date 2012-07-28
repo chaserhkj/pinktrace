@@ -25,12 +25,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_INIT_H
-#define _PINK_EASY_INIT_H
+#ifndef PINK_EASY_INIT_H
+#define PINK_EASY_INIT_H
 
 /**
  * @file pinktrace/easy/init.h
  * @brief Pink's easy initialization
+ *
+ * Do not include this file directly. Use pinktrace/easy/pink.h directly.
+ *
  * @defgroup pink_easy_init Pink's easy initilization
  * @ingroup pinktrace-easy
  * @{
@@ -38,7 +41,9 @@
 
 #include <stdbool.h>
 
-PINK_BEGIN_DECL
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Kernel release which pinktrace uses to make certain decisions on how
@@ -55,6 +60,8 @@ extern unsigned pink_easy_os_release;
  **/
 bool pink_easy_init(void);
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

@@ -25,8 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_PINK_H
-#define _PINK_PINK_H
+#ifndef PINK_PINK_H
+#define PINK_PINK_H
 
 /**
  * @mainpage pinktrace
@@ -50,19 +50,17 @@
  **/
 
 /**
- * @file
+ * @file pinktrace/pink.h
  * @brief A header file including all other header files part of pinktrace
  * @defgroup pinktrace Pink's Tracing Library
  **/
 
 #include <pinktrace/about.h>
-
 #include <pinktrace/compat.h>
-#include <pinktrace/macros.h>
+#include <pinktrace/compiler.h>
 #include <pinktrace/system.h>
 #include <pinktrace/abi.h>
 #include <pinktrace/regs.h>
-
 #include <pinktrace/event.h>
 #include <pinktrace/syscall.h>
 #include <pinktrace/trace.h>

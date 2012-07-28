@@ -25,37 +25,43 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_PROCESS_H
-#define _PINK_EASY_PROCESS_H
+#ifndef PINK_EASY_PROCESS_H
+#define PINK_EASY_PROCESS_H
 
 /**
  * @file pinktrace/easy/process.h
  * @brief Pink's easy process representation
+ *
+ * Do not include this file directly. Use pinktrace/easy/pink.h directly.
+ *
  * @defgroup pink_easy_process Pink's easy process representation
  * @ingroup pinktrace-easy
  * @{
  **/
 
-#include <stdbool.h>
-#include <sys/types.h>
-#include <pinktrace/pink.h>
+#include <pinktrace/compiler.h>
 #include <pinktrace/easy/func.h>
 
-PINK_BEGIN_DECL
+#include <stdbool.h>
+#include <sys/types.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @struct pink_easy_process_t
+ * @struct struct pink_easy_process
  * @brief Opaque structure which represents a process entry
  * @note These entries are allocated internally by the tracing context.
  **/
-typedef struct pink_easy_process pink_easy_process_t;
+struct pink_easy_process;
 
 /**
- * @struct pink_easy_process_list_t
+ * @struct struct pink_easy_process_list
  * @brief Opaque structure which represents a process list
  * @note This list is maintained internally by the tracing context.
  **/
-typedef struct pink_easy_process_list pink_easy_process_list_t;
+struct pink_easy_process_list;
 
 /**
  * Kill a process
@@ -66,7 +72,7 @@ typedef struct pink_easy_process_list pink_easy_process_list_t;
  * @param sig Signal to deliver
  * @return Same as @e kill(2)
  **/
-int pink_easy_process_kill(const pink_easy_process_t *proc, int sig);
+int pink_easy_process_kill(const struct pink_easy_process *proc, int sig);
 
 /**
  * Detach from a process as necessary and resume its execution. This function
@@ -77,7 +83,7 @@ int pink_easy_process_kill(const pink_easy_process_t *proc, int sig);
  * @param sig Same as pink_trace_cont()
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_easy_process_resume(const pink_easy_process_t *proc, int sig);
+bool pink_easy_process_resume(const struct pink_easy_process *proc, int sig);
 
 /**
  * Returns the thread ID of the entry
@@ -85,7 +91,7 @@ bool pink_easy_process_resume(const pink_easy_process_t *proc, int sig);
  * @param proc Process entry
  * @return Thread ID
  **/
-pid_t pink_easy_process_get_tid(const pink_easy_process_t *proc)
+pid_t pink_easy_process_get_tid(const struct pink_easy_process *proc)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
@@ -94,7 +100,7 @@ pid_t pink_easy_process_get_tid(const pink_easy_process_t *proc)
  * @param proc Process entry
  * @return Thread group ID or -1
  **/
-pid_t pink_easy_process_get_tgid(const pink_easy_process_t *proc)
+pid_t pink_easy_process_get_tgid(const struct pink_easy_process *proc)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
@@ -103,7 +109,7 @@ pid_t pink_easy_process_get_tgid(const pink_easy_process_t *proc)
  * @param proc Process entry
  * @return System call ABI
  **/
-int pink_easy_process_get_abi(const pink_easy_process_t *proc)
+int pink_easy_process_get_abi(const struct pink_easy_process *proc)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
@@ -112,7 +118,7 @@ int pink_easy_process_get_abi(const pink_easy_process_t *proc)
  * @param proc Process entry
  * @return true if the process is attached, false otherwise
  **/
-bool pink_easy_process_is_attached(const pink_easy_process_t *proc)
+bool pink_easy_process_is_attached(const struct pink_easy_process *proc)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
@@ -123,7 +129,7 @@ bool pink_easy_process_is_attached(const pink_easy_process_t *proc)
  * @param proc Process entry
  * @return true if the process is a clone, false otherwise
  **/
-bool pink_easy_process_is_clone(const pink_easy_process_t *proc)
+bool pink_easy_process_is_clone(const struct pink_easy_process *proc)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
@@ -138,7 +144,7 @@ bool pink_easy_process_is_clone(const pink_easy_process_t *proc)
  * @param userdata User data
  * @param userdata_destroy The destructor function of the user data
  **/
-void pink_easy_process_set_userdata(pink_easy_process_t *proc, void *userdata,
+void pink_easy_process_set_userdata(struct pink_easy_process *proc, void *userdata,
 		pink_easy_free_func_t userdata_destroy)
 	PINK_GCC_ATTR((nonnull(1)));
 
@@ -149,7 +155,7 @@ void pink_easy_process_set_userdata(pink_easy_process_t *proc, void *userdata,
  * @param proc Process entry
  * @return User data
  **/
-void *pink_easy_process_get_userdata(const pink_easy_process_t *proc)
+void *pink_easy_process_get_userdata(const struct pink_easy_process *proc)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
@@ -162,8 +168,8 @@ void *pink_easy_process_get_userdata(const pink_easy_process_t *proc)
  * @param list Process list
  * @param proc Process entry
  **/
-void pink_easy_process_list_remove(pink_easy_process_list_t *list,
-		const pink_easy_process_t *proc)
+void pink_easy_process_list_remove(struct pink_easy_process_list *list,
+		const struct pink_easy_process *proc)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
@@ -173,7 +179,7 @@ void pink_easy_process_list_remove(pink_easy_process_list_t *list,
  * @param tid Thread ID
  * @return The process on successful look up, NULL on failure
  **/
-pink_easy_process_t *pink_easy_process_list_lookup(const pink_easy_process_list_t *list,
+struct pink_easy_process *pink_easy_process_list_lookup(const struct pink_easy_process_list *list,
 		pid_t tid)
 	PINK_GCC_ATTR((nonnull(1)));
 
@@ -185,10 +191,12 @@ pink_easy_process_t *pink_easy_process_list_lookup(const pink_easy_process_list_
  * @param userdata User data to pass to the walk function
  * @return Total number of visited entries
  **/
-unsigned pink_easy_process_list_walk(const pink_easy_process_list_t *list,
+unsigned pink_easy_process_list_walk(const struct pink_easy_process_list *list,
 		pink_easy_walk_func_t func, void *userdata)
 	PINK_GCC_ATTR((nonnull(1,2)));
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

@@ -25,22 +25,28 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_CALL_H
-#define _PINK_EASY_CALL_H
+#ifndef PINK_EASY_CALL_H
+#define PINK_EASY_CALL_H
 
 /**
  * @file pinktrace/easy/call.h
  * @brief Pink's easy tracing function calls
+ *
+ * Do not include this file directly. Use pinktrace/easy/pink.h instead.
+ *
  * @defgroup pink_easy_call Pink's easy tracing function calls
  * @ingroup pinktrace-easy
  * @{
  **/
 
-#include <pinktrace/pink.h>
-#include <pinktrace/easy/context.h>
+#include <pinktrace/compiler.h>
 #include <pinktrace/easy/func.h>
 
-PINK_BEGIN_DECL
+#include <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Call a simple function which will be traced.
@@ -52,9 +58,11 @@ PINK_BEGIN_DECL
  * @param userdata User data to be passed to the child function
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_easy_call(pink_easy_context_t *ctx, pink_easy_child_func_t func, void *userdata)
+bool pink_easy_call(struct pink_easy_context *ctx, pink_easy_child_func_t func, void *userdata)
 	PINK_GCC_ATTR((nonnull(1,2)));
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

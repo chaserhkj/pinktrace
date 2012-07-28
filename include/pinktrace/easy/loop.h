@@ -25,21 +25,27 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_LOOP_H
-#define _PINK_EASY_LOOP_H
+#ifndef PINK_EASY_LOOP_H
+#define PINK_EASY_LOOP_H
 
 /**
  * @file pinktrace/easy/loop.h
  * @brief Pink's easy event loop
+ *
+ * Do not include this file directly. Use pinktrace/easy/pink.h directly.
+ *
  * @defgroup pink_easy_loop Pink's easy event loop
  * @ingroup pinktrace-easy
  * @{
  **/
 
-#include <pinktrace/pink.h>
-#include <pinktrace/easy/context.h>
+#include <pinktrace/compiler.h>
 
-PINK_BEGIN_DECL
+struct pink_easy_context;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * The main event loop
@@ -51,9 +57,11 @@ PINK_BEGIN_DECL
  *         calls the "cb_error" callback and returns the error condition
  *         negated.
  **/
-int pink_easy_loop(pink_easy_context_t *ctx)
+int pink_easy_loop(struct pink_easy_context *ctx)
 	PINK_GCC_ATTR((nonnull(1)));
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

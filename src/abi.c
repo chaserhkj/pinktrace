@@ -33,7 +33,7 @@
 #include <pinktrace/pink.h>
 
 PINK_GCC_ATTR((nonnull(2)))
-bool pink_abi_wordsize(pink_abi_t abi, size_t *wsize)
+bool pink_abi_wordsize(enum pink_abi abi, size_t *wsize)
 {
 #if PINK_ABIS_SUPPORTED == 1
 	if (abi == 0) {

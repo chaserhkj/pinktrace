@@ -28,7 +28,7 @@
 #include <pinktrace/pink.h>
 #include <pinktrace/easy/pink.h>
 
-const char *pink_easy_child_strerror(pink_easy_child_error_t e)
+const char *pink_easy_child_strerror(enum pink_easy_child_error e)
 {
 	switch (e) {
 	case PINK_EASY_CHILD_ERROR_SUCCESS:
@@ -43,7 +43,7 @@ const char *pink_easy_child_strerror(pink_easy_child_error_t e)
 	}
 }
 
-const char *pink_easy_strerror(pink_easy_error_t e)
+const char *pink_easy_strerror(enum pink_easy_error e)
 {
 	switch (e) {
 	case PINK_EASY_ERROR_SUCCESS:

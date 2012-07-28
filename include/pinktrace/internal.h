@@ -25,8 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_INTERNAL_H
-#define _PINK_INTERNAL_H
+#ifndef PINK_INTERNAL_H
+#define PINK_INTERNAL_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -46,7 +46,7 @@
 #include <netinet/in.h>
 #include <sys/un.h>
 
-#include <pinktrace/system.h>
+#include <pinktrace/pink.h>
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
@@ -98,11 +98,5 @@
 				__func__, __FILE__, __LINE__);		\
 		abort();						\
 	} while (0)
-
-#if PINK_ARCH_X86_64
-#define _PINK_ABI_X32 2
-#elif PINK_ARCH_X32
-#define _PINK_ABI_X32 0
-#endif
 
 #endif

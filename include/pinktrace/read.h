@@ -33,23 +33,30 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_READ_H
-#define _PINK_READ_H
-
-#include <stdbool.h>
-#include <sys/types.h>
-#include <pinktrace/macros.h>
-#include <pinktrace/abi.h>
-#include <pinktrace/regs.h>
+#ifndef PINK_READ_H
+#define PINK_READ_H
 
 /**
  * @file pinktrace/read.h
  * @brief Pink's system call readers
+ *
+ * Do not include this file directly. Use pinktrace/pink.h instead.
+ *
  * @defgroup pink_read Pink's system call readers
  * @ingroup pinktrace
  * @{
  **/
-PINK_BEGIN_DECL
+
+#include <pinktrace/compiler.h>
+#include <pinktrace/abi.h>
+#include <pinktrace/regs.h>
+
+#include <stdbool.h>
+#include <sys/types.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Read a word at the given offset in tracee's USER area and place it in res,
@@ -81,7 +88,7 @@ bool pink_read_word_data(pid_t tid, long off, long *res);
  * @param abi Pointer to store the result, must @b not be @e NULL
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_read_abi(pid_t tid, const pink_regs_t *regs, pink_abi_t *abi);
+bool pink_read_abi(pid_t tid, const pink_regs_t *regs, enum pink_abi *abi);
 
 /**
  * Read len bytes of data of process @b pid, at address @b addr, to our address
@@ -99,7 +106,7 @@ bool pink_read_abi(pid_t tid, const pink_regs_t *regs, pink_abi_t *abi);
  *         On error, -1 is returned and errno is set appropriately.
  *         Check the return value for partial reads.
  **/
-ssize_t pink_read_vm_data(pid_t tid, pink_abi_t abi, long addr,
+ssize_t pink_read_vm_data(pid_t tid, enum pink_abi abi, long addr,
 		char *dest, size_t len)
 	PINK_GCC_ATTR((nonnull(4)));
 
@@ -122,7 +129,7 @@ ssize_t pink_read_vm_data(pid_t tid, pink_abi_t abi, long addr,
  * @param sysnum Pointer to store the system call, must @b not be @e NULL
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_read_syscall(pid_t tid, pink_abi_t abi,
+bool pink_read_syscall(pid_t tid, enum pink_abi abi,
 		const pink_regs_t *regs, long *sysnum)
 	PINK_GCC_ATTR((nonnull(3)));
 
@@ -136,7 +143,7 @@ bool pink_read_syscall(pid_t tid, pink_abi_t abi,
  * @param error Pointer to store the error condition, must @b not be @e NULL
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_read_retval(pid_t tid, pink_abi_t abi,
+bool pink_read_retval(pid_t tid, enum pink_abi abi,
 		const pink_regs_t *regs, long *retval,
 		int *error)
 	PINK_GCC_ATTR((nonnull(3,4)));
@@ -151,7 +158,7 @@ bool pink_read_retval(pid_t tid, pink_abi_t abi,
  * @param argval Pointer to store the value of the argument, must @b not be @e NULL
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_read_argument(pid_t tid, pink_abi_t abi,
+bool pink_read_argument(pid_t tid, enum pink_abi abi,
 		const pink_regs_t *regs,
 		unsigned arg_index, long *argval)
 	PINK_GCC_ATTR((nonnull(5)));
@@ -160,7 +167,7 @@ bool pink_read_argument(pid_t tid, pink_abi_t abi,
  * Like pink_read_vm_data() but make the additional effort of looking for a
  * terminating zero-byte
  **/
-ssize_t pink_read_vm_data_nul(pid_t tid, pink_abi_t abi, long addr,
+ssize_t pink_read_vm_data_nul(pid_t tid, enum pink_abi abi, long addr,
 		char *dest, size_t len)
 	PINK_GCC_ATTR((nonnull(4)));
 
@@ -188,12 +195,14 @@ ssize_t pink_read_vm_data_nul(pid_t tid, pink_abi_t abi, long addr,
  *                @e NULL, in which case the dest argument is left unmodified.
  * @return Same as pink_read_vm_data_nul()
  **/
-ssize_t pink_read_string_array(pid_t tid, pink_abi_t abi,
+ssize_t pink_read_string_array(pid_t tid, enum pink_abi abi,
 		long arg, unsigned arr_index,
 		char *dest, size_t dest_len,
 		bool *nullptr)
 	PINK_GCC_ATTR((nonnull(5)));
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

@@ -25,8 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_EXEC_H
-#define _PINK_EASY_EXEC_H
+#ifndef PINK_EASY_EXEC_H
+#define PINK_EASY_EXEC_H
 
 /**
  * @file pinktrace/easy/exec.h
@@ -36,10 +36,15 @@
  * @{
  **/
 
-#include <pinktrace/pink.h>
-#include <pinktrace/easy/context.h>
+#include <pinktrace/compiler.h>
 
-PINK_BEGIN_DECL
+#include <stdbool.h>
+
+struct pink_easy_context;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * This function calls fork() to spawn a new child, does the necessary
@@ -51,7 +56,7 @@ PINK_BEGIN_DECL
  * @param envp Array of strings, which are passed as environment to the new program
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_easy_execve(pink_easy_context_t *ctx, const char *filename,
+bool pink_easy_execve(struct pink_easy_context *ctx, const char *filename,
 		char *const argv[], char *const envp[])
 	PINK_GCC_ATTR((nonnull(1)));
 
@@ -65,7 +70,7 @@ bool pink_easy_execve(pink_easy_context_t *ctx, const char *filename,
  * @param ... Variable arguments which must be terminated by a NULL pointer
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_easy_execl(pink_easy_context_t *ctx, const char *file,
+bool pink_easy_execl(struct pink_easy_context *ctx, const char *file,
 		const char *arg, ...)
 	PINK_GCC_ATTR((nonnull(1), sentinel(0)));
 
@@ -79,7 +84,7 @@ bool pink_easy_execl(pink_easy_context_t *ctx, const char *file,
  * @param ... Variable arguments which must be terminated by a NULL pointer
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_easy_execlp(pink_easy_context_t *ctx, const char *file,
+bool pink_easy_execlp(struct pink_easy_context *ctx, const char *file,
 		const char *arg, ...)
 	PINK_GCC_ATTR((nonnull(1), sentinel(0)));
 
@@ -92,7 +97,7 @@ bool pink_easy_execlp(pink_easy_context_t *ctx, const char *file,
  * @param argv Arguments
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_easy_execv(pink_easy_context_t *ctx, const char *path,
+bool pink_easy_execv(struct pink_easy_context *ctx, const char *path,
 		char *const argv[])
 	PINK_GCC_ATTR((nonnull(1)));
 
@@ -105,10 +110,12 @@ bool pink_easy_execv(pink_easy_context_t *ctx, const char *path,
  * @param argv Arguments
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_easy_execvp(pink_easy_context_t *ctx, const char *file,
+bool pink_easy_execvp(struct pink_easy_context *ctx, const char *file,
 		char *const argv[])
 	PINK_GCC_ATTR((nonnull(1)));
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

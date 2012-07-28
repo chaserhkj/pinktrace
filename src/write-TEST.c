@@ -99,8 +99,9 @@ START_TEST(TEST_write_syscall)
 #undef TEST_LSEEK
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		int error = 0;
 		long rval, sysnum;
 		pink_regs_t regs;
@@ -197,8 +198,9 @@ START_TEST(TEST_write_retval)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		int error = 0;
 		long rval, sysno;
 		pink_regs_t regs;
@@ -262,8 +264,9 @@ START_TEST(TEST_write_argument)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		long argval, sysnum;
 		pink_regs_t regs;
 
@@ -334,8 +337,9 @@ START_TEST(TEST_write_vm_data)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		long argval, sysnum;
 		pink_regs_t regs;
 

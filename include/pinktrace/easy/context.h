@@ -25,33 +25,38 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_CONTEXT_H
-#define _PINK_EASY_CONTEXT_H
+#ifndef PINK_EASY_CONTEXT_H
+#define PINK_EASY_CONTEXT_H
 
 /**
  * @file pinktrace/easy/context.h
  * @brief Pink's easy tracing context
+ *
+ * Do not include this file directly. Include pinktrace/easy/pink.h instead.
+ *
  * @defgroup pink_easy_context Pink's easy tracing context
  * @ingroup pinktrace-easy
  * @{
  **/
 
-#include <pinktrace/pink.h>
-#include <pinktrace/easy/callback.h>
+#include <pinktrace/compiler.h>
 #include <pinktrace/easy/error.h>
 #include <pinktrace/easy/func.h>
-#include <pinktrace/easy/process.h>
 
-PINK_BEGIN_DECL
+struct pink_easy_callback_table;
 
 /**
- * @struct pink_easy_context_t
+ * @struct struct pink_easy_context
  * @brief Opaque structure which represents a tracing context.
  *
  * Use pink_easy_context_new() to create one and pink_easy_context_destroy() to
  * free all allocated resources.
  **/
-typedef struct pink_easy_context pink_easy_context_t;
+struct pink_easy_context;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Allocate a tracing context.
@@ -68,8 +73,8 @@ typedef struct pink_easy_context pink_easy_context_t;
  * @return The tracing context on success, @e NULL on failure and sets errno
  *         accordingly
  **/
-pink_easy_context_t *pink_easy_context_new(int ptrace_options,
-		const pink_easy_callback_table_t *callback_table,
+struct pink_easy_context *pink_easy_context_new(int ptrace_options,
+		const struct pink_easy_callback_table *callback_table,
 		void *userdata, pink_easy_free_func_t userdata_destroy)
 	PINK_GCC_ATTR((malloc, nonnull(2)));
 
@@ -82,7 +87,7 @@ pink_easy_context_t *pink_easy_context_new(int ptrace_options,
  *
  * @param ctx Tracing context
  **/
-void pink_easy_context_destroy(pink_easy_context_t *ctx)
+void pink_easy_context_destroy(struct pink_easy_context *ctx)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
@@ -91,7 +96,7 @@ void pink_easy_context_destroy(pink_easy_context_t *ctx)
  * @param ctx Tracing context
  * @return Error condition
  **/
-pink_easy_error_t pink_easy_context_get_error(const pink_easy_context_t *ctx)
+enum pink_easy_error pink_easy_context_get_error(const struct pink_easy_context *ctx)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
@@ -99,7 +104,7 @@ pink_easy_error_t pink_easy_context_get_error(const pink_easy_context_t *ctx)
  *
  * @param ctx Tracing context
  **/
-void pink_easy_context_clear_error(pink_easy_context_t *ctx)
+void pink_easy_context_clear_error(struct pink_easy_context *ctx)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
@@ -114,7 +119,7 @@ void pink_easy_context_clear_error(pink_easy_context_t *ctx)
  * @param userdata User data
  * @param userdata_destroy Destructor function for the user data
  **/
-void pink_easy_context_set_userdata(pink_easy_context_t *ctx, void *userdata,
+void pink_easy_context_set_userdata(struct pink_easy_context *ctx, void *userdata,
 		pink_easy_free_func_t userdata_destroy)
 	PINK_GCC_ATTR((nonnull(1)));
 
@@ -124,7 +129,7 @@ void pink_easy_context_set_userdata(pink_easy_context_t *ctx, void *userdata,
  * @param ctx Tracing context
  * @return User data
  **/
-void *pink_easy_context_get_userdata(const pink_easy_context_t *ctx)
+void *pink_easy_context_get_userdata(const struct pink_easy_context *ctx)
 	PINK_GCC_ATTR((nonnull(1)));
 
 /**
@@ -133,9 +138,11 @@ void *pink_easy_context_get_userdata(const pink_easy_context_t *ctx)
  * @param ctx Tracing context
  * @return Process list
  **/
-pink_easy_process_list_t *pink_easy_context_get_process_list(pink_easy_context_t *ctx)
+struct pink_easy_process_list *pink_easy_context_get_process_list(struct pink_easy_context *ctx)
 	PINK_GCC_ATTR((nonnull(1)));
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

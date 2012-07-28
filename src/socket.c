@@ -36,7 +36,7 @@
 #include <pinktrace/internal.h>
 #include <pinktrace/pink.h>
 
-const char *pink_name_socket_subcall(pink_socket_subcall_t subcall)
+const char *pink_name_socket_subcall(enum pink_socket_subcall subcall)
 {
 	switch (subcall) {
 	case PINK_SOCKET_SUBCALL_SOCKET:
@@ -81,7 +81,7 @@ const char *pink_name_socket_subcall(pink_socket_subcall_t subcall)
 }
 
 PINK_GCC_ATTR((nonnull(6)))
-bool pink_read_socket_argument(pid_t tid, pink_abi_t abi,
+bool pink_read_socket_argument(pid_t tid, enum pink_abi abi,
 		const pink_regs_t *regs,
 		bool decode_socketcall,
 		unsigned arg_index, long *argval)
@@ -109,11 +109,11 @@ bool pink_read_socket_argument(pid_t tid, pink_abi_t abi,
 }
 
 PINK_GCC_ATTR((nonnull(7)))
-bool pink_read_socket_address(pid_t tid, pink_abi_t abi,
+bool pink_read_socket_address(pid_t tid, enum pink_abi abi,
 		const pink_regs_t *regs,
 		bool decode_socketcall,
 		unsigned arg_index, long *fd,
-		pink_socket_address_t *sockaddr)
+		struct pink_sockaddr *sockaddr)
 {
 	long addr, addrlen, args;
 	size_t wsize;

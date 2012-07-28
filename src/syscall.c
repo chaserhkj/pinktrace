@@ -50,7 +50,7 @@ static const char *sysnames2[] = {
 static int nsys2 = ARRAY_SIZE(sysnames2);
 #endif
 
-const char *pink_syscall_name(long scno, pink_abi_t abi)
+const char *pink_syscall_name(long scno, enum pink_abi abi)
 {
 	int nsys;
 	const char **names;
@@ -86,7 +86,7 @@ const char *pink_syscall_name(long scno, pink_abi_t abi)
 	return names[scno];
 }
 
-long pink_syscall_lookup(const char *name, pink_abi_t abi)
+long pink_syscall_lookup(const char *name, enum pink_abi abi)
 {
 	int nsys;
 	const char **names;

@@ -25,19 +25,25 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_FUNC_H
-#define _PINK_EASY_FUNC_H
+#ifndef PINK_EASY_FUNC_H
+#define PINK_EASY_FUNC_H
 
 /**
  * @file pinktrace/easy/func.h
  * @brief Pink's easy function pointers
+ *
+ * Do not include this file directly. Use pinktrace/easy/pink.h instead.
+ *
  * @defgroup pink_easy_func Pink's easy function pointers
  * @ingroup pinktrace-easy
  * @{
  **/
-PINK_BEGIN_DECL
 
 struct pink_easy_process;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * This type definition represents a generic @e free(3) function.
@@ -50,10 +56,10 @@ typedef void (*pink_easy_free_func_t) (void *data);
 /**
  * This type definition represents the process tree walk function.
  * It takes a process entry and userdata as argument. If this function returns
- * false, pink_easy_process_tree_walk() stops iterating through the process
+ * false, struct pink_easy_processree_walk() stops iterating through the process
  * tree and returns immediately.
  *
- * @see pink_easy_process_tree_walk
+ * @see struct pink_easy_processree_walk
  **/
 typedef bool (*pink_easy_walk_func_t) (struct pink_easy_process *proc,
 		void *userdata);
@@ -66,6 +72,8 @@ typedef bool (*pink_easy_walk_func_t) (struct pink_easy_process *proc,
  **/
 typedef int (*pink_easy_child_func_t) (void *userdata);
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

@@ -25,12 +25,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_COMPAT_H
-#define _PINK_COMPAT_H
+#ifndef PINK_COMPAT_H
+#define PINK_COMPAT_H
 
 /**
  * @file pinktrace/compat.h
  * @brief Pink's compatibility macros
+ *
+ * Do not include this file directly. Use pinktrace/pink.h instead.
+ *
  * @defgroup pink_compat Pink's compatibility macros
  * @ingroup pinktrace
  * @{

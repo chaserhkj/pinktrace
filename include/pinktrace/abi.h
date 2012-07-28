@@ -29,57 +29,85 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_ABI_H
-#define _PINK_ABI_H
+#ifndef PINK_ABI_H
+#define PINK_ABI_H
 
 /**
  * @file pinktrace/abi.h
  * @brief Pink's supported system call ABIs
+ *
+ * Do not include this header directly. Use pinktrace/pink.h instead.
+ *
  * @defgroup pink_abi Pink's supported system call ABIs
  * @ingroup pinktrace
  * @{
  **/
 
+#include <pinktrace/compiler.h>
+
 #include <stdbool.h>
 #include <sys/types.h>
-#include <pinktrace/macros.h>
-#include <pinktrace/system.h>
-
-typedef int pink_abi_t;
 
 #define PINK_ABIS_SUPPORTED 1
-#define PINK_ABI_DEFAULT 0
-
 #if PINK_ARCH_ARM
 # undef PINK_ABIS_SUPPORTED
 # define PINK_ABIS_SUPPORTED 2
-# define PINK_ABI_THUMB PINK_ABI_DEFAULT
-# define PINK_ABI_ARM 1
-#elif PINK_ARCH_IA64
-# define PINK_ABI_IA64 PINK_ABI_DEFAULT
-#elif PINK_ARCH_POWERPC
-# define PINK_ABI_POWERPC PINK_ABI_DEFAULT
 #elif PINK_ARCH_POWERPC64
 # undef PINK_ABIS_SUPPORTED
 # define PINK_ABIS_SUPPORTED 2
-# define PINK_ABI_POWERPC64 PINK_ABI_DEFAULT
-# define PINK_ABI_POWERPC 1
-#elif PINK_ARCH_X86
-# define PINK_ABI_X86 PINK_ABI_DEFAULT
 #elif PINK_ARCH_X86_64
 # undef PINK_ABIS_SUPPORTED
 # define PINK_ABIS_SUPPORTED 3
-# define PINK_ABI_X86_64 PINK_ABI_DEFAULT
-# define PINK_ABI_X86 1
-# define PINK_ABI_X32 2
 #elif PINK_ARCH_X32
 # undef PINK_ABIS_SUPPORTED
 # define PINK_ABIS_SUPPORTED 2
-# define PINK_ABI_X32 PINK_ABI_DEFAULT
-# define PINK_ABI_X86 1
 #endif
 
-PINK_BEGIN_DECL
+enum pink_abi {
+	PINK_ABI_0,
+#define PINK_ABI_DEFAULT	PINK_ABI_0
+#if PINK_ARCH_ARM
+#define PINK_ABI_THUMB		PINK_ABI_0
+#elif PINK_ARCH_IA64
+#define PINK_ABI_IA64		PINK_ABI_0
+#elif PINK_ARCH_POWERPC
+#define PINK_ABI_POWERPC	PINK_ABI_0
+#elif PINK_ARCH_POWERPC64
+#define PINK_ABI_POWERPC64	PINK_ABI_0
+#elif PINK_ARCH_X86
+#define PINK_ABI_X86		PINK_ABI_0
+#elif PINK_ARCH_X86_64
+#define PINK_ABI_X86_64		PINK_ABI_0
+#elif PINK_ARCH_X32
+#define PINK_ABI_X32		PINK_ABI_0
+#else
+#error unsupported architecture
+#endif
+#if PINK_ABIS_SUPPORTED > 1
+	PINK_ABI_1,
+#if PINK_ARCH_ARM
+#define PINK_ABI_ARM		PINK_ABI_1
+#elif PINK_ARCH_POWERPC64
+#define PINK_ABI_POWERPC	PINK_ABI_1
+#elif PINK_ARCH_X86_64
+#define PINK_ABI_X86		PINK_ABI_1
+#elif PINK_ARCH_X32
+#define PINK_ABI_X86		PINK_ABI_1
+#else
+#error unsupported architecture
+#endif
+#endif
+#if PINK_ABIS_SUPPORTED > 2
+	PINK_ABI_2,
+#if PINK_ARCH_X86_64
+#define PINK_ABI_X32		PINK_ABI_2
+#endif
+#endif
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Return the word size of the system call ABI
@@ -88,9 +116,11 @@ PINK_BEGIN_DECL
  * @param wsize Pointer to store the word size, must @b not be @e NULL
  * @return Word size on success, -1 on failure and sets errno accordingly
  **/
-bool pink_abi_wordsize(pink_abi_t abi, size_t *wsize)
+bool pink_abi_wordsize(enum pink_abi abi, size_t *wsize)
 	PINK_GCC_ATTR((nonnull(2)));
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

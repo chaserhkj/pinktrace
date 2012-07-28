@@ -25,23 +25,28 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_WRITE_H
-#define _PINK_WRITE_H
-
-#include <stdbool.h>
-#include <sys/types.h>
-#include <pinktrace/macros.h>
-#include <pinktrace/abi.h>
-#include <pinktrace/regs.h>
+#ifndef PINK_WRITE_H
+#define PINK_WRITE_H
 
 /**
  * @file pinktrace/write.h
  * @brief Pink's system call writers
+ *
+ * Do not include this header directly, use pinktrace/pink.h instead.
+ *
  * @defgroup pink_write Pink's system call writers
  * @ingroup pinktrace
  * @{
  **/
-PINK_BEGIN_DECL
+
+#include <pinktrace/abi.h>
+
+#include <stdbool.h>
+#include <sys/types.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Copy the word val to the given offset in the tracee's USER area, aka
@@ -80,7 +85,7 @@ bool pink_write_word_data(pid_t tid, long off, long val);
  *         On error, -1 is returned and errno is set appropriately.
  *         Check the return value for partial writes.
  **/
-ssize_t pink_write_vm_data(pid_t tid, pink_abi_t abi, long addr,
+ssize_t pink_write_vm_data(pid_t tid, enum pink_abi abi, long addr,
 		const char *src, size_t len);
 
 /**
@@ -88,8 +93,8 @@ ssize_t pink_write_vm_data(pid_t tid, pink_abi_t abi, long addr,
  *
  * @see pink_write_vm_data
  **/
-#define pink_write_vm_object(pid, abi, addr, objp) \
-		pink_write_vm_data((pid), (abi), (addr), \
+#define pink_write_vm_object(tid, abi, addr, objp) \
+		pink_write_vm_data((tid), (abi), (addr), \
 				(char *)(objp), \
 				sizeof(*(objp)))
 
@@ -103,7 +108,7 @@ ssize_t pink_write_vm_data(pid_t tid, pink_abi_t abi, long addr,
  * @param sysnum System call number
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_write_syscall(pid_t tid, pink_abi_t abi, long sysnum);
+bool pink_write_syscall(pid_t tid, enum pink_abi abi, long sysnum);
 
 /**
  * Set the system call return value
@@ -114,7 +119,7 @@ bool pink_write_syscall(pid_t tid, pink_abi_t abi, long sysnum);
  * @param error Error condition (errno)
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_write_retval(pid_t tid, pink_abi_t abi, long retval, int error);
+bool pink_write_retval(pid_t tid, enum pink_abi abi, long retval, int error);
 
 /**
  * Write the specified value to the specified system call argument
@@ -125,9 +130,11 @@ bool pink_write_retval(pid_t tid, pink_abi_t abi, long retval, int error);
  * @param argval Value of the argument
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_write_argument(pid_t tid, pink_abi_t abi,
+bool pink_write_argument(pid_t tid, enum pink_abi abi,
 		unsigned arg_index, long argval);
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

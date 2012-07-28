@@ -25,11 +25,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_PINK_H
-#define _PINK_EASY_PINK_H
+#ifndef PINK_EASY_PINK_H
+#define PINK_EASY_PINK_H
 
 /**
- * @file
+ * @file pinktrace/easy/pink.h
  * @brief A header file including all other header files part of pinktrace-easy
  * @defgroup pinktrace-easy Pink's Easy Tracing Library
  **/
@@ -43,9 +43,8 @@
 #include <pinktrace/easy/error.h>
 #include <pinktrace/easy/exec.h>
 #include <pinktrace/easy/func.h>
+#include <pinktrace/easy/init.h>
 #include <pinktrace/easy/loop.h>
 #include <pinktrace/easy/process.h>
-
-#include <pinktrace/easy/init.h>
 
 #endif

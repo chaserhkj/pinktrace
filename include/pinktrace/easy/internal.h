@@ -30,8 +30,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_EASY_INTERNAL_H
-#define _PINK_EASY_INTERNAL_H
+#ifndef PINK_EASY_INTERNAL_H
+#define PINK_EASY_INTERNAL_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -44,8 +44,7 @@
 
 #include <pinktrace/internal.h> /* _pink_assert_not_reached() */
 #include <pinktrace/pink.h>
-#include <pinktrace/easy/callback.h>
-#include <pinktrace/easy/error.h>
+#include <pinktrace/easy/pink.h>
 
 #undef KERNEL_VERSION
 #define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
@@ -65,13 +64,9 @@
 /** Process is a clone **/
 #define PINK_EASY_PROCESS_CLONE_THREAD		00100
 
-PINK_BEGIN_DECL
-
-typedef enum {
-	PINK_EASY_TRIBOOL_FALSE = 0,
-	PINK_EASY_TRIBOOL_TRUE,
-	PINK_EASY_TRIBOOL_NONE,
-} pink_easy_tribool_t;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /** Process entry **/
 struct pink_easy_process {
@@ -85,7 +80,7 @@ struct pink_easy_process {
 	pid_t tgid;
 
 	/** System call ABI (e.g. 32bit, 64bit) of this process **/
-	pink_abi_t abi;
+	enum pink_abi abi;
 
 	/** Per-process user data **/
 	void *userdata;
@@ -106,7 +101,7 @@ struct pink_easy_context {
 	int ptrace_options;
 
 	/** Last error **/
-	pink_easy_error_t error;
+	enum pink_easy_error error;
 
 	/** Was the error fatal? **/
 	bool fatal;
@@ -115,7 +110,7 @@ struct pink_easy_context {
 	struct pink_easy_process_list process_list;
 
 	/** Callback table **/
-	pink_easy_callback_table_t callback_table;
+	struct pink_easy_callback_table callback_table;
 
 	/** User data **/
 	void *userdata;
@@ -143,5 +138,7 @@ struct pink_easy_context {
 		(ctx)->nprocs--;								\
 	} while (0)
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 #endif

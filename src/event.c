@@ -28,12 +28,12 @@
 #include <pinktrace/internal.h>
 #include <pinktrace/pink.h>
 
-inline pink_event_t pink_event_decide(int status)
+inline enum pink_event pink_event_decide(int status)
 {
 	return (unsigned)status >> 16;
 }
 
-const char *pink_event_name(pink_event_t event)
+const char *pink_event_name(enum pink_event event)
 {
 	switch (event) {
 	case PINK_EVENT_FORK:

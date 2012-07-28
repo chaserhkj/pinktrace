@@ -38,14 +38,14 @@
 #include <sys/syscall.h>
 #include <asm/unistd.h>
 
-int pink_easy_process_kill(const pink_easy_process_t *proc, int sig)
+int pink_easy_process_kill(const struct pink_easy_process *proc, int sig)
 {
 	if (proc->flags & PINK_EASY_PROCESS_CLONE_THREAD)
 		return pink_trace_kill(proc->tid, proc->tgid, sig);
 	return pink_trace_kill(proc->tid, proc->tid, sig);
 }
 
-bool pink_easy_process_resume(const pink_easy_process_t *proc, int sig)
+bool pink_easy_process_resume(const struct pink_easy_process *proc, int sig)
 {
 	if (proc->flags & PINK_EASY_PROCESS_ATTACHED)
 		return pink_trace_detach(proc->tid, sig);
@@ -53,45 +53,45 @@ bool pink_easy_process_resume(const pink_easy_process_t *proc, int sig)
 		return pink_trace_resume(proc->tid, sig);
 }
 
-pid_t pink_easy_process_get_tid(const pink_easy_process_t *proc)
+pid_t pink_easy_process_get_tid(const struct pink_easy_process *proc)
 {
 	return proc->tid;
 }
 
-pid_t pink_easy_process_get_tgid(const pink_easy_process_t *proc)
+pid_t pink_easy_process_get_tgid(const struct pink_easy_process *proc)
 {
 	return proc->tgid;
 }
 
-int pink_easy_process_get_abi(const pink_easy_process_t *proc)
+int pink_easy_process_get_abi(const struct pink_easy_process *proc)
 {
 	return proc->abi;
 }
 
-bool pink_easy_process_is_attached(const pink_easy_process_t *proc)
+bool pink_easy_process_is_attached(const struct pink_easy_process *proc)
 {
 	return !!(proc->flags & PINK_EASY_PROCESS_ATTACHED);
 }
 
-bool pink_easy_process_is_clone(const pink_easy_process_t *proc)
+bool pink_easy_process_is_clone(const struct pink_easy_process *proc)
 {
 	return !!(proc->flags & PINK_EASY_PROCESS_CLONE_THREAD);
 }
 
-void *pink_easy_process_get_userdata(const pink_easy_process_t *proc)
+void *pink_easy_process_get_userdata(const struct pink_easy_process *proc)
 {
 	return proc->userdata;
 }
 
-void pink_easy_process_set_userdata(pink_easy_process_t *proc, void *userdata, pink_easy_free_func_t userdata_destroy)
+void pink_easy_process_set_userdata(struct pink_easy_process *proc, void *userdata, pink_easy_free_func_t userdata_destroy)
 {
 	proc->userdata = userdata;
 	proc->userdata_destroy = userdata_destroy;
 }
 
-pink_easy_process_t *pink_easy_process_list_lookup(const pink_easy_process_list_t *list, pid_t tid)
+struct pink_easy_process *pink_easy_process_list_lookup(const struct pink_easy_process_list *list, pid_t tid)
 {
-	pink_easy_process_t *node;
+	struct pink_easy_process *node;
 
 	SLIST_FOREACH(node, list, entries) {
 		if (node->tid == tid)
@@ -101,16 +101,16 @@ pink_easy_process_t *pink_easy_process_list_lookup(const pink_easy_process_list_
 	return NULL;
 }
 
-void pink_easy_process_list_remove(pink_easy_process_list_t *list, const pink_easy_process_t *proc)
+void pink_easy_process_list_remove(struct pink_easy_process_list *list, const struct pink_easy_process *proc)
 {
 	SLIST_REMOVE(list, proc, pink_easy_process, entries);
 }
 
-unsigned pink_easy_process_list_walk(const pink_easy_process_list_t *list,
+unsigned pink_easy_process_list_walk(const struct pink_easy_process_list *list,
 		pink_easy_walk_func_t func, void *userdata)
 {
 	unsigned count;
-	pink_easy_process_t *node;
+	struct pink_easy_process *node;
 
 	count = 0;
 	SLIST_FOREACH(node, list, entries) {

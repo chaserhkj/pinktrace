@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Ali Polatel <alip@exherbo.org>
+ * Copyright (c) 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,26 +25,19 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_MACROS_H
-#define _PINK_MACROS_H
+#ifndef PINK_COMPILER_H
+#define PINK_COMPILER_H
 
 /**
- * @file pinktrace/macros.h
- * @brief Pink's common macros
- * @defgroup pink_macros Pink's common macros
+ * @file pinktrace/compiler.h
+ * @brief Pink's compiler specific definitions
+ *
+ * Do not include this file directly. Use pinktrace/pink.h instead.
+ *
+ * @defgroup pink_compiler Pink's compiler specific definitions
  * @ingroup pinktrace
  * @{
  **/
-
-#ifdef __cplusplus
-#define PINK_BEGIN_DECL  extern "C" {
-#define PINK_END_DECL    }
-#else
-/** Start declarations in C mode */
-#define PINK_BEGIN_DECL /* empty */
-/** End declarations in C mode */
-#define PINK_END_DECL /* empty */
-#endif
 
 #if !defined(SPARSE) && defined(__GNUC__) && __GNUC__ >= 3
 #define PINK_GCC_ATTR(x)     __attribute__(x)

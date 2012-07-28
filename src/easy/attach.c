@@ -37,7 +37,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-bool pink_easy_attach(pink_easy_context_t *ctx, pid_t tid, pid_t tgid)
+bool pink_easy_attach(struct pink_easy_context *ctx, pid_t tid, pid_t tgid)
 {
 	struct pink_easy_process *current;
 

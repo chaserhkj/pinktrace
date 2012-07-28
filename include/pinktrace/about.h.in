@@ -27,12 +27,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_ABOUT_H
-#define _PINK_ABOUT_H
+#ifndef PINK_ABOUT_H
+#define PINK_ABOUT_H
 
 /**
  * @file pinktrace/about.h
  * @brief Pink's version and build constants
+ *
+ * Do not include this file directly. Use pinktrace/pink.h instead.
+ *
  * @defgroup pink_about Pink's version and build constants
  * @ingroup pinktrace
  * @{

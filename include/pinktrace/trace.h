@@ -25,21 +25,24 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_TRACE_H
-#define _PINK_TRACE_H
+#ifndef PINK_TRACE_H
+#define PINK_TRACE_H
 
 /**
  * @file pinktrace/trace.h
  * @brief Pink's low level wrappers around ptrace(2) internals
+ *
+ * Do not include this file directly. Use pinktrace/pink.h instead.
+ *
  * @defgroup pink_trace Pink's low level wrappers around ptrace(2) internals
  * @ingroup pinktrace
  * @{
  **/
 
+#include <pinktrace/regs.h>
+
 #include <stdbool.h>
 #include <sys/types.h>
-#include <pinktrace/macros.h>
-#include <pinktrace/regs.h>
 
 /**
  * This define represents the trace option SYSGOOD.
@@ -117,7 +120,9 @@
  **/
 #define PINK_TRACE_OPTION_EXIT      (1 << 6)
 
-PINK_BEGIN_DECL
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Small wrapper around @e ptrace(2) addressing oddities
@@ -288,6 +293,8 @@ bool pink_trace_attach(pid_t tid);
  **/
 bool pink_trace_detach(pid_t tid, int sig);
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

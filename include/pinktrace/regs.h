@@ -25,25 +25,18 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_REGS_H
-#define _PINK_REGS_H
+#ifndef PINK_REGS_H
+#define PINK_REGS_H
 
 /**
  * @file pinktrace/regs.h
  * @brief Pink's structure of registers
+ *
+ * Do not include this file directly. Use pinktrace/pink.h instead.
+ *
  * @defgroup pink_regs Pink's structure of registers
  * @ingroup pinktrace
  * @{
- **/
-
-#include <pinktrace/system.h>
-
-/**
- * @struct pink_regs_t
- * @brief Structure of registers
- *
- * @see pink_trace_get_regs()
- * @see pink_trace_set_regs()
  **/
 
 /**

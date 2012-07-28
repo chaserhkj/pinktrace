@@ -61,8 +61,8 @@ START_TEST(TEST_read_socket_address)
 	const char *test_name;
 	long expfd = 23;
 	long newfd;
-	pink_socket_address_t expaddr;
-	pink_socket_address_t newaddr;
+	struct pink_sockaddr expaddr;
+	struct pink_sockaddr newaddr;
 	char ip[64];
 
 #define TEST_AF_NULL 0
@@ -164,8 +164,9 @@ START_TEST(TEST_read_socket_address)
 	}
 
 	LOOP_WHILE_TRUE() {
-		int status, abi;
+		int status;
 		pid_t tracee_pid;
+		enum pink_abi abi;
 		long argval, sysnum;
 		char *exp_sun_path;
 		char *new_sun_path;

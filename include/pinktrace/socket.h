@@ -25,8 +25,23 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PINK_SOCKET_H
-#define _PINK_SOCKET_H
+#ifndef PINK_SOCKET_H
+#define PINK_SOCKET_H
+
+/**
+ * @file pinktrace/socket.h
+ * @brief Pink's socket related data structures and functions
+ *
+ * Do not include this file directly. Use pinktrace/pink.h instead.
+ *
+ * @defgroup pink_socket Pink's socket related data structures and functions
+ * @ingroup pinktrace
+ * @{
+ **/
+
+#include <pinktrace/compiler.h>
+#include <pinktrace/abi.h>
+#include <pinktrace/regs.h>
 
 #include <stdbool.h>
 #include <sys/types.h>
@@ -38,22 +53,8 @@
 #include <linux/netlink.h>
 #endif
 
-#include <pinktrace/macros.h>
-#include <pinktrace/system.h>
-#include <pinktrace/abi.h>
-#include <pinktrace/regs.h>
-
-/**
- * @file pinktrace/socket.h
- * @brief Pink's socket related data structures and functions
- * @defgroup pink_socket Pink's socket related data structures and functions
- * @ingroup pinktrace
- * @{
- **/
-PINK_BEGIN_DECL
-
-/** Structure which defines a decoded socket address. */
-typedef struct {
+/** Structure which represents a socket address. */
+struct pink_sockaddr {
 	/** Family of the socket address **/
 	int family;
 
@@ -95,10 +96,10 @@ typedef struct {
 		struct sockaddr_nl nl;
 #endif
 	} u;
-} pink_socket_address_t;
+};
 
 /** Decoded socket subcalls */
-typedef enum {
+enum pink_socket_subcall {
 	/** socket() subcall **/
 	PINK_SOCKET_SUBCALL_SOCKET = 1,
 	/** bind() subcall **/
@@ -135,7 +136,11 @@ typedef enum {
 	PINK_SOCKET_SUBCALL_RECVMSG,
 	/** accept4() subcall **/
 	PINK_SOCKET_SUBCALL_ACCEPT4,
-} pink_socket_subcall_t;
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Name socket subcall
@@ -145,7 +150,7 @@ typedef enum {
  * @param subcall Socket subcall
  * @return The name of the subcall
  **/
-const char *pink_socket_subcall_name(pink_socket_subcall_t subcall)
+const char *pink_socket_subcall_name(enum pink_socket_subcall subcall)
 	PINK_GCC_ATTR((pure));
 
 /**
@@ -178,7 +183,7 @@ const char *pink_socket_subcall_name(pink_socket_subcall_t subcall)
  * @param argval Pointer to store the value, must @b not be @e NULL
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_read_socket_argument(pid_t tid, pink_abi_t abi,
+bool pink_read_socket_argument(pid_t tid, enum pink_abi abi,
 		const pink_regs_t *regs,
 		bool decode_socketcall,
 		unsigned arg_index, long *argval)
@@ -203,13 +208,15 @@ bool pink_read_socket_argument(pid_t tid, pink_abi_t abi,
  * @param sockaddr Pointer to store the socket address, must @b not be @e NULL
  * @return true on success, false on failure and sets errno accordingly
  **/
-bool pink_read_socket_address(pid_t tid, pink_abi_t abi,
+bool pink_read_socket_address(pid_t tid, enum pink_abi abi,
 		const pink_regs_t *regs,
 		bool decode_socketcall,
 		unsigned arg_index, long *fd,
-		pink_socket_address_t *sockaddr)
+		struct pink_sockaddr *sockaddr)
 	PINK_GCC_ATTR((nonnull(7)));
 
-PINK_END_DECL
+#ifdef __cplusplus
+}
+#endif
 /** @} */
 #endif

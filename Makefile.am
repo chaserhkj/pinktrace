@@ -32,8 +32,8 @@ pinktrace_include_HEADERS= \
 			  include/pinktrace/system.h \
 			  include/pinktrace/abi.h \
 			  include/pinktrace/compat.h \
+			  include/pinktrace/compiler.h \
 			  include/pinktrace/event.h \
-			  include/pinktrace/macros.h \
 			  include/pinktrace/read.h \
 			  include/pinktrace/regs.h \
 			  include/pinktrace/socket.h \

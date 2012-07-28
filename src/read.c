@@ -64,9 +64,9 @@ bool pink_read_word_data(pid_t tid, long off, long *res)
 	return true;
 }
 
-bool pink_read_abi(pid_t tid, const pink_regs_t *regs, pink_abi_t *abi)
+bool pink_read_abi(pid_t tid, const pink_regs_t *regs, enum pink_abi *abi)
 {
-	pink_abi_t abival;
+	enum pink_abi abival;
 #if PINK_ABIS_SUPPORTED == 1
 	abival = 0;
 #elif PINK_ARCH_X86_64 || PINK_ARCH_X32
@@ -82,7 +82,7 @@ bool pink_read_abi(pid_t tid, const pink_regs_t *regs, pink_abi_t *abi)
 		break;
 	case 0x33:
 		if (regs->ds == 0x2b) {
-			abival = _PINK_ABI_X32;
+			abival = PINK_ABI_X32;
 			break;
 		}
 		else {
@@ -180,7 +180,7 @@ static ssize_t _pink_read_vm_data_ptrace(pid_t tid, long addr, char *dest, size_
 }
 
 PINK_GCC_ATTR((nonnull(4)))
-ssize_t pink_read_vm_data(pid_t tid, pink_abi_t abi, long addr, char *dest, size_t len)
+ssize_t pink_read_vm_data(pid_t tid, enum pink_abi abi, long addr, char *dest, size_t len)
 {
 #if PINK_ABIS_SUPPORTED > 1
 	size_t wsize;
@@ -255,7 +255,7 @@ static ssize_t _pink_read_vm_data_nul_ptrace(pid_t tid, long addr, char *dest, s
 }
 
 PINK_GCC_ATTR((nonnull(4)))
-ssize_t pink_read_vm_data_nul(pid_t tid, pink_abi_t abi, long addr, char *dest, size_t len)
+ssize_t pink_read_vm_data_nul(pid_t tid, enum pink_abi abi, long addr, char *dest, size_t len)
 {
 #if PINK_ABIS_SUPPORTED > 1
 	size_t wsize;
@@ -322,7 +322,7 @@ ssize_t pink_read_vm_data_nul(pid_t tid, pink_abi_t abi, long addr, char *dest, 
 }
 
 PINK_GCC_ATTR((nonnull(3)))
-bool pink_read_syscall(pid_t tid, pink_abi_t abi, const pink_regs_t *regs, long *sysnum)
+bool pink_read_syscall(pid_t tid, enum pink_abi abi, const pink_regs_t *regs, long *sysnum)
 {
 	long sysval;
 #if PINK_ARCH_ARM
@@ -386,7 +386,7 @@ bool pink_read_syscall(pid_t tid, pink_abi_t abi, const pink_regs_t *regs, long 
 #  define __X32_SYSCALL_MASK	__X32_SYSCALL_BIT
 # endif
 	sysval = regs->orig_rax;
-	if (abi == _PINK_ABI_X32)
+	if (abi == PINK_ABI_X32)
 		sysval &= ~__X32_SYSCALL_MASK;
 #else
 #error unsupported architecture
@@ -413,7 +413,7 @@ static inline int is_negated_errno(unsigned long int val, size_t current_wordsiz
 }
 
 PINK_GCC_ATTR((nonnull(3,4)))
-bool pink_read_retval(pid_t tid, pink_abi_t abi,
+bool pink_read_retval(pid_t tid, enum pink_abi abi,
 		const pink_regs_t *regs, long *retval,
 		int *error)
 {
@@ -495,7 +495,7 @@ bool pink_read_retval(pid_t tid, pink_abi_t abi,
 }
 
 PINK_GCC_ATTR((nonnull(5)))
-bool pink_read_argument(pid_t tid, pink_abi_t abi,
+bool pink_read_argument(pid_t tid, enum pink_abi abi,
 		const pink_regs_t *regs,
 		unsigned arg_index, long *argval)
 {
@@ -591,7 +591,7 @@ bool pink_read_argument(pid_t tid, pink_abi_t abi,
 	return true;
 }
 
-ssize_t pink_read_string_array(pid_t tid, pink_abi_t abi,
+ssize_t pink_read_string_array(pid_t tid, enum pink_abi abi,
 		long arg, unsigned arr_index,
 		char *dest, size_t dest_len,
 		bool *nullptr)
