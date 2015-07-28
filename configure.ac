@@ -115,7 +115,7 @@ linux*)
 	AC_MSG_CHECKING([for supported kernel])
 	kernel_version=`uname -r | cut -d'-' -f1`
 	case "$kernel_version" in
-	3.*|2.6*)
+	4.*|3.*|2.6*)
 		AC_MSG_RESULT([$kernel_version])
 		;;
 	2.5*)
